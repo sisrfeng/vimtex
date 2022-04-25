@@ -1,5 +1,6 @@
 " VimTeX - LaTeX plugin for Vim
 "
+" Maintainer: Karl Yngve Lervåg
 " Email:      karl.yngve@gmail.com
 "
 "
@@ -29,7 +30,7 @@ call vimtex#syntax#nested#reset()
 " Load syntax rules that depend on VimTeX state
 " * This includes e.g. package specific syntax
 if exists('b:vimtex')
-    call vimtex#syntax#core#init_post()
+  call vimtex#syntax#core#init_post()
 endif
 
 " Use autocommands to ensure
@@ -38,9 +39,9 @@ endif
 " 2. that the init_post function is executed when VimTeX state is loaded (if it
 "    was not already done).
 augroup vimtex_syntax
-    autocmd! * <buffer>
-    autocmd ColorScheme <buffer> call vimtex#syntax#core#init_highlights()
-    autocmd! User VimtexEventInitPost call vimtex#syntax#core#init_post()
+  autocmd! * <buffer>
+  autocmd ColorScheme <buffer> call vimtex#syntax#core#init_highlights()
+  autocmd! User VimtexEventInitPost call vimtex#syntax#core#init_post()
 augroup END
 
 unlet s:is_loading
