@@ -7,676 +7,672 @@
 " This script has a lot of unicode characters (for conceals)
 scriptencoding utf-8
 
-function! vimtex#syntax#core#init() abort " {{{1
-    syntax spell toplevel
+fun! vimtex#syntax#core#init() abort "
+    syn spell toplevel
 
-    syntax sync maxlines=500
-    syntax sync minlines=50
-    syntax iskeyword 48-57,a-z,A-Z,192-255
+    syn sync maxlines=500
+    syn sync minlines=50
+    syn iskeyword 48-57,a-z,A-Z,192-255
 
-    " {{{2 Define main syntax clusters
+    " Define main syntax clusters
+        syn cluster texClusterOpt contains=
+                    \texCmd,
+                    \texComment,
+                    \texGroup,
+                    \texLength,
+                    \texOpt,
+                    \texOptEqual,
+                    \texOptSep,
+                    \@NoSpell
 
-    syntax cluster texClusterOpt contains=
-                \texCmd,
-                \texComment,
-                \texGroup,
-                \texLength,
-                \texOpt,
-                \texOptEqual,
-                \texOptSep,
-                \@NoSpell
-
-    syntax cluster texClusterMath contains=
-                \texCmdEnvM,
-                \texCmdFootnote,
-                \texCmdGreek,
-                \texCmdMinipage,
-                \texCmdParbox,
-                \texCmdRef,
-                \texCmdSize,
-                \texCmdStyle,
-                \texCmdTodo,
-                \texCmdVerb,
-                \texComment,
-                \texGroupError,
-                \texMathCmd,
-                \texMathCmdEnv,
-                \texMathCmdStyle,
-                \texMathCmdStyleBold,
-                \texMathCmdStyleItal,
-                \texMathCmdText,
-                \texMathDelim,
-                \texMathDelimMod,
-                \texMathGroup,
-                \texMathOper,
-                \texMathSuperSub,
-                \texMathSymbol,
-                \texSpecialChar,
-                \texTabularChar,
-                \@NoSpell
-
-    " }}}2
-
-    " {{{2 TeX symbols and special characters
-
-    syntax match texLigature "--"
-    syntax match texLigature "---"
-    syntax match texLigature "\v%(``|''|,,)"
-    syntax match texTabularChar "&"
-    syntax match texTabularChar "\\\\"
-
-    " E.g.:  \$ \& \% \# \{ \} \_ \S \P
-    syntax match texSpecialChar "\\[$&%#{}_]"
-    syntax match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"
-    syntax match texSpecialChar "\^\^\%(\S\|[0-9a-f]\{2}\)"
-    syntax match texSpecialChar "\\[,;:!]"
+        syn cluster texClusterMath contains=
+                    \texCmdEnvM,
+                    \texCmdFootnote,
+                    \texCmdGreek,
+                    \texCmdMinipage,
+                    \texCmdParbox,
+                    \texCmdRef,
+                    \texCmdSize,
+                    \texCmdStyle,
+                    \texCmdTodo,
+                    \texCmdVerb,
+                    \texComment,
+                    \texGroupError,
+                    \texMathCmd,
+                    \texMathCmdEnv,
+                    \texMathCmdStyle,
+                    \texMathCmdStyleBold,
+                    \texMathCmdStyleItal,
+                    \texMathCmdText,
+                    \texMathDelim,
+                    \texMathDelimMod,
+                    \texMathGroup,
+                    \texMathOper,
+                    \texMathSuperSub,
+                    \texMathSymbol,
+                    \texSpecialChar,
+                    \texTabularChar,
+                    \@NoSpell
 
     " }}}2
-    " {{{2 Commands: general
 
-    " Unspecified TeX groups
-    " Note: This is necessary to keep track of all nested braces
-    call vimtex#syntax#core#new_arg('texGroup', {'opts': ''})
+    " TeX symbols and special characters
+        syn match texLigature "--"
+        syn match texLigature "---"
+        syn match texLigature "\v%(``|''|,,)"
+        syn match texTabularChar "&"
+        syn match texTabularChar "\\\\"
 
-    " Flag mismatching ending brace delimiter
-    syntax match texGroupError "}"
-
-    " Add generic option elements contained in common option groups
-    syntax match texOptEqual contained "="
-    syntax match texOptSep contained ",\s*"
-
-    " TeX Lengths (matched in options and some arguments)
-    syntax match texLength contained "\<\d\+\([.,]\d\+\)\?\s*\(true\)\?\s*\(bp\|cc\|cm\|dd\|em\|ex\|in\|mm\|pc\|pt\|sp\)\>"
-
-    " Match general commands first
-    syntax match texCmd nextgroup=texOpt,texArg skipwhite skipnl "\\[a-zA-Z@]\+"
-    call vimtex#syntax#core#new_opt('texOpt', {'next': 'texArg'})
-    call vimtex#syntax#core#new_arg('texArg', {'next': 'texArg', 'opts': 'contained transparent'})
-
-    " Define separate "generic" commands inside math regions
-    " Note: Defined here because order matters!
-    syntax match texMathCmd contained nextgroup=texMathArg skipwhite skipnl "\\\a\+"
-    call vimtex#syntax#core#new_arg('texMathArg', {'contains': '@texClusterMath'})
-
-    " {{{2 Commands: core set
-
-    " Accents and ligatures
-    syntax match texCmdAccent "\\[bcdvuH]$"
-    syntax match texCmdAccent "\\[bcdvuH]\ze[^a-zA-Z@]"
-    syntax match texCmdAccent /\\[=^.~"`']/
-    syntax match texCmdAccent /\\['=t'.c^ud"vb~Hr]{\a}/
-    syntax match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)$"
-    syntax match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)\ze[^a-zA-Z@]"
-
-    " Spacecodes (TeX'isms)
-    " * See e.g. https://en.wikibooks.org/wiki/TeX/catcode
-    " * \mathcode`\^^@ = "2201
-    " * \delcode`\( = "028300
-    " * \sfcode`\) = 0
-    " * \uccode`X = `X
-    " * \lccode`x = `x
-    syntax match texCmdSpaceCode "\v\\%(math|cat|del|lc|sf|uc)code`"me=e-1
-                \ nextgroup=texCmdSpaceCodeChar
-    syntax match texCmdSpaceCodeChar "\v`\\?.%(\^.)?\?%(\d|\"\x{1,6}|`.)" contained
-
-    " Todo commands
-    syntax match texCmdTodo '\\todo\w*'
-
-    " \author
-    syntax match texCmdAuthor nextgroup=texAuthorOpt,texAuthorArg skipwhite skipnl "\\author\>"
-    call vimtex#syntax#core#new_opt('texAuthorOpt', {'next': 'texAuthorArg'})
-    call vimtex#syntax#core#new_arg('texAuthorArg', {'contains': 'TOP,@Spell'})
-
-    " \title
-    syntax match texCmdTitle nextgroup=texTitleArg skipwhite skipnl "\\title\>"
-    call vimtex#syntax#core#new_arg('texTitleArg')
-
-    " \footnote
-    syntax match texCmdFootnote nextgroup=texFootnoteArg skipwhite skipnl "\\footnote\>"
-    call vimtex#syntax#core#new_arg('texFootnoteArg')
-
-    " \if \else \fi
-    syntax match texCmdConditional nextgroup=texConditionalArg skipwhite skipnl "\\\(if[a-zA-Z@]\+\|fi\|else\)\>"
-    call vimtex#syntax#core#new_arg('texConditionalArg')
-
-    " \@ifnextchar
-    syntax match texCmdConditionalINC "\\\w*@ifnextchar\>"
-                \ nextgroup=texConditionalINCChar skipwhite skipnl
-    syntax match texConditionalINCChar "\S" contained
-
-    " Various commands that take a file argument (or similar)
-    syntax match texCmdInput   nextgroup=texFileArg              skipwhite skipnl "\\input\>"
-    syntax match texCmdInput   nextgroup=texFileArg              skipwhite skipnl "\\include\>"
-    syntax match texCmdInput   nextgroup=texFilesArg             skipwhite skipnl "\\includeonly\>"
-    syntax match texCmdInput   nextgroup=texFileOpt,texFileArg   skipwhite skipnl "\\includegraphics\>"
-    syntax match texCmdBib     nextgroup=texFilesArg             skipwhite skipnl "\\bibliography\>"
-    syntax match texCmdBib     nextgroup=texFileArg              skipwhite skipnl "\\bibliographystyle\>"
-    syntax match texCmdClass   nextgroup=texFileOpt,texFileArg   skipwhite skipnl "\\document\%(class\|style\)\>"
-    syntax match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\usepackage\>"
-    syntax match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\RequirePackage\>"
-    syntax match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\ProvidesPackage\>"
-    call vimtex#syntax#core#new_arg('texFileArg', {'contains': '@NoSpell,texCmd,texComment'})
-    call vimtex#syntax#core#new_arg('texFilesArg', {'contains': '@NoSpell,texCmd,texComment,texOptSep'})
-    call vimtex#syntax#core#new_opt('texFileOpt', {'next': 'texFileArg'})
-    call vimtex#syntax#core#new_opt('texFilesOpt', {'next': 'texFilesArg'})
-
-    " LaTeX 2.09 type styles
-    syntax match texCmdStyle "\\rm\>"
-    syntax match texCmdStyle "\\em\>"
-    syntax match texCmdStyle "\\bf\>"
-    syntax match texCmdStyle "\\it\>"
-    syntax match texCmdStyle "\\sl\>"
-    syntax match texCmdStyle "\\sf\>"
-    syntax match texCmdStyle "\\sc\>"
-    syntax match texCmdStyle "\\tt\>"
-
-    " LaTeX2E type styles
-    syntax match texCmdStyle "\\textbf\>"
-    syntax match texCmdStyle "\\textit\>"
-    syntax match texCmdStyle "\\textmd\>"
-    syntax match texCmdStyle "\\textrm\>"
-    syntax match texCmdStyle "\\texts[cfl]\>"
-    syntax match texCmdStyle "\\texttt\>"
-    syntax match texCmdStyle "\\textup\>"
-    syntax match texCmdStyle "\\textnormal\>"
-    syntax match texCmdStyle "\\emph\>"
-
-    syntax match texCmdStyle "\\rmfamily\>"
-    syntax match texCmdStyle "\\sffamily\>"
-    syntax match texCmdStyle "\\ttfamily\>"
-
-    syntax match texCmdStyle "\\itshape\>"
-    syntax match texCmdStyle "\\scshape\>"
-    syntax match texCmdStyle "\\slshape\>"
-    syntax match texCmdStyle "\\upshape\>"
-
-    syntax match texCmdStyle "\\bfseries\>"
-    syntax match texCmdStyle "\\mdseries\>"
-
-    " Bold and italic commands
-    call s:match_bold_italic()
-
-    " Type sizes
-    syntax match texCmdSize "\\tiny\>"
-    syntax match texCmdSize "\\scriptsize\>"
-    syntax match texCmdSize "\\footnotesize\>"
-    syntax match texCmdSize "\\small\>"
-    syntax match texCmdSize "\\normalsize\>"
-    syntax match texCmdSize "\\large\>"
-    syntax match texCmdSize "\\Large\>"
-    syntax match texCmdSize "\\LARGE\>"
-    syntax match texCmdSize "\\huge\>"
-    syntax match texCmdSize "\\Huge\>"
-
-    " \newcommand
-    syntax match texCmdNewcmd "\\\%(re\)\?newcommand\>\*\?"
-                \ nextgroup=texNewcmdArgName skipwhite skipnl
-    syntax match texNewcmdArgName "\\[a-zA-Z@]\+"
-                \ nextgroup=texNewcmdOpt,texNewcmdArgBody skipwhite skipnl
-                \ contained
-    call vimtex#syntax#core#new_arg('texNewcmdArgName', {
-                \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
-                \ 'contains': ''
-                \})
-    call vimtex#syntax#core#new_opt('texNewcmdOpt', {
-                \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
-                \ 'opts': 'oneline',
-                \})
-    call vimtex#syntax#core#new_arg('texNewcmdArgBody')
-    syntax match texNewcmdParm contained "#\+\d" containedin=texNewcmdArgBody
-
-    " \newenvironment
-    syntax match texCmdNewenv nextgroup=texNewenvArgName skipwhite skipnl "\\\%(re\)\?newenvironment\>"
-    call vimtex#syntax#core#new_arg('texNewenvArgName', {'next': 'texNewenvArgBegin,texNewenvOpt'})
-    call vimtex#syntax#core#new_opt('texNewenvOpt', {
-                \ 'next': 'texNewenvArgBegin,texNewenvOpt',
-                \ 'opts': 'oneline'
-                \})
-    call vimtex#syntax#core#new_arg('texNewenvArgBegin', {'next': 'texNewenvArgEnd'})
-    call vimtex#syntax#core#new_arg('texNewenvArgEnd')
-    syntax match texNewenvParm contained "#\+\d" containedin=texNewenvArgBegin,texNewenvArgEnd
-
-    " Definitions/Commands
-    " E.g. \def \foo #1#2 {foo #1 bar #2 baz}
-    syntax match texCmdDef "\\def\>" nextgroup=texDefArgName skipwhite skipnl
-    syntax match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[a-zA-Z@]\+"
-    syntax match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[^a-zA-Z@]"
-    syntax match texDefParmPre contained nextgroup=texDefArgBody skipwhite skipnl "#[^{]*"
-    syntax match texDefParm contained "#\+\d" containedin=texDefParmPre,texDefArgBody
-    call vimtex#syntax#core#new_arg('texDefArgBody')
-
-    " \let
-    syntax match texCmdLet "\\let\>" nextgroup=texLetArgName skipwhite skipnl
-    syntax match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[a-zA-Z@]\+"
-    syntax match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[^a-zA-Z@]"
-    " Note: define texLetArgEqual after texLetArgBody; order matters
-    " E.g. in '\let\eq==' we want: 1st = is texLetArgEqual, 2nd = is texLetArgBody
-    " Reversing lines results in:  1st = is texLetArgBody,  2nd = is unmatched
-    syntax match texLetArgBody  contained "\\[a-zA-Z@]\+\|\\[^a-zA-Z@]\|\S" contains=TOP,@Nospell
-    syntax match texLetArgEqual contained nextgroup=texLetArgBody skipwhite skipnl "="
-
-    " Reference and cite commands
-    syntax match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\nocite\>"
-    syntax match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\label\>"
-    syntax match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\\(page\|eq\)ref\>"
-    syntax match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\v\?ref\>"
-    syntax match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite\>"
-    syntax match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite[tp]\>\*\?"
-    call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
-    call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
-
-    " \bibitem[label]{marker}
-    syntax match texCmdBibitem "\\bibitem\>"
-                \ nextgroup=texBibitemOpt,texBibitemArg skipwhite skipnl
-    call vimtex#syntax#core#new_opt('texBibitemOpt', {
-                \ 'next': 'texBibitemArg'
-                \})
-    call vimtex#syntax#core#new_arg('texBibitemArg',
-                \ {'contains': 'texComment,@NoSpell'})
-
-    " Sections and parts
-    syntax match texCmdPart "\\\(front\|main\|back\)matter\>"
-    syntax match texCmdPart "\\part\>"                    nextgroup=texPartArgTitle
-    syntax match texCmdPart "\\chapter\>\*\?"             nextgroup=texPartArgTitle
-    syntax match texCmdPart "\v\\%(sub)*section>\*?"      nextgroup=texPartArgTitle
-    syntax match texCmdPart "\v\\%(sub)?paragraph>"       nextgroup=texPartArgTitle
-    syntax match texCmdPart "\v\\add%(part|chap|sec)>\*?" nextgroup=texPartArgTitle
-    call vimtex#syntax#core#new_arg('texPartArgTitle')
-
-    " Item elements in lists
-    syntax match texCmdItem "\\item\>"
-
-    " \begin \end environments
-    syntax match texCmdEnv "\v\\%(begin|end)>" nextgroup=texEnvArgName
-    call vimtex#syntax#core#new_arg('texEnvArgName', {
-                \ 'contains': 'texComment,@NoSpell',
-                \ 'next': 'texEnvOpt',
-                \})
-    call vimtex#syntax#core#new_opt('texEnvOpt')
-
-    " {{{2 Commands: \begin{tabular}
-
-    syntax match texCmdTabular "\\begin{tabular}"
-                \ skipwhite skipnl
-                \ nextgroup=texTabularOpt,texTabularArg
-                \ contains=texCmdEnv
-    call vimtex#syntax#core#new_opt('texTabularOpt', {
-                \ 'next': 'texTabularArg',
-                \ 'contains': 'texComment,@NoSpell',
-                \})
-    call vimtex#syntax#core#new_arg('texTabularArg', {
-                \ 'contains': '@texClusterTabular'
-                \})
-
-    syntax match texTabularCol   "[lcr]" contained
-    syntax match texTabularCol   "p"     contained nextgroup=texTabularLength
-    syntax match texTabularAtSep "@"     contained nextgroup=texTabularLength
-    syntax cluster texClusterTabular contains=texTabular.*
-
-    call vimtex#syntax#core#new_arg('texTabularLength', {
-                \ 'contains': 'texLength,texCmd'
-                \})
-
-    " {{{2 Commands: \begin{minipage}[position][height][inner-pos]{width}
-
-    " Reference: http://latexref.xyz/minipage.html
-
-    syntax match texCmdMinipage "\\begin{minipage}"
-                \ skipwhite skipnl
-                \ nextgroup=texMinipageOptPos,texMinipageArgWidth
-                \ contains=texCmdEnv
-
-    call vimtex#syntax#core#new_opt('texMinipageOptPos', {
-                \ 'next': 'texMinipageOptHeight,texMinipageArgWidth',
-                \ 'contains': 'texBoxOptPosVal,texComment',
-                \})
-    call vimtex#syntax#core#new_opt('texMinipageOptHeight', {
-                \ 'next': 'texMinipageOptIPos,texMinipageArgWidth',
-                \ 'contains': 'texLength,texCmd,texComment',
-                \})
-    call vimtex#syntax#core#new_opt('texMinipageOptIPos', {
-                \ 'next': 'texMinipageArgWidth',
-                \ 'contains': 'texBoxOptIPosVal,texComment',
-                \})
-    call vimtex#syntax#core#new_arg('texMinipageArgWidth', {
-                \ 'contains': 'texLength,texCmd,texComment',
-                \})
-
-    " These are also used inside \parbox options
-    syntax match texBoxOptPosVal "[bcmt]" contained
-    syntax match texBoxOptIPosVal "[bcst]" contained
-
-    " {{{2 Commands: \parbox[position][height][inner-pos]{width}{contents}
-
-    " Reference: http://latexref.xyz/_005cparbox.html
-
-    syntax match texCmdParbox "\\parbox\>"
-                \ skipwhite skipnl
-                \ nextgroup=texParboxOptPos,texParboxArgWidth
-
-    call vimtex#syntax#core#new_opt('texParboxOptPos', {
-                \ 'next': 'texParboxOptHeight,texParboxArgWidth',
-                \ 'contains': 'texBoxOptPosVal,texComment',
-                \})
-    call vimtex#syntax#core#new_opt('texParboxOptHeight', {
-                \ 'next': 'texParboxOptIPos,texParboxArgWidth',
-                \ 'contains': 'texLength,texCmd,texComment',
-                \})
-    call vimtex#syntax#core#new_opt('texParboxOptIPos', {
-                \ 'next': 'texParboxArgWidth',
-                \ 'contains': 'texBoxOptIPosVal,texComment',
-                \})
-    call vimtex#syntax#core#new_arg('texParboxArgWidth', {
-                \ 'next': 'texParboxArgContent',
-                \ 'contains': 'texLength,texCmd,texComment',
-                \})
-    call vimtex#syntax#core#new_arg('texParboxArgContent')
-
+        " E.g.:  \$ \& \% \# \{ \} \_ \S \P
+        syn match texSpecialChar "\\[$&%#{}_]"
+        syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"
+        syn match texSpecialChar "\^\^\%(\S\|[0-9a-f]\{2}\)"
+        syn match texSpecialChar "\\[,;:!]"
     " }}}2
-    " {{{2 Commands: Theorems
+    "
+    " Commands: general
+        " Unspecified TeX groups
+        " Note: This is necessary to keep track of all nested braces
+        call vimtex#syntax#core#new_arg('texGroup', {'opts': ''})
 
+        " Flag mismatching ending brace delimiter
+        syn match texGroupError "}"
+
+        " Add generic option elements contained in common option groups
+        syn match texOptEqual contained "="
+        syn match texOptSep contained ",\s*"
+
+        " TeX Lengths (matched in options and some arguments)
+        syn match texLength contained "\<\d\+\([.,]\d\+\)\?\s*\(true\)\?\s*\(bp\|cc\|cm\|dd\|em\|ex\|in\|mm\|pc\|pt\|sp\)\>"
+
+        " Match general commands first
+        syn match texCmd   "\\[a-zA-Z@]\+"   nextgroup=texOpt,texArg  skipwhite skipnl
+        call vimtex#syntax#core#new_opt('texOpt', {'next': 'texArg'})
+        call vimtex#syntax#core#new_arg('texArg', {'next': 'texArg', 'opts': 'contained transparent'})
+
+        " Define separate "generic" commands inside math regions
+        " Note: Defined here because order matters!
+        syn match texMathCmd contained nextgroup=texMathArg skipwhite skipnl "\\\a\+"
+        call vimtex#syntax#core#new_arg('texMathArg', {'contains': '@texClusterMath'})
+
+        " Commands: core set
+
+        " Accents and ligatures
+        syn match texCmdAccent "\\[bcdvuH]$"
+        syn match texCmdAccent "\\[bcdvuH]\ze[^a-zA-Z@]"
+        syn match texCmdAccent /\\[=^.~"`']/
+        syn match texCmdAccent /\\['=t'.c^ud"vb~Hr]{\a}/
+        syn match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)$"
+        syn match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)\ze[^a-zA-Z@]"
+
+        " Spacecodes (TeX'isms)
+        " * See e.g. https://en.wikibooks.org/wiki/TeX/catcode
+        " * \mathcode`\^^@ = "2201
+        " * \delcode`\( = "028300
+        " * \sfcode`\) = 0
+        " * \uccode`X = `X
+        " * \lccode`x = `x
+        syn match texCmdSpaceCode "\v\\%(math|cat|del|lc|sf|uc)code`"me=e-1
+                    \ nextgroup=texCmdSpaceCodeChar
+        syn match texCmdSpaceCodeChar "\v`\\?.%(\^.)?\?%(\d|\"\x{1,6}|`.)" contained
+
+        " Todo commands
+        syn match texCmdTodo '\\todo\w*'
+
+        " \author
+        syn match texCmdAuthor nextgroup=texAuthorOpt,texAuthorArg skipwhite skipnl "\\author\>"
+        call vimtex#syntax#core#new_opt('texAuthorOpt', {'next': 'texAuthorArg'})
+        call vimtex#syntax#core#new_arg('texAuthorArg', {'contains': 'TOP,@Spell'})
+
+        " \title
+        syn match texCmdTitle nextgroup=texTitleArg skipwhite skipnl "\\title\>"
+        call vimtex#syntax#core#new_arg('texTitleArg')
+
+        " \footnote
+        syn match texCmdFootnote nextgroup=texFootnoteArg skipwhite skipnl "\\footnote\>"
+        call vimtex#syntax#core#new_arg('texFootnoteArg')
+
+        " \if \else \fi
+        syn match texCmdConditional nextgroup=texConditionalArg skipwhite skipnl "\\\(if[a-zA-Z@]\+\|fi\|else\)\>"
+        call vimtex#syntax#core#new_arg('texConditionalArg')
+
+        " \@ifnextchar
+        syn match texCmdConditionalINC "\\\w*@ifnextchar\>"
+                    \ nextgroup=texConditionalINCChar skipwhite skipnl
+        syn match texConditionalINCChar "\S" contained
+
+        " Various commands that take a file argument (or similar)
+        syn match texCmdInput   nextgroup=texFileArg              skipwhite skipnl "\\input\>"
+        syn match texCmdInput   nextgroup=texFileArg              skipwhite skipnl "\\include\>"
+        syn match texCmdInput   nextgroup=texFilesArg             skipwhite skipnl "\\includeonly\>"
+        syn match texCmdInput   nextgroup=texFileOpt,texFileArg   skipwhite skipnl "\\includegraphics\>"
+        syn match texCmdBib     nextgroup=texFilesArg             skipwhite skipnl "\\bibliography\>"
+        syn match texCmdBib     nextgroup=texFileArg              skipwhite skipnl "\\bibliographystyle\>"
+        syn match texCmdClass   nextgroup=texFileOpt,texFileArg   skipwhite skipnl "\\document\%(class\|style\)\>"
+        syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\usepackage\>"
+        syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\RequirePackage\>"
+        syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\ProvidesPackage\>"
+        call vimtex#syntax#core#new_arg('texFileArg', {'contains': '@NoSpell,texCmd,texComment'})
+        call vimtex#syntax#core#new_arg('texFilesArg', {'contains': '@NoSpell,texCmd,texComment,texOptSep'})
+        call vimtex#syntax#core#new_opt('texFileOpt', {'next': 'texFileArg'})
+        call vimtex#syntax#core#new_opt('texFilesOpt', {'next': 'texFilesArg'})
+
+        " LaTeX 2.09 type styles
+        syn match texCmdStyle "\\rm\>"
+        syn match texCmdStyle "\\em\>"
+        syn match texCmdStyle "\\bf\>"
+        syn match texCmdStyle "\\it\>"
+        syn match texCmdStyle "\\sl\>"
+        syn match texCmdStyle "\\sf\>"
+        syn match texCmdStyle "\\sc\>"
+        syn match texCmdStyle "\\tt\>"
+
+        " LaTeX2E type styles
+        syn match texCmdStyle "\\textbf\>"
+        syn match texCmdStyle "\\textit\>"
+        syn match texCmdStyle "\\textmd\>"
+        syn match texCmdStyle "\\textrm\>"
+        syn match texCmdStyle "\\texts[cfl]\>"
+        syn match texCmdStyle "\\texttt\>"
+        syn match texCmdStyle "\\textup\>"
+        syn match texCmdStyle "\\textnormal\>"
+        syn match texCmdStyle "\\emph\>"
+
+        syn match texCmdStyle "\\rmfamily\>"
+        syn match texCmdStyle "\\sffamily\>"
+        syn match texCmdStyle "\\ttfamily\>"
+
+        syn match texCmdStyle "\\itshape\>"
+        syn match texCmdStyle "\\scshape\>"
+        syn match texCmdStyle "\\slshape\>"
+        syn match texCmdStyle "\\upshape\>"
+
+        syn match texCmdStyle "\\bfseries\>"
+        syn match texCmdStyle "\\mdseries\>"
+
+        " Bold and italic commands
+        call s:match_bold_italic()
+
+        " Type sizes
+        syn match texCmdSize "\\tiny\>"
+        syn match texCmdSize "\\scriptsize\>"
+        syn match texCmdSize "\\footnotesize\>"
+        syn match texCmdSize "\\small\>"
+        syn match texCmdSize "\\normalsize\>"
+        syn match texCmdSize "\\large\>"
+        syn match texCmdSize "\\Large\>"
+        syn match texCmdSize "\\LARGE\>"
+        syn match texCmdSize "\\huge\>"
+        syn match texCmdSize "\\Huge\>"
+
+        " \newcommand
+        syn match texCmdNewcmd "\\\%(re\)\?newcommand\>\*\?"
+                    \ nextgroup=texNewcmdArgName skipwhite skipnl
+        syn match texNewcmdArgName "\\[a-zA-Z@]\+"
+                    \ nextgroup=texNewcmdOpt,texNewcmdArgBody skipwhite skipnl
+                    \ contained
+        call vimtex#syntax#core#new_arg('texNewcmdArgName', {
+                    \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
+                    \ 'contains': ''
+                    \})
+        call vimtex#syntax#core#new_opt('texNewcmdOpt', {
+                    \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
+                    \ 'opts': 'oneline',
+                    \})
+        call vimtex#syntax#core#new_arg('texNewcmdArgBody')
+        syn match texNewcmdParm contained "#\+\d" containedin=texNewcmdArgBody
+
+        " \newenvironment
+        syn match texCmdNewenv nextgroup=texNewenvArgName skipwhite skipnl "\\\%(re\)\?newenvironment\>"
+        call vimtex#syntax#core#new_arg('texNewenvArgName', {'next': 'texNewenvArgBegin,texNewenvOpt'})
+        call vimtex#syntax#core#new_opt('texNewenvOpt', {
+                    \ 'next': 'texNewenvArgBegin,texNewenvOpt',
+                    \ 'opts': 'oneline'
+                    \})
+        call vimtex#syntax#core#new_arg('texNewenvArgBegin', {'next': 'texNewenvArgEnd'})
+        call vimtex#syntax#core#new_arg('texNewenvArgEnd')
+        syn match texNewenvParm contained "#\+\d" containedin=texNewenvArgBegin,texNewenvArgEnd
+
+        " Definitions/Commands
+        " E.g. \def \foo #1#2 {foo #1 bar #2 baz}
+        syn match texCmdDef "\\def\>" nextgroup=texDefArgName skipwhite skipnl
+        syn match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[a-zA-Z@]\+"
+        syn match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[^a-zA-Z@]"
+        syn match texDefParmPre contained nextgroup=texDefArgBody skipwhite skipnl "#[^{]*"
+        syn match texDefParm contained "#\+\d" containedin=texDefParmPre,texDefArgBody
+        call vimtex#syntax#core#new_arg('texDefArgBody')
+
+        " \let
+        syn match texCmdLet "\\let\>" nextgroup=texLetArgName skipwhite skipnl
+        syn match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[a-zA-Z@]\+"
+        syn match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[^a-zA-Z@]"
+        " Note: define texLetArgEqual after texLetArgBody; order matters
+        " E.g. in '\let\eq==' we want: 1st = is texLetArgEqual, 2nd = is texLetArgBody
+        " Reversing lines results in:  1st = is texLetArgBody,  2nd = is unmatched
+        syn match texLetArgBody  contained "\\[a-zA-Z@]\+\|\\[^a-zA-Z@]\|\S" contains=TOP,@Nospell
+        syn match texLetArgEqual contained nextgroup=texLetArgBody skipwhite skipnl "="
+
+        " Reference and cite commands
+        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\nocite\>"
+        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\label\>"
+        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\\(page\|eq\)ref\>"
+        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\v\?ref\>"
+        syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite\>"
+        syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite[tp]\>\*\?"
+        call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
+        call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
+
+        " \bibitem[label]{marker}
+        syn match texCmdBibitem "\\bibitem\>"
+                    \ nextgroup=texBibitemOpt,texBibitemArg skipwhite skipnl
+        call vimtex#syntax#core#new_opt('texBibitemOpt', {
+                    \ 'next': 'texBibitemArg'
+                    \})
+        call vimtex#syntax#core#new_arg('texBibitemArg',
+                    \ {'contains': 'texComment,@NoSpell'})
+
+        " Sections and parts
+        syn match texCmdPart "\\\(front\|main\|back\)matter\>"
+        syn match texCmdPart "\\part\>"                    nextgroup=texPartArgTitle
+        syn match texCmdPart "\\chapter\>\*\?"             nextgroup=texPartArgTitle
+        syn match texCmdPart "\v\\%(sub)*section>\*?"      nextgroup=texPartArgTitle
+        syn match texCmdPart "\v\\%(sub)?paragraph>"       nextgroup=texPartArgTitle
+        syn match texCmdPart "\v\\add%(part|chap|sec)>\*?" nextgroup=texPartArgTitle
+        call vimtex#syntax#core#new_arg('texPartArgTitle')
+
+        " Item elements in lists
+        syn match texCmdItem "\\item\>"
+
+        " \begin \end environments
+        " syn match texCmdEnv "\v\\%(begin|end)>" nextgroup=texEnvArgName
+        syn match texCmdEnv "\v\\begin" contained conceal cchar=⇒    nextgroup=texEnvArgName
+        syn match texCmdEnv "\v\\end"   contained conceal cchar=⇐    nextgroup=texEnvArgName
+
+        call vimtex#syntax#core#new_arg('texEnvArgName', {
+                    \ 'contains': 'texComment,@NoSpell',
+                    \ 'next': 'texEnvOpt',
+                    \})
+        call vimtex#syntax#core#new_opt('texEnvOpt')
+
+        " Commands: \begin{tabular}
+
+        syn match texCmdTabular "\\begin{tabular}"
+                    \ skipwhite skipnl
+                    \ nextgroup=texTabularOpt,texTabularArg
+                    \ contains=texCmdEnv
+        call vimtex#syntax#core#new_opt('texTabularOpt', {
+                    \ 'next': 'texTabularArg',
+                    \ 'contains': 'texComment,@NoSpell',
+                    \})
+        call vimtex#syntax#core#new_arg('texTabularArg', {
+                    \ 'contains': '@texClusterTabular'
+                    \})
+
+        syn match texTabularCol   "[lcr]" contained
+        syn match texTabularCol   "p"     contained nextgroup=texTabularLength
+        syn match texTabularAtSep "@"     contained nextgroup=texTabularLength
+        syn cluster texClusterTabular contains=texTabular.*
+
+        call vimtex#syntax#core#new_arg('texTabularLength', {
+                    \ 'contains': 'texLength,texCmd'
+                    \})
+
+        " Commands: \begin{minipage}[position][height][inner-pos]{width}
+
+        " Reference: http://latexref.xyz/minipage.html
+
+        syn match texCmdMinipage "\\begin{minipage}"
+                    \ skipwhite skipnl
+                    \ nextgroup=texMinipageOptPos,texMinipageArgWidth
+                    \ contains=texCmdEnv
+
+        call vimtex#syntax#core#new_opt('texMinipageOptPos', {
+                    \ 'next': 'texMinipageOptHeight,texMinipageArgWidth',
+                    \ 'contains': 'texBoxOptPosVal,texComment',
+                    \})
+        call vimtex#syntax#core#new_opt('texMinipageOptHeight', {
+                    \ 'next': 'texMinipageOptIPos,texMinipageArgWidth',
+                    \ 'contains': 'texLength,texCmd,texComment',
+                    \})
+        call vimtex#syntax#core#new_opt('texMinipageOptIPos', {
+                    \ 'next': 'texMinipageArgWidth',
+                    \ 'contains': 'texBoxOptIPosVal,texComment',
+                    \})
+        call vimtex#syntax#core#new_arg('texMinipageArgWidth', {
+                    \ 'contains': 'texLength,texCmd,texComment',
+                    \})
+
+        " These are also used inside \parbox options
+        syn match texBoxOptPosVal "[bcmt]" contained
+        syn match texBoxOptIPosVal "[bcst]" contained
+
+        " Commands: \parbox[position][height][inner-pos]{width}{contents}
+
+        " Reference: http://latexref.xyz/_005cparbox.html
+
+        syn match texCmdParbox "\\parbox\>"
+                    \ skipwhite skipnl
+                    \ nextgroup=texParboxOptPos,texParboxArgWidth
+
+        call vimtex#syntax#core#new_opt('texParboxOptPos', {
+                    \ 'next': 'texParboxOptHeight,texParboxArgWidth',
+                    \ 'contains': 'texBoxOptPosVal,texComment',
+                    \})
+        call vimtex#syntax#core#new_opt('texParboxOptHeight', {
+                    \ 'next': 'texParboxOptIPos,texParboxArgWidth',
+                    \ 'contains': 'texLength,texCmd,texComment',
+                    \})
+        call vimtex#syntax#core#new_opt('texParboxOptIPos', {
+                    \ 'next': 'texParboxArgWidth',
+                    \ 'contains': 'texBoxOptIPosVal,texComment',
+                    \})
+        call vimtex#syntax#core#new_arg('texParboxArgWidth', {
+                    \ 'next': 'texParboxArgContent',
+                    \ 'contains': 'texLength,texCmd,texComment',
+                    \})
+        call vimtex#syntax#core#new_arg('texParboxArgContent')
+    " }}}2
+    "
+    " Commands: Theorems
     " Reference: LaTeX 2e Unofficial reference guide, section 12.9
     "            https://texdoc.org/serve/latex2e/0
+        " \newtheorem
+        syn match texCmdNewthm "\\newtheorem\>"
+                    \ nextgroup=texNewthmArgName skipwhite skipnl
+        call vimtex#syntax#core#new_arg('texNewthmArgName', {
+                    \ 'next': 'texNewthmOptCounter,texNewthmArgPrinted',
+                    \ 'contains': 'TOP,@Spell'
+                    \})
+        call vimtex#syntax#core#new_opt('texNewthmOptCounter',
+                    \ {'next': 'texNewthmArgPrinted'}
+                    \)
+        call vimtex#syntax#core#new_arg('texNewthmArgPrinted',
+                    \ {'next': 'texNewthmOptNumberby'}
+                    \)
+        call vimtex#syntax#core#new_opt('texNewthmOptNumberby')
 
-    " \newtheorem
-    syntax match texCmdNewthm "\\newtheorem\>"
-                \ nextgroup=texNewthmArgName skipwhite skipnl
-    call vimtex#syntax#core#new_arg('texNewthmArgName', {
-                \ 'next': 'texNewthmOptCounter,texNewthmArgPrinted',
-                \ 'contains': 'TOP,@Spell'
-                \})
-    call vimtex#syntax#core#new_opt('texNewthmOptCounter',
-                \ {'next': 'texNewthmArgPrinted'}
-                \)
-    call vimtex#syntax#core#new_arg('texNewthmArgPrinted',
-                \ {'next': 'texNewthmOptNumberby'}
-                \)
-    call vimtex#syntax#core#new_opt('texNewthmOptNumberby')
-
-    " \begin{mytheorem}[custom title]
-    call vimtex#syntax#core#new_opt('texTheoremEnvOpt', {
-                \ 'contains': 'TOP,@NoSpell'
-                \})
-
+        " \begin{mytheorem}[custom title]
+        call vimtex#syntax#core#new_opt('texTheoremEnvOpt', {
+                    \ 'contains': 'TOP,@NoSpell'
+                    \})
     " }}}2
-    " {{{2 Comments
-
-    " * In documented TeX Format, actual comments are defined by leading "^^A".
-    "   Almost all other lines start with one or more "%", which may be matched
-    "   as comment characters. The remaining part of the line can be interpreted
-    "   as TeX syntax.
-    " * For more info on dtx files, see e.g.
-    "   https://ctan.uib.no/info/dtxtut/dtxtut.pdf
-    if expand('%:e') ==# 'dtx'
-        syntax match texComment "\^\^A.*$"
-        syntax match texComment "^%\+"
-    elseif g:vimtex_syntax_nospell_comments
-        syntax match texComment "%.*$" contains=@NoSpell
-    else
-        syntax match texComment "%.*$" contains=@Spell
-    endif
-
-    " Don't spell check magic comments/directives
-    syntax match texComment "^\s*%\s*!.*" contains=@NoSpell
-
-    " Do not check URLs and acronyms in comments
-    " Source: https://github.com/lervag/vimtex/issues/562
-    syntax match texCommentURL "\w\+:\/\/[^[:space:]]\+"
-                \ containedin=texComment contained contains=@NoSpell
-    syntax match texCommentAcronym '\v<(\u|\d){3,}s?>'
-                \ containedin=texComment contained contains=@NoSpell
-
-    " Todo and similar within comments
-    syntax case ignore
-    syntax keyword texCommentTodo combak fixme todo xxx
-                \ containedin=texComment contained
-    syntax case match
-
-    " Highlight \iffalse ... \fi blocks as comments
-    syntax region texComment matchgroup=texCmdConditional
-                \ start="^\s*\\iffalse\>" end="\\\%(fi\|else\)\>"
-                \ contains=texCommentConditionals
-
-    syntax region texCommentConditionals matchgroup=texComment
-                \ start="\\if\w\+" end="\\fi\>"
-                \ contained transparent
-
-    " Highlight \iftrue ... \else ... \fi blocks as comments
-    syntax region texConditionalTrueZone matchgroup=texCmdConditional
-                \ start="^\s*\\iftrue\>"  end="\v\\fi>|%(\\else>)@="
-                \ contains=TOP nextgroup=texCommentFalse
-                \ transparent
-
-    syntax region texConditionalNested matchgroup=texCmdConditional
-                \ start="\\if\w\+" end="\\fi\>"
-                \ contained contains=TOP
-                \ containedin=texConditionalTrueZone,texConditionalNested
-
-    syntax region texCommentFalse matchgroup=texCmdConditional
-                \ start="\\else\>"  end="\\fi\>"
-                \ contained contains=texCommentConditionals
-
-    " }}}2
-    " {{{2 Zone: Verbatim
-
-    " Verbatim environment
-    call vimtex#syntax#core#new_region_env('texVerbZone', '[vV]erbatim')
-
-    " Verbatim inline
-    syntax match texCmdVerb "\\verb\>\*\?" nextgroup=texVerbZoneInline
-    call vimtex#syntax#core#new_arg('texVerbZoneInline', {
-                \ 'contains': '',
-                \ 'matcher': 'start="\z([^\ta-zA-Z]\)" end="\z1"'
-                \})
-
-    " }}}2
-    " {{{2 Zone: Expl3
-
-    syntax region texE3Zone matchgroup=texCmdE3
-                \ start="\\\%(ExplSyntaxOn\|ProvidesExpl\%(Package\|Class\|File\)\)"
-                \ end="\\ExplSyntaxOff\|\%$"
-                \ transparent
-                \ contains=TOP,@NoSpell
-
-    call vimtex#syntax#core#new_arg('texE3Group', {
-                \ 'opts': 'contained containedin=@texClusterE3',
-                \})
-
-    syntax match texE3Cmd "\\\w\+"
-                \ contained containedin=@texClusterE3
-                \ nextgroup=texE3Opt,texE3Arg skipwhite skipnl
-    call vimtex#syntax#core#new_opt('texE3Opt', {'next': 'texE3Arg'})
-    call vimtex#syntax#core#new_arg('texE3Arg', {
-                \ 'next': 'texE3Arg',
-                \ 'opts': 'contained transparent'
-                \})
-
-    syntax match texE3CmdNestedZoneEnd '\\\ExplSyntaxOff'
-                \ contained containedin=texE3Arg,texE3Group
-
-    syntax match texE3Variable "\\[gl]_\%(\h\|@@_\@=\)*_\a\+"
-                \ contained containedin=@texClusterE3
-    syntax match texE3Constant "\\c_\%(\h\|@@_\@=\)*_\a\+"
-                \ contained containedin=@texClusterE3
-    syntax match texE3Function "\\\%(\h\|@@_\)\+:\a*"
-                \ contained containedin=@texClusterE3
-                \ contains=texE3Type
-
-    syntax match texE3Type ":[a-zA-Z]*" contained
-    syntax match texE3Parm "#\+\d" contained containedin=@texClusterE3
-
-    syntax cluster texClusterE3 contains=texE3Zone,texE3Arg,texE3Group,texE3Opt
-
-    " }}}2
-    " {{{2 Zone: Math
-
-    " Define math region group
-    call vimtex#syntax#core#new_arg('texMathGroup', {'contains': '@texClusterMath'})
-
-    " Define math environment boundaries
-    syntax match texCmdMathEnv "\v\\%(begin|end)>" contained nextgroup=texMathEnvArgName
-    call vimtex#syntax#core#new_arg('texMathEnvArgName',
-                \ {'contains': 'texComment,@NoSpell'})
-
-    " Environments inside math zones
-    " * This is used to restrict the whitespace between environment name and
-    "   the option group (see https://github.com/lervag/vimtex/issues/2043).
-    syntax match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
-    call vimtex#syntax#core#new_arg('texEnvMArgName', {
-                \ 'contains': 'texComment,@NoSpell',
-                \ 'next': 'texEnvOpt',
-                \ 'skipwhite': v:false
-                \})
-
-    " Math regions: environments
-    call vimtex#syntax#core#new_region_math('displaymath')
-    call vimtex#syntax#core#new_region_math('eqnarray')
-    call vimtex#syntax#core#new_region_math('equation')
-    call vimtex#syntax#core#new_region_math('math')
-
-    " Math regions: Inline Math Zones
-    let l:conceal = g:vimtex_syntax_conceal.math_bounds ? 'concealends' : ''
-    execute 'syntax region texMathZone matchgroup=texMathDelimZone'
-                    \ 'start="\%(\\\@<!\)\@<=\\("'
-                    \ 'end="\%(\\\@<!\)\@<=\\)"'
-                    \ 'contains=@texClusterMath keepend'
-                    \ l:conceal
-    execute 'syntax region texMathZone matchgroup=texMathDelimZone'
-                    \ 'start="\\\["'
-                    \ 'end="\\]"'
-                    \ 'contains=@texClusterMath keepend'
-                    \ l:conceal
-    execute 'syntax region texMathZoneX matchgroup=texMathDelimZone'
-                    \ 'start="\$"'
-                    \ 'skip="\\\\\|\\\$"'
-                    \ 'end="\$"'
-                    \ 'contains=@texClusterMath'
-                    \ 'nextgroup=texMathTextAfter'
-                    \ l:conceal
-    execute 'syntax region texMathZoneXX matchgroup=texMathDelimZone'
-                    \ 'start="\$\$"'
-                    \ 'end="\$\$"'
-                    \ 'contains=@texClusterMath keepend'
-                    \ l:conceal
-
-    " This is to disable spell check for text just after "$" (e.g. "$n$th")
-    syntax match texMathTextAfter "\w\+" contained contains=@NoSpell
-
-    " Math regions: \ensuremath{...}
-    syntax match texCmdMath "\\ensuremath\>" nextgroup=texMathZoneEnsured
-    call vimtex#syntax#core#new_arg('texMathZoneEnsured', {'contains': '@texClusterMath'})
-
-    " Bad/Mismatched math
-    syntax match texMathError "\\[\])]"
-    syntax match texMathError "\\end\s*{\s*\(array\|[bBpvV]matrix\|split\|smallmatrix\)\s*}"
-
-    " Operators and similar
-    syntax match texMathOper "[/=+-]" contained
-    syntax match texMathSuperSub "[_^]" contained
-
-    " Text Inside Math regions
-    for l:re_cmd in [
-                \ 'text%(normal|rm|up|tt|sf|sc)?',
-                \ 'intertext',
-                \ '[mf]box',
-                \]
-        execute 'syntax match texMathCmdText'
-                    \ '"\v\\' . l:re_cmd . '>"'
-                    \ 'contained skipwhite nextgroup=texMathTextArg'
-    endfor
-    call vimtex#syntax#core#new_arg('texMathTextArg')
-
-    " Math style commands
-    syntax match texMathCmdStyle contained "\\mathbb\>"
-    syntax match texMathCmdStyle contained "\\mathbf\>"
-    syntax match texMathCmdStyle contained "\\mathcal\>"
-    syntax match texMathCmdStyle contained "\\mathfrak\>"
-    syntax match texMathCmdStyle contained "\\mathit\>"
-    syntax match texMathCmdStyle contained "\\mathnormal\>"
-    syntax match texMathCmdStyle contained "\\mathrm\>"
-    syntax match texMathCmdStyle contained "\\mathsf\>"
-    syntax match texMathCmdStyle contained "\\mathtt\>"
-
-    " Bold and italic commands
-    call s:match_bold_italic_math()
-
-    " Support for array environment
-    syntax match texMathCmdEnv contained contains=texCmdMathEnv "\\begin{array}"
-                \ nextgroup=texMathArrayArg skipwhite skipnl
-    syntax match texMathCmdEnv contained contains=texCmdMathEnv "\\end{array}"
-    call vimtex#syntax#core#new_arg('texMathArrayArg', {
-                \ 'contains': '@texClusterTabular'
-                \})
-
-    call s:match_math_sub_super()
-    call s:match_math_delims()
-    call s:match_math_symbols()
-    call s:match_math_fracs()
-
-    " }}}2
-    " {{{2 Zone: SynIgnore
-
-    syntax region texSynIgnoreZone matchgroup=texComment
-                \ start="^\c\s*% VimTeX: SynIgnore\%( on\| enable\)\?\s*$"
-                \ end="^\c\s*% VimTeX: SynIgnore\%( off\| disable\).*"
-                \ contains=texComment,texCmd
-
-    " Also support Overleafs magic comment
-    " https://www.overleaf.com/learn/how-to/Code_Check
-    syntax region texSynIgnoreZone matchgroup=texComment
-                \ start="^%%begin novalidate\s*$"
-                \ end="^%%end novalidate\s*$"
-                \ contains=texComment,texCmd
-
-    " }}}2
-    " {{{2 Conceal mode support
-
-    " Add support for conceal with custom replacement (conceallevel = 2)
-
-    if &encoding ==# 'utf-8'
-        " Conceal various commands - be fancy
-        if g:vimtex_syntax_conceal.fancy
-            call s:match_conceal_fancy()
+    "
+    " Comments
+        " * In documented TeX Format, actual comments are defined by leading "^^A".
+        "   Almost all other lines start with one or more "%",
+        "   which may be matched  as comment characters.
+        "   ✌The remaining part of the line can be interpreted  as TeX syntax✌.
+        " * For more info on dtx files, see e.g.
+        "   https://ctan.uib.no/info/dtxtut/dtxtut.pdf
+        if expand('%:e') ==# 'dtx'
+            syn match texComment "\^\^A.*$"
+            syn match texComment "^%\+"
+        elseif g:vimtex_syntax_nospell_comments
+            syn match texComment "%.*$" contains=@NoSpell
+        else
+            syn match texComment "%.*$" contains=@Spell
         endif
 
-        " Conceal replace greek letters
-        if g:vimtex_syntax_conceal.greek
-            call s:match_conceal_greek()
-        endif
+        " Don't spell check magic comments/directives
+        syn match texComment "^\s*%\s*!.*" contains=@NoSpell
 
-        " Conceal replace accented characters
-        if g:vimtex_syntax_conceal.accents
-            call s:match_conceal_accents()
-        endif
+        " Do not check URLs and acronyms in comments
+        " Source: https://github.com/lervag/vimtex/issues/562
+        syn match texCommentURL "\w\+:\/\/[^[:space:]]\+"
+                    \ containedin=texComment contained contains=@NoSpell
+        syn match texCommentAcronym '\v<(\u|\d){3,}s?>'
+                    \ containedin=texComment contained contains=@NoSpell
 
-        " Conceal replace ligatures
-        if g:vimtex_syntax_conceal.ligatures
-            call s:match_conceal_ligatures()
-        endif
+        " Todo and similar within comments
+        syn case ignore
+        syn keyword texCommentTodo combak fixme todo xxx
+                    \ containedin=texComment contained
+        syn case match
 
-        " Conceal cite commands
-        if g:vimtex_syntax_conceal.cites
-            call s:match_conceal_cites_{g:vimtex_syntax_conceal_cites.type}()
-        endif
+        " Highlight \iffalse ... \fi blocks as comments
+        syn region texComment matchgroup=texCmdConditional
+                    \ start="^\s*\\iffalse\>" end="\\\%(fi\|else\)\>"
+                    \ contains=texCommentConditionals
 
-        " Conceal section commands
-        if g:vimtex_syntax_conceal.sections
-            call s:match_conceal_sections()
-        endif
-    endif
+        syn region texCommentConditionals matchgroup=texComment
+                    \ start="\\if\w\+" end="\\fi\>"
+                    \ contained transparent
 
+        " Highlight \iftrue ... \else ... \fi blocks as comments
+        syn region texConditionalTrueZone matchgroup=texCmdConditional
+                    \ start="^\s*\\iftrue\>"  end="\v\\fi>|%(\\else>)@="
+                    \ contains=TOP nextgroup=texCommentFalse
+                    \ transparent
+
+        syn region texConditionalNested matchgroup=texCmdConditional
+                    \ start="\\if\w\+" end="\\fi\>"
+                    \ contained contains=TOP
+                    \ containedin=texConditionalTrueZone,texConditionalNested
+
+        syn region texCommentFalse matchgroup=texCmdConditional
+                    \ start="\\else\>"  end="\\fi\>"
+                    \ contained contains=texCommentConditionals
     " }}}2
+
+    " Zone: Verbatim
+        " Verbatim environment
+        call vimtex#syntax#core#new_region_env('texVerbZone', '[vV]erbatim')
+
+        " Verbatim inline
+        syn match texCmdVerb "\\verb\>\*\?" nextgroup=texVerbZoneInline
+        call vimtex#syntax#core#new_arg('texVerbZoneInline', {
+                    \ 'contains': '',
+                    \ 'matcher': 'start="\z([^\ta-zA-Z]\)" end="\z1"'
+                    \})
+    " }}}2
+
+    " Zone: Expl3
+        syn region texE3Zone matchgroup=texCmdE3
+                    \ start="\\\%(ExplSyntaxOn\|ProvidesExpl\%(Package\|Class\|File\)\)"
+                    \ end="\\ExplSyntaxOff\|\%$"
+                    \ transparent
+                    \ contains=TOP,@NoSpell
+
+        call vimtex#syntax#core#new_arg('texE3Group', {
+                    \ 'opts': 'contained containedin=@texClusterE3',
+                    \})
+
+        syn match texE3Cmd "\\\w\+"
+                    \ contained containedin=@texClusterE3
+                    \ nextgroup=texE3Opt,texE3Arg skipwhite skipnl
+        call vimtex#syntax#core#new_opt('texE3Opt', {'next': 'texE3Arg'})
+        call vimtex#syntax#core#new_arg('texE3Arg', {
+                    \ 'next': 'texE3Arg',
+                    \ 'opts': 'contained transparent'
+                    \})
+
+        syn match texE3CmdNestedZoneEnd '\\\ExplSyntaxOff'
+                    \ contained containedin=texE3Arg,texE3Group
+
+        syn match texE3Variable "\\[gl]_\%(\h\|@@_\@=\)*_\a\+"
+                    \ contained containedin=@texClusterE3
+        syn match texE3Constant "\\c_\%(\h\|@@_\@=\)*_\a\+"
+                    \ contained containedin=@texClusterE3
+        syn match texE3Function "\\\%(\h\|@@_\)\+:\a*"
+                    \ contained containedin=@texClusterE3
+                    \ contains=texE3Type
+
+        syn match texE3Type ":[a-zA-Z]*" contained
+        syn match texE3Parm "#\+\d" contained containedin=@texClusterE3
+
+        syn cluster texClusterE3 contains=texE3Zone,texE3Arg,texE3Group,texE3Opt
+
+
+
+    " Zone: Math
+        " Define math region group
+        call vimtex#syntax#core#new_arg('texMathGroup', {'contains': '@texClusterMath'})
+
+        " Define math environment boundaries
+            " syn match texCmdMathEnv "\v\\%(begin|end)>" contained conceal   nextgroup=texMathEnvArgName
+                                          " %():
+                                          " Just like (), but without counting it as a sub-expression.
+            syn match texCmdMathEnv "\v\\begin>" contained conceal cchar=⇒     nextgroup=texMathEnvArgName
+            syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=⇐     nextgroup=texMathEnvArgName
+            call vimtex#syntax#core#new_arg('texMathEnvArgName',
+                        \ {'contains': 'texComment,@NoSpell'})
+
+        " Environments inside math zones
+        " * This is used to restrict the whitespace between environment name and
+        "   the option group (see https://github.com/lervag/vimtex/issues/2043).
+        syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
+        call vimtex#syntax#core#new_arg('texEnvMArgName', {
+                    \ 'contains': 'texComment,@NoSpell',
+                    \ 'next': 'texEnvOpt',
+                    \ 'skipwhite': v:false
+                    \})
+
+        " Math regions: environments
+            call vimtex#syntax#core#new_region_math('displaymath')
+            call vimtex#syntax#core#new_region_math('eqnarray')
+            call vimtex#syntax#core#new_region_math('equation')
+            call vimtex#syntax#core#new_region_math('math')
+
+        " Math regions: Inline Math Zones
+            let l:conceal = g:vimtex_syntax_conceal.math_bounds ? 'concealends' : ''
+            execute 'syntax region texMathZone matchgroup=texMathDelimZone'
+                            \ 'start="\%(\\\@<!\)\@<=\\("'
+                            \ 'end="\%(\\\@<!\)\@<=\\)"'
+                            \ 'contains=@texClusterMath keepend'
+                            \ l:conceal
+            execute 'syntax region texMathZone matchgroup=texMathDelimZone'
+                            \ 'start="\\\["'
+                            \ 'end="\\]"'
+                            \ 'contains=@texClusterMath keepend'
+                            \ l:conceal
+            execute 'syntax region texMathZoneX matchgroup=texMathDelimZone'
+                            \ 'start="\$"'
+                            \ 'skip="\\\\\|\\\$"'
+                            \ 'end="\$"'
+                            \ 'contains=@texClusterMath'
+                            \ 'nextgroup=texMathTextAfter'
+                            \ l:conceal
+            execute 'syntax region texMathZoneXX matchgroup=texMathDelimZone'
+                            \ 'start="\$\$"'
+                            \ 'end="\$\$"'
+                            \ 'contains=@texClusterMath keepend'
+                            \ l:conceal
+
+        " This is to disable spell check for text just after "$" (e.g. "$n$th")
+        syn match texMathTextAfter "\w\+" contained contains=@NoSpell
+
+        " Math regions: \ensuremath{...}
+        syn match texCmdMath "\\ensuremath\>" nextgroup=texMathZoneEnsured
+        call vimtex#syntax#core#new_arg('texMathZoneEnsured', {'contains': '@texClusterMath'})
+
+        " Bad/Mismatched math
+        syn match texMathError "\\[\])]"
+        syn match texMathError "\\end\s*{\s*\(array\|[bBpvV]matrix\|split\|smallmatrix\)\s*}"
+
+        " Operators and similar
+        syn match texMathOper "[/=+-]" contained
+        syn match texMathSuperSub "[_^]" contained
+
+        " Text Inside Math regions
+        for l:re_cmd in [
+                    \ 'text%(normal|rm|up|tt|sf|sc)?',
+                    \ 'intertext',
+                    \ '[mf]box',
+                    \]
+            execute 'syntax match texMathCmdText'
+                        \ '"\v\\' . l:re_cmd . '>"'
+                        \ 'contained skipwhite nextgroup=texMathTextArg'
+        endfor
+        call vimtex#syntax#core#new_arg('texMathTextArg')
+
+        " Math style commands
+        syn match texMathCmdStyle contained "\\mathbb\>"
+        syn match texMathCmdStyle contained "\\mathbf\>"
+        syn match texMathCmdStyle contained "\\mathcal\>"
+        syn match texMathCmdStyle contained "\\mathfrak\>"
+        syn match texMathCmdStyle contained "\\mathit\>"
+        syn match texMathCmdStyle contained "\\mathnormal\>"
+        syn match texMathCmdStyle contained "\\mathrm\>"
+        syn match texMathCmdStyle contained "\\mathsf\>"
+        syn match texMathCmdStyle contained "\\mathtt\>"
+
+        " Bold and italic commands
+        call s:match_bold_italic_math()
+
+        " Support for array environment
+        syn match texMathCmdEnv contained contains=texCmdMathEnv "\\begin{array}"
+                    \ nextgroup=texMathArrayArg skipwhite skipnl
+        syn match texMathCmdEnv contained contains=texCmdMathEnv "\\end{array}"
+        call vimtex#syntax#core#new_arg('texMathArrayArg', {
+                    \ 'contains': '@texClusterTabular'
+                    \})
+
+        call s:match_math_sub_super()
+        call s:match_math_delims()
+        call s:match_math_symbols()
+        call s:match_math_fracs()
+
+
+
+    " Zone: SynIgnore
+        syn region texSynIgnoreZone matchgroup=texComment
+                    \ start="^\c\s*% VimTeX: SynIgnore\%( on\| enable\)\?\s*$"
+                    \ end="^\c\s*% VimTeX: SynIgnore\%( off\| disable\).*"
+                    \ contains=texComment,texCmd
+
+        " Also support Overleafs magic comment
+        " https://www.overleaf.com/learn/how-to/Code_Check
+        syn region texSynIgnoreZone matchgroup=texComment
+                    \ start="^%%begin novalidate\s*$"
+                    \ end="^%%end novalidate\s*$"
+                    \ contains=texComment,texCmd
+
+
+
+    " Conceal mode support
+        " Add support for conceal with custom replacement (conceallevel = 2)
+        if &encoding ==# 'utf-8'
+            " Conceal various commands - be fancy
+            if g:vimtex_syntax_conceal.fancy
+                call s:match_conceal_fancy()
+            endif
+
+            " Conceal replace greek letters
+            if g:vimtex_syntax_conceal.greek
+                call s:match_conceal_greek()
+            endif
+
+            " Conceal replace accented characters
+            if g:vimtex_syntax_conceal.accents
+                call s:match_conceal_accents()
+            endif
+
+            " Conceal replace ligatures
+            if g:vimtex_syntax_conceal.ligatures
+                call s:match_conceal_ligatures()
+            endif
+
+            " Conceal cite commands
+            if g:vimtex_syntax_conceal.cites
+                call s:match_conceal_cites_{g:vimtex_syntax_conceal_cites.type}()
+            endif
+
+            " Conceal section commands
+            if g:vimtex_syntax_conceal.sections
+                call s:match_conceal_sections()
+            endif
+        endif
+
+
 
     " Apply custom command syntax specifications
-    for l:item in g:vimtex_syntax_custom_cmds
-        call vimtex#syntax#core#new_cmd(l:item)
-    endfor
-
+        for l:item in g:vimtex_syntax_custom_cmds
+            call vimtex#syntax#core#new_cmd(l:item)
+        endfor
     let b:current_syntax = 'tex'
-endfunction
+endf
 
-" }}}1
-function! vimtex#syntax#core#init_post() abort " {{{1
+fun! vimtex#syntax#core#init_post() abort
     if exists('b:vimtex_syntax_did_postinit') | return | endif
     let b:vimtex_syntax_did_postinit = 1
 
@@ -689,84 +685,76 @@ function! vimtex#syntax#core#init_post() abort " {{{1
     endfor
 
     call vimtex#syntax#packages#init()
-endfunction
+endf
 
-" }}}1
 
-function! vimtex#syntax#core#init_highlights() abort " {{{1
+fun! vimtex#syntax#core#init_highlights() abort
     " See :help group-name for list of conventional group names
 
     " Primitive TeX highlighting groups
-        hi def link texArg                Error
+    "
+        hi def link texArg                Ignore
 
-        hi def link texCmd                Error
-        hi def link texCmdSpaceCodeChar   Error
-        hi def link texCmdTodo            Error
-        hi def link texCmdType            Error
+        hi def link texCmd                Ignore
+        hi def link texCmdSpaceCodeChar   Ignore
+        hi def link texCmdTodo            Ignore
+        hi def link texCmdType            Ignore
 
-        hi def link texComment            Error
-        hi def link texCommentTodo        Error
+        hi def link texComment            Ignore
+        hi def link texCommentTodo        Ignore
 
-        hi def link texDelim              Error
+        " hi def link texDelim              Delimiter
+        hi texDelim guifg=none guibg=none gui=none
+            " 大括号的fg还受其他位置控制
 
-        hi def link texEnvArgName         Error
+        hi def link texEnvArgName         Ignore
 
-        hi def link texError              Error
-        hi def link texLength             Error
+        hi def link texIgnore              Ignore
+        hi def link texLength             Ignore
 
-        hi def link texMathDelim          Error
-        hi def link texMathEnvArgName     Error
-        hi def link texMathOper           Error
-        hi def link texMathZone           Error
+        hi def link texMathDelim          Ignore
+        hi def link texMathEnvArgName     Ignore
+        hi def link texMathOper           Ignore
+        hi def link texMathZone           Ignore
 
-        hi def link texOpt                Error
-        hi def link texOptSep             Error
+        hi def link texOpt                Ignore
+        hi def link texOptSep             Ignore
 
-        hi def link texParm               Error
-        hi def link texPartArgTitle       Error
-        hi def link texRefArg             Error
-        hi def link texZone               Error
+        hi def link texParm               Ignore
+        hi def link texPartArgTitle       Ignore
+        hi def link texRefArg             Ignore
+        hi def link texZone               Ignore
 
-        hi def link texSpecialChar        Error
-        hi def link texSymbol             Error
+        hi def link texSpecialChar        Ignore
+        hi def link texSymbol             Ignore
 
-        hi def link texTitleArg           Error
+        hi def link texTitleArg           Ignore
 
                     " 本来是
-        " hi def link texArg
-        "
-        " hi def link texCmd
-        " hi def link texCmdSpaceCodeChar
-        " hi def link texCmdTodo
-        " hi def link texCmdType
-        "
-        " hi def link texComment
-        " hi def link texCommentTodo
-        "
-        " hi def link texDelim                                              Include
-        "                                                                   Statement
-        " hi def link texEnvArgName                                         Special
-        "                                                                   Todo
-        " hi def link texError                                              Type
-        " hi def link texLength                                             Comment
-        "                                                                   Todo
-        " hi def link texMathDelim                                          Delimiter
-        " hi def link texMathEnvArgName                                     PreCondit
-        " hi def link texMathOper                                           Error
-        " hi def link texMathZone                                           Number
-        "                                                                   Type
-        " hi def link texOpt                                                Delimiter
-        " hi def link texOptSep                                             Operator
-        "                                                                   Special
-        " hi def link texParm                                               Identifier
-        " hi def link texPartArgTitle                                       NormalNC
-        " hi def link texRefArg                                             Special
-        " hi def link texZone                                               String
-        "                                                                   Special
-        " hi def link texSpecialChar                                        PreCondit
-        " hi def link texSymbol                                             SpecialChar
-        "                                                                   SpecialChar
-        " hi def link texTitleArg                                            Underlined
+        " hi def link texArg                Include吧
+        " hi def link texCmd                Statement
+        " hi def link texCmdSpaceCodeChar   Special
+        " hi def link texCmdTodo            Todo
+        " hi def link texCmdType            Type
+        " hi def link texComment            Comment
+        " hi def link texCommentTodo        Todo
+        " hi def link texDelim              Delimiter
+        " hi def link texEnvArgName         PreCondit
+        " hi def link texError              Error
+        " hi def link texLength             Number
+        " hi def link texMathDelim          Type
+        " hi def link texMathEnvArgName     Delimiter
+        " hi def link texMathOper           Operator
+        " hi def link texMathZone           Special
+        " hi def link texOpt                Identifier
+        " hi def link texOptSep             NormalNC
+        " hi def link texParm               Special
+        " hi def link texPartArgTitle       String
+        " hi def link texRefArg             Special
+        " hi def link texZone               PreCondit
+        " hi def link texSpecialChar        SpecialChar
+        " hi def link texSymbol             SpecialChar
+        " hi def link texTitleArg           Underlined
 
 
 
@@ -801,12 +789,12 @@ function! vimtex#syntax#core#init_highlights() abort " {{{1
     "     hi def link texCmdEnvM            texCmdEnv
     "     hi def link texCmdE3              texCmd
     "     hi def link texCmdFootnote        texCmd
-    "     hi def link texCmdGreek           texMathCmd
+        hi def link texCmdGreek           texMathCmd
+        hi def link texCmdMath            texCmd
     "     hi def link texCmdInput           texCmd
     "     hi def link texCmdItem            texCmdEnv
     "     hi def link texCmdLet             texCmdNew
     "     hi def link texCmdLigature        texSpecialChar
-    "     hi def link texCmdMath            texCmd
     "     hi def link texCmdMathEnv         texCmdEnv
     "     hi def link texCmdNew             texCmd
     "     hi def link texCmdNewcmd          texCmdNew
@@ -835,7 +823,9 @@ function! vimtex#syntax#core#init_highlights() abort " {{{1
     "     hi def link texDefArgName         texArgNew
     "     hi def link texDefParm            texParm
     "     hi def link texE3Cmd              texCmd
-    "     hi def link texE3Delim            texDelim
+        hi def link texE3Delim            texDelim
+        hi def link texRefConcealedDelim  texDelim
+        hi def link texMathDelimZone      texDelim
     "     hi def link texE3Function         texCmdType
     "     hi def link texE3Opt              texOpt
     "     hi def link texE3Parm             texParm
@@ -863,7 +853,6 @@ function! vimtex#syntax#core#init_highlights() abort " {{{1
     "     hi def link texMathCmdStyleItal   texMathCmd
     "     hi def link texMathCmdText        texCmd
     "     hi def link texMathDelimMod       texMathDelim
-    "     hi def link texMathDelimZone      texDelim
     "     hi def link texMathError          texError
     "     hi def link texMathErrorDelim     texError
     "     hi def link texMathGroup          texMathZone
@@ -890,13 +879,12 @@ function! vimtex#syntax#core#init_highlights() abort " {{{1
     "     hi def link texParboxOptHeight    texError
     "     hi def link texParboxOptIPos      texError
     "     hi def link texParboxOptPos       texError
-    "     hi def link texPartConcealed      texCmdPart
+        hi def link texPartConcealed      texCmdPart
     "     hi def link texPartConcArgTitle   texPartArgTitle
     "     hi def link texRefOpt             texOpt
     "     hi def link texRefConcealedOpt1   texRefOpt
     "     hi def link texRefConcealedOpt2   texRefOpt
     "     hi def link texRefConcealedArg    texRefArg
-    "     hi def link texRefConcealedDelim  texDelim
     "     hi def link texTabularArg         texOpt
     "     hi def link texTabularAtSep       texMathDelim
     "     hi def link texTabularChar        texSymbol
@@ -905,11 +893,10 @@ function! vimtex#syntax#core#init_highlights() abort " {{{1
     "     hi def link texTheoremEnvOpt      texEnvOpt
     "     hi def link texVerbZone           texZone
     "     hi def link texVerbZoneInline     texVerbZone
-endfunction
+endf
 
-" }}}1
 
-function! vimtex#syntax#core#new_arg(grp, ...) abort " {{{1
+fun! vimtex#syntax#core#new_arg(grp, ...) abort
     let l:cfg = extend({
                 \ 'contains': 'TOP,@NoSpell',
                 \ 'matcher': 'start="{" skip="\\\\\|\\}" end="}"',
@@ -927,10 +914,9 @@ function! vimtex#syntax#core#new_arg(grp, ...) abort " {{{1
                 \ (empty(l:cfg.next) ? ''
                 \   : 'nextgroup=' . l:cfg.next
                 \     . (l:cfg.skipwhite ? ' skipwhite skipnl' : ''))
-endfunction
+endf
 
-" }}}1
-function! vimtex#syntax#core#new_opt(grp, ...) abort " {{{1
+fun! vimtex#syntax#core#new_opt(grp, ...) abort
     let l:cfg = extend({
                 \ 'opts': '',
                 \ 'next': '',
@@ -943,10 +929,9 @@ function! vimtex#syntax#core#new_opt(grp, ...) abort " {{{1
                 \ l:cfg.opts
                 \ (empty(l:cfg.contains) ? '' : 'contains=' . l:cfg.contains)
                 \ (empty(l:cfg.next) ? '' : 'nextgroup=' . l:cfg.next . ' skipwhite skipnl')
-endfunction
+endf
 
-" }}}1
-function! vimtex#syntax#core#new_cmd(cfg) abort " {{{1
+fun! vimtex#syntax#core#new_cmd(cfg) abort "
     if empty(get(a:cfg, 'name')) | return | endif
 
     " Parse options/config
@@ -1058,11 +1043,10 @@ function! vimtex#syntax#core#new_cmd(cfg) abort " {{{1
                 \ !empty(l:cfg.hlgroup)
                 \   ? l:cfg.hlgroup
                 \   : l:pre . 'Cmd'
-endfunction
+endf
 
-" }}}1
 
-function! vimtex#syntax#core#new_region_env(grp, envname, ...) abort " {{{1
+fun! vimtex#syntax#core#new_region_env(grp, envname, ...) abort
     let l:cfg = extend({
                 \ 'contains': '',
                 \ 'opts': '',
@@ -1087,10 +1071,9 @@ function! vimtex#syntax#core#new_region_env(grp, envname, ...) abort " {{{1
                 \ 'end="\\end{' . a:envname .'}"'
                 \ l:contains
                 \ l:options
-endfunction
+endf
 
-" }}}1
-function! vimtex#syntax#core#new_region_math(mathzone, ...) abort " {{{1
+fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
     let l:cfg = extend({
                 \ 'starred': 1,
                 \ 'next': '',
@@ -1098,37 +1081,38 @@ function! vimtex#syntax#core#new_region_math(mathzone, ...) abort " {{{1
 
     let l:envname = a:mathzone . (l:cfg.starred ? '\*\?' : '')
 
-    execute 'syntax match texMathEnvBgnEnd "\\\%(begin\|end\)\>{' . l:envname . '}"'
-                \ 'contained contains=texCmdMathEnv'
-                \ (empty(l:cfg.next) ? '' : 'nextgroup=' . l:cfg.next . ' skipwhite skipnl')
-    execute 'syntax match texMathError "\\end{' . l:envname . '}"'
+    execute 'syntax match texMathError  "\\end{'..l:envname ..'}"  '
+
+    execute 'syntax match texMathEnvBgnEnd  "\\\v%(begin|end)>\V{'..l:envname..'}"  contained'
+                \ ' contains=texCmdMathEnv'
+                \ ( empty(l:cfg.next) ?  ''   :   'nextgroup='..l:cfg.next..' skipwhite skipnl' )
+
     execute 'syntax region texMathZoneEnv'
-                \ 'start="\\begin{\z(' . l:envname . '\)}"'
+                \ 'start="\\begin{\z('..l:envname..'\)}"'
                 \ 'end="\\end{\z1}"'
                 \ 'contains=texMathEnvBgnEnd,@texClusterMath'
                 \ 'keepend'
-endfunction
+    " \z\(aaabbb\): 用于✌start= ✌的特殊的regex
+endf
 
-" }}}1
 
-function! vimtex#syntax#core#conceal_cmd_pairs(cmd, pairs) abort " {{{1
+fun! vimtex#syntax#core#conceal_cmd_pairs(cmd, pairs) abort
     for [l:from, l:to] in a:pairs
         execute 'syntax match texMathSymbol'
                     \ '"\\' . a:cmd . '\%({\s*' . l:from . '\s*}\|\s\+' . l:from . '\)"'
                     \ 'contained conceal cchar=' . l:to
     endfor
-endfunction
-
-" }}}1
+endf
 
 
-function! s:match_bold_italic() abort " {{{1
+
+fun! s:match_bold_italic() abort
     let [l:conceal, l:concealends] =
                 \ (g:vimtex_syntax_conceal.styles ? ['conceal', 'concealends'] : ['', ''])
 
-    syntax cluster texClusterBold     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold
-    syntax cluster texClusterItal     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleBoldItal
-    syntax cluster texClusterItalBold contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold,texCmdStyleBoldItal
+    syn cluster texClusterBold     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold
+    syn cluster texClusterItal     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleBoldItal
+    syn cluster texClusterItalBold contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold,texCmdStyleBoldItal
 
     let l:map = {
                 \ 'texCmdStyleBold': 'texStyleBold',
@@ -1157,15 +1141,15 @@ function! s:match_bold_italic() abort " {{{1
     execute 'syntax region texStyleBoth matchgroup=texDelim start="{" end="}" contained contains=@texClusterItalBold' l:concealends
 
     if g:vimtex_syntax_conceal.styles
-        syntax match texCmdStyle "\v\\text%(rm|tt|up|normal|sf|sc)>"
+        syn match texCmdStyle "\v\\text%(rm|tt|up|normal|sf|sc)>"
                     \ conceal skipwhite skipnl nextgroup=texStyleArgConc
-        syntax region texStyleArgConc matchgroup=texDelim start="{" end="}"
+        syn region texStyleArgConc matchgroup=texDelim start="{" end="}"
                     \ contained contains=TOP,@NoSpell concealends
     endif
-endfunction
+endf
 
-" }}}1
-function! s:match_bold_italic_math() abort " {{{1
+
+fun! s:match_bold_italic_math() abort
     let [l:conceal, l:concealends] =
                 \ (g:vimtex_syntax_conceal.styles ? ['conceal', 'concealends'] : ['', ''])
 
@@ -1188,9 +1172,9 @@ function! s:match_bold_italic_math() abort " {{{1
     execute 'syntax region texMathStyleItal matchgroup=texDelim start="{" end="}" contained contains=@texClusterMath' l:concealends
 
     if g:vimtex_syntax_conceal.styles
-        syntax match texMathCmdStyle "\v\\math%(rm|tt|normal|sf)>"
+        syn match texMathCmdStyle "\v\\math%(rm|tt|normal|sf)>"
                     \ contained conceal skipwhite nextgroup=texMathStyleConcArg
-        syntax region texMathStyleConcArg matchgroup=texDelim start="{" end="}"
+        syn region texMathStyleConcArg matchgroup=texDelim start="{" end="}"
                     \ contained contains=@texClusterMath concealends
 
         for l:re_cmd in [
@@ -1203,14 +1187,14 @@ function! s:match_bold_italic_math() abort " {{{1
                         \ 'contained skipwhite nextgroup=texMathTextConcArg'
                         \ 'conceal'
         endfor
-        syntax region texMathTextConcArg matchgroup=texDelim start="{" end="}"
+        syn region texMathTextConcArg matchgroup=texDelim start="{" end="}"
                     \ contained contains=TOP,@NoSpell concealends
     endif
-endfunction
+endf
 
-" }}}1
 
-function! s:match_math_sub_super() abort " {{{1
+
+fun! s:match_math_sub_super() abort
     if !g:vimtex_syntax_conceal.math_super_sub | return | endif
 
     " This feature does not work unless &encoding = 'utf-8'
@@ -1243,7 +1227,7 @@ function! s:match_math_sub_super() abort " {{{1
                     \ '"' . l:from . '"'
                     \ 'contained conceal cchar=' . l:to
     endfor
-endfunction
+endf
 
 let s:re_sub =
             \ '[-+=()0-9aehijklmnoprstuvx]\|\\\%('
@@ -1358,15 +1342,15 @@ let s:map_super = [
             \ ['W',  'ᵂ'],
             \]
 
-" }}}1
-function! s:match_math_symbols() abort " {{{1
+
+fun! s:match_math_symbols() abort
     " Many of these symbols were contributed by Björn Winckler
     if !g:vimtex_syntax_conceal.math_symbols | return | endif
 
-    syntax match texMathSymbol '\\[,:;!]'              contained conceal
-    syntax match texMathSymbol '\\|'                   contained conceal cchar=‖
-    syntax match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
-    syntax match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
+    syn match texMathSymbol '\\[,:;!]'              contained conceal
+    syn match texMathSymbol '\\|'                   contained conceal cchar=‖
+    syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
+    syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
 
     for [l:cmd, l:symbol] in s:cmd_symbols
         execute 'syntax match texMathSymbol'
@@ -1377,176 +1361,176 @@ function! s:match_math_symbols() abort " {{{1
     for [l:cmd, l:pairs] in items(s:cmd_pairs_dict)
         call vimtex#syntax#core#conceal_cmd_pairs(l:cmd, l:pairs)
     endfor
-endfunction
+endf
 
 let s:cmd_symbols = [
-            \ ['aleph', 'ℵ'],
-            \ ['amalg', '∐'],
-            \ ['angle', '∠'],
-            \ ['approx', '≈'],
-            \ ['ast', '∗'],
-            \ ['asymp', '≍'],
-            \ ['backslash', '∖'],
-            \ ['bigcap', '∩'],
-            \ ['bigcirc', '○'],
-            \ ['bigcup', '∪'],
-            \ ['bigodot', '⊙'],
-            \ ['bigoplus', '⊕'],
-            \ ['bigotimes', '⊗'],
-            \ ['bigsqcup', '⊔'],
-            \ ['bigtriangledown', '∇'],
-            \ ['bigtriangleup', '∆'],
-            \ ['bigvee', '⋁'],
-            \ ['bigwedge', '⋀'],
-            \ ['bot', '⊥'],
-            \ ['bowtie', '⋈'],
-            \ ['bullet', '•'],
-            \ ['cap', '∩'],
-            \ ['cdot', '·'],
-            \ ['cdots', '⋯'],
-            \ ['circ', '∘'],
-            \ ['clubsuit', '♣'],
-            \ ['cong', '≅'],
-            \ ['coprod', '∐'],
-            \ ['copyright', '©'],
-            \ ['cup', '∪'],
-            \ ['dagger', '†'],
-            \ ['dashv', '⊣'],
-            \ ['ddagger', '‡'],
-            \ ['ddots', '⋱'],
-            \ ['diamond', '⋄'],
-            \ ['diamondsuit', '♢'],
-            \ ['div', '÷'],
-            \ ['doteq', '≐'],
-            \ ['dots', '…'],
-            \ ['downarrow', '↓'],
-            \ ['Downarrow', '⇓'],
-            \ ['ell', 'ℓ'],
-            \ ['emptyset', 'Ø'],
-            \ ['equiv', '≡'],
-            \ ['exists', '∃'],
-            \ ['flat', '♭'],
-            \ ['forall', '∀'],
-            \ ['frown', '⁔'],
-            \ ['ge', '≥'],
-            \ ['geq', '≥'],
-            \ ['gets', '←'],
-            \ ['gg', '⟫'],
-            \ ['hbar', 'ℏ'],
-            \ ['heartsuit', '♡'],
-            \ ['hookleftarrow', '↩'],
-            \ ['hookrightarrow', '↪'],
-            \ ['iff', '⇔'],
-            \ ['Im', 'ℑ'],
-            \ ['imath', 'ɩ'],
-            \ ['in', '∈'],
-            \ ['infty', '∞'],
-            \ ['int', '∫'],
-            \ ['iint', '∬'],
-            \ ['iiint', '∭'],
-            \ ['jmath', '𝚥'],
-            \ ['land', '∧'],
-            \ ['lnot', '¬'],
-            \ ['lceil', '⌈'],
-            \ ['ldots', '…'],
-            \ ['le', '≤'],
-            \ ['leftarrow', '←'],
-            \ ['Leftarrow', '⇐'],
-            \ ['leftharpoondown', '↽'],
-            \ ['leftharpoonup', '↼'],
-            \ ['leftrightarrow', '↔'],
-            \ ['Leftrightarrow', '⇔'],
-            \ ['lhd', '◁'],
-            \ ['rhd', '▷'],
-            \ ['leq', '≤'],
-            \ ['ll', '≪'],
-            \ ['lmoustache', '╭'],
-            \ ['lor', '∨'],
-            \ ['mapsto', '↦'],
-            \ ['mid', '∣'],
-            \ ['models', '⊨'],
-            \ ['mp', '∓'],
-            \ ['nabla', '∇'],
-            \ ['natural', '♮'],
-            \ ['ne', '≠'],
-            \ ['nearrow', '↗'],
-            \ ['neg', '¬'],
-            \ ['neq', '≠'],
-            \ ['ni', '∋'],
-            \ ['notin', '∉'],
-            \ ['nwarrow', '↖'],
-            \ ['odot', '⊙'],
-            \ ['oint', '∮'],
-            \ ['ominus', '⊖'],
-            \ ['oplus', '⊕'],
-            \ ['oslash', '⊘'],
-            \ ['otimes', '⊗'],
-            \ ['owns', '∋'],
-            \ ['P', '¶'],
-            \ ['parallel', '║'],
-            \ ['partial', '∂'],
-            \ ['perp', '⊥'],
-            \ ['pm', '±'],
-            \ ['prec', '≺'],
-            \ ['preceq', '⪯'],
-            \ ['prime', '′'],
-            \ ['prod', '∏'],
-            \ ['propto', '∝'],
-            \ ['rceil', '⌉'],
-            \ ['Re', 'ℜ'],
-            \ ['quad', ' '],
-            \ ['qquad', ' '],
-            \ ['rightarrow', '→'],
-            \ ['Rightarrow', '⇒'],
-            \ ['leftarrow', '←'],
-            \ ['Leftarrow', '⇐'],
-            \ ['rightleftharpoons', '⇌'],
-            \ ['rmoustache', '╮'],
-            \ ['S', '§'],
-            \ ['searrow', '↘'],
-            \ ['setminus', '⧵'],
-            \ ['sharp', '♯'],
-            \ ['sim', '∼'],
-            \ ['simeq', '⋍'],
-            \ ['smile', '‿'],
-            \ ['spadesuit', '♠'],
-            \ ['sqcap', '⊓'],
-            \ ['sqcup', '⊔'],
-            \ ['sqsubset', '⊏'],
-            \ ['sqsubseteq', '⊑'],
-            \ ['sqsupset', '⊐'],
-            \ ['sqsupseteq', '⊒'],
-            \ ['star', '✫'],
-            \ ['subset', '⊂'],
-            \ ['subseteq', '⊆'],
-            \ ['succ', '≻'],
-            \ ['succeq', '⪰'],
-            \ ['sum', '∑'],
-            \ ['supset', '⊃'],
-            \ ['supseteq', '⊇'],
-            \ ['surd', '√'],
-            \ ['swarrow', '↙'],
-            \ ['times', '×'],
-            \ ['to', '→'],
-            \ ['top', '⊤'],
-            \ ['triangle', '∆'],
-            \ ['triangleleft', '⊲'],
-            \ ['triangleright', '⊳'],
-            \ ['uparrow', '↑'],
-            \ ['Uparrow', '⇑'],
-            \ ['updownarrow', '↕'],
-            \ ['Updownarrow', '⇕'],
-            \ ['vdash', '⊢'],
-            \ ['vdots', '⋮'],
-            \ ['vee', '∨'],
-            \ ['wedge', '∧'],
-            \ ['wp', '℘'],
-            \ ['wr', '≀'],
-            \ ['implies', '⇒'],
-            \ ['choose', 'C'],
-            \ ['sqrt', '√'],
-            \ ['colon', ':'],
-            \ ['coloneqq', '≔'],
+            \ ['aleph'             , 'ℵ'],
+            \ ['amalg'             , '∐'],
+            \ ['angle'             , '∠'],
+            \ ['approx'            , '≈'],
+            \ ['ast'               , '∗'],
+            \ ['asymp'             , '≍'],
+            \ ['backslash'         , '∖'],
+            \ ['bigcap'            , '∩'],
+            \ ['bigcirc'           , '○'],
+            \ ['bigcup'            , '∪'],
+            \ ['bigodot'           , '⊙'],
+            \ ['bigoplus'          , '⊕'],
+            \ ['bigotimes'         , '⊗'],
+            \ ['bigsqcup'          , '⊔'],
+            \ ['bigtriangledown'   , '∇'],
+            \ ['bigtriangleup'     , '∆'],
+            \ ['bigvee'            , '⋁'],
+            \ ['bigwedge'          , '⋀'],
+            \ ['bot'               , '⊥'],
+            \ ['bowtie'            , '⋈'],
+            \ ['bullet'            , '•'],
+            \ ['cap'               , '∩'],
+            \ ['cdot'              , '·'],
+            \ ['cdots'             , '⋯'],
+            \ ['circ'              , '∘'],
+            \ ['clubsuit'          , '♣'],
+            \ ['cong'              , '≅'],
+            \ ['coprod'            , '∐'],
+            \ ['copyright'         , '©'],
+            \ ['cup'               , '∪'],
+            \ ['dagger'            , '†'],
+            \ ['dashv'             , '⊣'],
+            \ ['ddagger'           , '‡'],
+            \ ['ddots'             , '⋱'],
+            \ ['diamond'           , '⋄'],
+            \ ['diamondsuit'       , '♢'],
+            \ ['div'               , '÷'],
+            \ ['doteq'             , '≐'],
+            \ ['dots'              , '…'],
+            \ ['downarrow'         , '↓'],
+            \ ['Downarrow'         , '⇓'],
+            \ ['ell'               , 'ℓ'],
+            \ ['emptyset'          , 'Ø'],
+            \ ['equiv'             , '≡'],
+            \ ['exists'            , '∃'],
+            \ ['flat'              , '♭'],
+            \ ['forall'            , '∀'],
+            \ ['frown'             , '⁔'],
+            \ ['ge'                , '≥'],
+            \ ['geq'               , '≥'],
+            \ ['gets'              , '←'],
+            \ ['gg'                , '⟫'],
+            \ ['hbar'              , 'ℏ'],
+            \ ['heartsuit'         , '♡'],
+            \ ['hookleftarrow'     , '↩'],
+            \ ['hookrightarrow'    , '↪'],
+            \ ['iff'               , '⇔'],
+            \ ['Im'                , 'ℑ'],
+            \ ['imath'             , 'ɩ'],
+            \ ['in'                , '∈'],
+            \ ['infty'             , '∞'],
+            \ ['int'               , '∫'],
+            \ ['iint'              , '∬'],
+            \ ['iiint'             , '∭'],
+            \ ['jmath'             , '𝚥'],
+            \ ['land'              , '∧'],
+            \ ['lnot'              , '¬'],
+            \ ['lceil'             , '⌈'],
+            \ ['ldots'             , '…'],
+            \ ['le'                , '≤'],
+            \ ['leftarrow'         , '←'],
+            \ ['Leftarrow'         , '⇐'],
+            \ ['leftharpoondown'   , '↽'],
+            \ ['leftharpoonup'     , '↼'],
+            \ ['leftrightarrow'    , '↔'],
+            \ ['Leftrightarrow'    , '⇔'],
+            \ ['lhd'               , '◁'],
+            \ ['rhd'               , '▷'],
+            \ ['leq'               , '≤'],
+            \ ['ll'                , '≪'],
+            \ ['lmoustache'        , '╭'],
+            \ ['lor'               , '∨'],
+            \ ['mapsto'            , '↦'],
+            \ ['mid'               , '∣'],
+            \ ['models'            , '⊨'],
+            \ ['mp'                , '∓'],
+            \ ['nabla'             , '∇'],
+            \ ['natural'           , '♮'],
+            \ ['ne'                , '≠'],
+            \ ['nearrow'           , '↗'],
+            \ ['neg'               , '¬'],
+            \ ['neq'               , '≠'],
+            \ ['ni'                , '∋'],
+            \ ['notin'             , '∉'],
+            \ ['nwarrow'           , '↖'],
+            \ ['odot'              , '⊙'],
+            \ ['oint'              , '∮'],
+            \ ['ominus'            , '⊖'],
+            \ ['oplus'             , '⊕'],
+            \ ['oslash'            , '⊘'],
+            \ ['otimes'            , '⊗'],
+            \ ['owns'              , '∋'],
+            \ ['P'                 , '¶'],
+            \ ['parallel'          , '║'],
+            \ ['partial'           , '∂'],
+            \ ['perp'              , '⊥'],
+            \ ['pm'                , '±'],
+            \ ['prec'              , '≺'],
+            \ ['preceq'            , '⪯'],
+            \ ['prime'             , '′'],
+            \ ['prod'              , '∏'],
+            \ ['propto'            , '∝'],
+            \ ['rceil'             , '⌉'],
+            \ ['Re'                , 'ℜ'],
+            \ ['quad'              , ' '],
+            \ ['qquad'             , ' '],
+            \ ['rightarrow'        , '→'],
+            \ ['Rightarrow'        , '⇒'],
+            \ ['leftarrow'         , '←'],
+            \ ['Leftarrow'         , '⇐'],
+            \ ['rightleftharpoons' , '⇌'],
+            \ ['rmoustache'        , '╮'],
+            \ ['S'                 , '§'],
+            \ ['searrow'           , '↘'],
+            \ ['setminus'          , '⧵'],
+            \ ['sharp'             , '♯'],
+            \ ['sim'               , '∼'],
+            \ ['simeq'             , '⋍'],
+            \ ['smile'             , '‿'],
+            \ ['spadesuit'         , '♠'],
+            \ ['sqcap'             , '⊓'],
+            \ ['sqcup'             , '⊔'],
+            \ ['sqsubset'          , '⊏'],
+            \ ['sqsubseteq'        , '⊑'],
+            \ ['sqsupset'          , '⊐'],
+            \ ['sqsupseteq'        , '⊒'],
+            \ ['star'              , '✫'],
+            \ ['subset'            , '⊂'],
+            \ ['subseteq'          , '⊆'],
+            \ ['succ'              , '≻'],
+            \ ['succeq'            , '⪰'],
+            \ ['sum'               , '∑'],
+            \ ['supset'            , '⊃'],
+            \ ['supseteq'          , '⊇'],
+            \ ['surd'              , '√'],
+            \ ['swarrow'           , '↙'],
+            \ ['times'             , '×'],
+            \ ['to'                , '→'],
+            \ ['top'               , '⊤'],
+            \ ['triangle'          , '∆'],
+            \ ['triangleleft'      , '⊲'],
+            \ ['triangleright'     , '⊳'],
+            \ ['uparrow'           , '↑'],
+            \ ['Uparrow'           , '⇑'],
+            \ ['updownarrow'       , '↕'],
+            \ ['Updownarrow'       , '⇕'],
+            \ ['vdash'             , '⊢'],
+            \ ['vdots'             , '⋮'],
+            \ ['vee'               , '∨'],
+            \ ['wedge'             , '∧'],
+            \ ['wp'                , '℘'],
+            \ ['wr'                , '≀'],
+            \ ['implies'           , '⇒'],
+            \ ['choose'            , 'C'],
+            \ ['sqrt'              , '√'],
+            \ ['colon'             , ':'],
+            \ ['coloneqq'          , '≔'],
             \]
 
 let s:cmd_symbols += &ambiwidth ==# 'double'
@@ -1785,112 +1769,112 @@ let s:cmd_pairs_dict = {
             \ ],
             \}
 
-" }}}1
-function! s:match_math_fracs() abort " {{{1
+
+fun! s:match_math_fracs() abort
     if !g:vimtex_syntax_conceal.math_fracs | return | endif
 
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(2\|{2}\)' contained conceal cchar=½
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(3\|{3}\)' contained conceal cchar=⅓
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(2\|{2}\)\s*\%(3\|{3}\)' contained conceal cchar=⅔
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(4\|{4}\)' contained conceal cchar=¼
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(5\|{5}\)' contained conceal cchar=⅕
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(2\|{2}\)\s*\%(5\|{5}\)' contained conceal cchar=⅖
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(3\|{3}\)\s*\%(5\|{5}\)' contained conceal cchar=⅗
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(4\|{4}\)\s*\%(5\|{5}\)' contained conceal cchar=⅘
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(6\|{6}\)' contained conceal cchar=⅙
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(5\|{5}\)\s*\%(6\|{6}\)' contained conceal cchar=⅚
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(8\|{8}\)' contained conceal cchar=⅛
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(3\|{3}\)\s*\%(8\|{8}\)' contained conceal cchar=⅜
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(5\|{5}\)\s*\%(8\|{8}\)' contained conceal cchar=⅝
-    syntax match texMathSymbol '\\[dt]\?frac\s*\%(7\|{7}\)\s*\%(8\|{8}\)' contained conceal cchar=⅞
-endfunction
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(2\|{2}\)' contained conceal cchar=½
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(3\|{3}\)' contained conceal cchar=⅓
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(2\|{2}\)\s*\%(3\|{3}\)' contained conceal cchar=⅔
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(4\|{4}\)' contained conceal cchar=¼
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(5\|{5}\)' contained conceal cchar=⅕
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(2\|{2}\)\s*\%(5\|{5}\)' contained conceal cchar=⅖
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(3\|{3}\)\s*\%(5\|{5}\)' contained conceal cchar=⅗
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(4\|{4}\)\s*\%(5\|{5}\)' contained conceal cchar=⅘
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(6\|{6}\)' contained conceal cchar=⅙
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(5\|{5}\)\s*\%(6\|{6}\)' contained conceal cchar=⅚
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(8\|{8}\)' contained conceal cchar=⅛
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(3\|{3}\)\s*\%(8\|{8}\)' contained conceal cchar=⅜
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(5\|{5}\)\s*\%(8\|{8}\)' contained conceal cchar=⅝
+    syn match texMathSymbol '\\[dt]\?frac\s*\%(7\|{7}\)\s*\%(8\|{8}\)' contained conceal cchar=⅞
+endf
 
-" }}}1
-function! s:match_math_delims() abort " {{{1
-    syntax match texMathDelimMod contained "\\\(left\|right\)\>"
-    syntax match texMathDelimMod contained "\\[bB]igg\?[lr]\?\>"
-    syntax match texMathDelim contained "[<>()[\]|/.]\|\\[{}|]"
-    syntax match texMathDelim contained "\\backslash\>"
-    syntax match texMathDelim contained "\\downarrow\>"
-    syntax match texMathDelim contained "\\Downarrow\>"
-    syntax match texMathDelim contained "\\[lr]vert\>"
-    syntax match texMathDelim contained "\\[lr]Vert\>"
-    syntax match texMathDelim contained "\\langle\>"
-    syntax match texMathDelim contained "\\lbrace\>"
-    syntax match texMathDelim contained "\\lceil\>"
-    syntax match texMathDelim contained "\\lfloor\>"
-    syntax match texMathDelim contained "\\lgroup\>"
-    syntax match texMathDelim contained "\\lmoustache\>"
-    syntax match texMathDelim contained "\\rangle\>"
-    syntax match texMathDelim contained "\\rbrace\>"
-    syntax match texMathDelim contained "\\rceil\>"
-    syntax match texMathDelim contained "\\rfloor\>"
-    syntax match texMathDelim contained "\\rgroup\>"
-    syntax match texMathDelim contained "\\rmoustache\>"
-    syntax match texMathDelim contained "\\uparrow\>"
-    syntax match texMathDelim contained "\\Uparrow\>"
-    syntax match texMathDelim contained "\\updownarrow\>"
-    syntax match texMathDelim contained "\\Updownarrow\>"
+
+fun! s:match_math_delims() abort
+    syn match texMathDelimMod contained "\\\(left\|right\)\>"
+    syn match texMathDelimMod contained "\\[bB]igg\?[lr]\?\>"
+    syn match texMathDelim contained "[<>()[\]|/.]\|\\[{}|]"
+    syn match texMathDelim contained "\\backslash\>"
+    syn match texMathDelim contained "\\downarrow\>"
+    syn match texMathDelim contained "\\Downarrow\>"
+    syn match texMathDelim contained "\\[lr]vert\>"
+    syn match texMathDelim contained "\\[lr]Vert\>"
+    syn match texMathDelim contained "\\langle\>"
+    syn match texMathDelim contained "\\lbrace\>"
+    syn match texMathDelim contained "\\lceil\>"
+    syn match texMathDelim contained "\\lfloor\>"
+    syn match texMathDelim contained "\\lgroup\>"
+    syn match texMathDelim contained "\\lmoustache\>"
+    syn match texMathDelim contained "\\rangle\>"
+    syn match texMathDelim contained "\\rbrace\>"
+    syn match texMathDelim contained "\\rceil\>"
+    syn match texMathDelim contained "\\rfloor\>"
+    syn match texMathDelim contained "\\rgroup\>"
+    syn match texMathDelim contained "\\rmoustache\>"
+    syn match texMathDelim contained "\\uparrow\>"
+    syn match texMathDelim contained "\\Uparrow\>"
+    syn match texMathDelim contained "\\updownarrow\>"
+    syn match texMathDelim contained "\\Updownarrow\>"
 
     if !g:vimtex_syntax_conceal.math_delimiters || &encoding !=# 'utf-8'
         return
     endif
 
-    syntax match texMathDelim contained conceal cchar=| "\\left|"
-    syntax match texMathDelim contained conceal cchar=| "\\right|"
-    syntax match texMathDelim contained conceal cchar=‖ "\\left\\|"
-    syntax match texMathDelim contained conceal cchar=‖ "\\right\\|"
-    syntax match texMathDelim contained conceal cchar=| "\\[lr]vert\>"
-    syntax match texMathDelim contained conceal cchar=‖ "\\[lr]Vert\>"
-    syntax match texMathDelim contained conceal cchar=( "\\left("
-    syntax match texMathDelim contained conceal cchar=) "\\right)"
-    syntax match texMathDelim contained conceal cchar=[ "\\left\["
-    syntax match texMathDelim contained conceal cchar=] "\\right]"
-    syntax match texMathDelim contained conceal cchar={ "\\left\\{"
-    syntax match texMathDelim contained conceal cchar=} "\\right\\}"
-    syntax match texMathDelim contained conceal cchar=⟨ '\\langle\>'
-    syntax match texMathDelim contained conceal cchar=⟩ '\\rangle\>'
-    syntax match texMathDelim contained conceal cchar=⌊ "\\lfloor\>"
-    syntax match texMathDelim contained conceal cchar=⌋ "\\rfloor\>"
-    syntax match texMathDelim contained conceal cchar=< "\\\%([bB]igg\?l\?\|left\)<"
-    syntax match texMathDelim contained conceal cchar=> "\\\%([bB]igg\?r\?\|right\)>"
-    syntax match texMathDelim contained conceal cchar=( "\\\%([bB]igg\?l\?\|left\)("
-    syntax match texMathDelim contained conceal cchar=) "\\\%([bB]igg\?r\?\|right\))"
-    syntax match texMathDelim contained conceal cchar=[ "\\\%([bB]igg\?l\?\|left\)\["
-    syntax match texMathDelim contained conceal cchar=] "\\\%([bB]igg\?r\?\|right\)]"
-    syntax match texMathDelim contained conceal cchar={ "\\\%([bB]igg\?l\?\|left\)\\{"
-    syntax match texMathDelim contained conceal cchar=} "\\\%([bB]igg\?r\?\|right\)\\}"
-    syntax match texMathDelim contained conceal cchar=[ "\\\%([bB]igg\?l\?\|left\)\\lbrace\>"
-    syntax match texMathDelim contained conceal cchar=⌈ "\\\%([bB]igg\?l\?\|left\)\\lceil\>"
-    syntax match texMathDelim contained conceal cchar=⌊ "\\\%([bB]igg\?l\?\|left\)\\lfloor\>"
-    syntax match texMathDelim contained conceal cchar=⌊ "\\\%([bB]igg\?l\?\|left\)\\lgroup\>"
-    syntax match texMathDelim contained conceal cchar=⎛ "\\\%([bB]igg\?l\?\|left\)\\lmoustache\>"
-    syntax match texMathDelim contained conceal cchar=] "\\\%([bB]igg\?r\?\|right\)\\rbrace\>"
-    syntax match texMathDelim contained conceal cchar=⌉ "\\\%([bB]igg\?r\?\|right\)\\rceil\>"
-    syntax match texMathDelim contained conceal cchar=⌋ "\\\%([bB]igg\?r\?\|right\)\\rfloor\>"
-    syntax match texMathDelim contained conceal cchar=⌋ "\\\%([bB]igg\?r\?\|right\)\\rgroup\>"
-    syntax match texMathDelim contained conceal cchar=⎞ "\\\%([bB]igg\?r\?\|right\)\\rmoustache\>"
-    syntax match texMathDelim contained conceal cchar=| "\\\%([bB]igg\?[lr]\?\|left\|right\)|"
-    syntax match texMathDelim contained conceal cchar=‖ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\|"
-    syntax match texMathDelim contained conceal cchar=↓ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\downarrow\>"
-    syntax match texMathDelim contained conceal cchar=⇓ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Downarrow\>"
-    syntax match texMathDelim contained conceal cchar=↑ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\uparrow\>"
-    syntax match texMathDelim contained conceal cchar=↑ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Uparrow\>"
-    syntax match texMathDelim contained conceal cchar=↕ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\updownarrow\>"
-    syntax match texMathDelim contained conceal cchar=⇕ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Updownarrow\>"
+    syn match texMathDelim contained conceal cchar=| "\\left|"
+    syn match texMathDelim contained conceal cchar=| "\\right|"
+    syn match texMathDelim contained conceal cchar=‖ "\\left\\|"
+    syn match texMathDelim contained conceal cchar=‖ "\\right\\|"
+    syn match texMathDelim contained conceal cchar=| "\\[lr]vert\>"
+    syn match texMathDelim contained conceal cchar=‖ "\\[lr]Vert\>"
+    syn match texMathDelim contained conceal cchar=( "\\left("
+    syn match texMathDelim contained conceal cchar=) "\\right)"
+    syn match texMathDelim contained conceal cchar=[ "\\left\["
+    syn match texMathDelim contained conceal cchar=] "\\right]"
+    syn match texMathDelim contained conceal cchar={ "\\left\\{"
+    syn match texMathDelim contained conceal cchar=} "\\right\\}"
+    syn match texMathDelim contained conceal cchar=⟨ '\\langle\>'
+    syn match texMathDelim contained conceal cchar=⟩ '\\rangle\>'
+    syn match texMathDelim contained conceal cchar=⌊ "\\lfloor\>"
+    syn match texMathDelim contained conceal cchar=⌋ "\\rfloor\>"
+    syn match texMathDelim contained conceal cchar=< "\\\%([bB]igg\?l\?\|left\)<"
+    syn match texMathDelim contained conceal cchar=> "\\\%([bB]igg\?r\?\|right\)>"
+    syn match texMathDelim contained conceal cchar=( "\\\%([bB]igg\?l\?\|left\)("
+    syn match texMathDelim contained conceal cchar=) "\\\%([bB]igg\?r\?\|right\))"
+    syn match texMathDelim contained conceal cchar=[ "\\\%([bB]igg\?l\?\|left\)\["
+    syn match texMathDelim contained conceal cchar=] "\\\%([bB]igg\?r\?\|right\)]"
+    syn match texMathDelim contained conceal cchar={ "\\\%([bB]igg\?l\?\|left\)\\{"
+    syn match texMathDelim contained conceal cchar=} "\\\%([bB]igg\?r\?\|right\)\\}"
+    syn match texMathDelim contained conceal cchar=[ "\\\%([bB]igg\?l\?\|left\)\\lbrace\>"
+    syn match texMathDelim contained conceal cchar=⌈ "\\\%([bB]igg\?l\?\|left\)\\lceil\>"
+    syn match texMathDelim contained conceal cchar=⌊ "\\\%([bB]igg\?l\?\|left\)\\lfloor\>"
+    syn match texMathDelim contained conceal cchar=⌊ "\\\%([bB]igg\?l\?\|left\)\\lgroup\>"
+    syn match texMathDelim contained conceal cchar=⎛ "\\\%([bB]igg\?l\?\|left\)\\lmoustache\>"
+    syn match texMathDelim contained conceal cchar=] "\\\%([bB]igg\?r\?\|right\)\\rbrace\>"
+    syn match texMathDelim contained conceal cchar=⌉ "\\\%([bB]igg\?r\?\|right\)\\rceil\>"
+    syn match texMathDelim contained conceal cchar=⌋ "\\\%([bB]igg\?r\?\|right\)\\rfloor\>"
+    syn match texMathDelim contained conceal cchar=⌋ "\\\%([bB]igg\?r\?\|right\)\\rgroup\>"
+    syn match texMathDelim contained conceal cchar=⎞ "\\\%([bB]igg\?r\?\|right\)\\rmoustache\>"
+    syn match texMathDelim contained conceal cchar=| "\\\%([bB]igg\?[lr]\?\|left\|right\)|"
+    syn match texMathDelim contained conceal cchar=‖ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\|"
+    syn match texMathDelim contained conceal cchar=↓ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\downarrow\>"
+    syn match texMathDelim contained conceal cchar=⇓ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Downarrow\>"
+    syn match texMathDelim contained conceal cchar=↑ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\uparrow\>"
+    syn match texMathDelim contained conceal cchar=↑ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Uparrow\>"
+    syn match texMathDelim contained conceal cchar=↕ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\updownarrow\>"
+    syn match texMathDelim contained conceal cchar=⇕ "\\\%([bB]igg\?[lr]\?\|left\|right\)\\Updownarrow\>"
 
     if &ambiwidth ==# 'double'
-        syntax match texMathDelim contained conceal cchar=〈 "\\\%([bB]igg\?l\?\|left\)\\langle\>"
-        syntax match texMathDelim contained conceal cchar=〉 "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
+        syn match texMathDelim contained conceal cchar=〈 "\\\%([bB]igg\?l\?\|left\)\\langle\>"
+        syn match texMathDelim contained conceal cchar=〉 "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
     else
-        syntax match texMathDelim contained conceal cchar=⟨ "\\\%([bB]igg\?l\?\|left\)\\langle\>"
-        syntax match texMathDelim contained conceal cchar=⟩ "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
+        syn match texMathDelim contained conceal cchar=⟨ "\\\%([bB]igg\?l\?\|left\)\\langle\>"
+        syn match texMathDelim contained conceal cchar=⟩ "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
     endif
-endfunction
+endf
 
-" }}}1
 
-function! s:match_conceal_accents() abort " {{{1
+
+fun! s:match_conceal_accents() abort
     for [l:chr; l:targets] in s:map_accents
         for i in range(13)
             let l:target = l:targets[i]
@@ -1903,7 +1887,7 @@ function! s:match_conceal_accents() abort " {{{1
                         \ 'conceal cchar=' . l:target
         endfor
     endfor
-endfunction
+endf
 
 let s:key_accents = [
             \ '\\`',
@@ -1962,90 +1946,90 @@ let s:map_accents = [
             \ ['\\i','ì','í','î','ï','ĩ','į','' ,'' ,'' ,'' ,'' ,'ĭ',''],
             \]
 
-" }}}1
-function! s:match_conceal_ligatures() abort " {{{1
-    syntax match texCmdLigature "\\lq\>" conceal cchar=‘
-    syntax match texCmdLigature "\\rq\>" conceal cchar=′
-    syntax match texCmdLigature "\\i\>"  conceal cchar=ı
-    syntax match texCmdLigature "\\j\>"  conceal cchar=ȷ
-    syntax match texCmdLigature "\\AE\>" conceal cchar=Æ
-    syntax match texCmdLigature "\\ae\>" conceal cchar=æ
-    syntax match texCmdLigature "\\oe\>" conceal cchar=œ
-    syntax match texCmdLigature "\\OE\>" conceal cchar=Œ
-    syntax match texCmdLigature "\\o\>"  conceal cchar=ø
-    syntax match texCmdLigature "\\O\>"  conceal cchar=Ø
-    syntax match texCmdLigature "\\aa\>" conceal cchar=å
-    syntax match texCmdLigature "\\AA\>" conceal cchar=Å
-    syntax match texCmdLigature "\\ss\>" conceal cchar=ß
-    syntax match texLigature    "--"     conceal cchar=–
-    syntax match texLigature    "---"    conceal cchar=—
-    syntax match texLigature    "`"      conceal cchar=‘
-    syntax match texLigature    "'"      conceal cchar=’
-    syntax match texLigature    "``"     conceal cchar=“
-    syntax match texLigature    "''"     conceal cchar=”
-    syntax match texLigature    ",,"     conceal cchar=„
-    syntax match texLigature    "!`"     conceal cchar=¡
-    syntax match texLigature    "?`"     conceal cchar=¿
-endfunction
 
-" }}}1
-function! s:match_conceal_fancy() abort " {{{1
-    syntax match texCmd         '\\colon\>' conceal cchar=:
-    syntax match texCmd         '\\dots\>'  conceal cchar=…
-    syntax match texCmd         '\\slash\>' conceal cchar=/
-    syntax match texCmd         '\\ldots\>' conceal cchar=…
-    syntax match texCmdItem     '\\item\>'  conceal cchar=○
-    syntax match texTabularChar '\\\\'      conceal cchar=⏎
-endfunction
+fun! s:match_conceal_ligatures() abort
+    syn match texCmdLigature "\\lq\>"    conceal cchar=‘
+    syn match texCmdLigature "\\rq\>"    conceal cchar=′
+    syn match texCmdLigature "\\i\>"     conceal cchar=ı
+    syn match texCmdLigature "\\j\>"     conceal cchar=ȷ
+    syn match texCmdLigature "\\AE\>"    conceal cchar=Æ
+    syn match texCmdLigature "\\ae\>"    conceal cchar=æ
+    syn match texCmdLigature "\\oe\>"    conceal cchar=œ
+    syn match texCmdLigature "\\OE\>"    conceal cchar=Œ
+    syn match texCmdLigature "\\o\>"     conceal cchar=ø
+    syn match texCmdLigature "\\O\>"     conceal cchar=Ø
+    syn match texCmdLigature "\\aa\>"    conceal cchar=å
+    syn match texCmdLigature "\\AA\>"    conceal cchar=Å
+    syn match texCmdLigature "\\ss\>"    conceal cchar=ß
+    syn match texLigature    "--"        conceal cchar=–
+    syn match texLigature    "---"       conceal cchar=—
+    syn match texLigature    "`"         conceal cchar=‘
+    syn match texLigature    "'"         conceal cchar=’
+    syn match texLigature    "``"        conceal cchar=“
+    syn match texLigature    "''"        conceal cchar=”
+    syn match texLigature    ",,"        conceal cchar=„
+    syn match texLigature    "!`"        conceal cchar=¡
+    syn match texLigature    "?`"        conceal cchar=¿
+endf
 
-" }}}1
-function! s:match_conceal_greek() abort " {{{1
-    syntax match texCmdGreek "\\alpha\>"      contained conceal cchar=α
-    syntax match texCmdGreek "\\beta\>"       contained conceal cchar=β
-    syntax match texCmdGreek "\\gamma\>"      contained conceal cchar=γ
-    syntax match texCmdGreek "\\delta\>"      contained conceal cchar=δ
-    syntax match texCmdGreek "\\epsilon\>"    contained conceal cchar=ϵ
-    syntax match texCmdGreek "\\varepsilon\>" contained conceal cchar=ε
-    syntax match texCmdGreek "\\zeta\>"       contained conceal cchar=ζ
-    syntax match texCmdGreek "\\eta\>"        contained conceal cchar=η
-    syntax match texCmdGreek "\\theta\>"      contained conceal cchar=θ
-    syntax match texCmdGreek "\\vartheta\>"   contained conceal cchar=ϑ
-    syntax match texCmdGreek "\\iota\>"       contained conceal cchar=ι
-    syntax match texCmdGreek "\\kappa\>"      contained conceal cchar=κ
-    syntax match texCmdGreek "\\lambda\>"     contained conceal cchar=λ
-    syntax match texCmdGreek "\\mu\>"         contained conceal cchar=μ
-    syntax match texCmdGreek "\\nu\>"         contained conceal cchar=ν
-    syntax match texCmdGreek "\\xi\>"         contained conceal cchar=ξ
-    syntax match texCmdGreek "\\pi\>"         contained conceal cchar=π
-    syntax match texCmdGreek "\\varpi\>"      contained conceal cchar=ϖ
-    syntax match texCmdGreek "\\rho\>"        contained conceal cchar=ρ
-    syntax match texCmdGreek "\\varrho\>"     contained conceal cchar=ϱ
-    syntax match texCmdGreek "\\sigma\>"      contained conceal cchar=σ
-    syntax match texCmdGreek "\\varsigma\>"   contained conceal cchar=ς
-    syntax match texCmdGreek "\\tau\>"        contained conceal cchar=τ
-    syntax match texCmdGreek "\\upsilon\>"    contained conceal cchar=υ
-    syntax match texCmdGreek "\\phi\>"        contained conceal cchar=ϕ
-    syntax match texCmdGreek "\\varphi\>"     contained conceal cchar=φ
-    syntax match texCmdGreek "\\chi\>"        contained conceal cchar=χ
-    syntax match texCmdGreek "\\psi\>"        contained conceal cchar=ψ
-    syntax match texCmdGreek "\\omega\>"      contained conceal cchar=ω
-    syntax match texCmdGreek "\\Gamma\>"      contained conceal cchar=Γ
-    syntax match texCmdGreek "\\Delta\>"      contained conceal cchar=Δ
-    syntax match texCmdGreek "\\Theta\>"      contained conceal cchar=Θ
-    syntax match texCmdGreek "\\Lambda\>"     contained conceal cchar=Λ
-    syntax match texCmdGreek "\\Xi\>"         contained conceal cchar=Ξ
-    syntax match texCmdGreek "\\Pi\>"         contained conceal cchar=Π
-    syntax match texCmdGreek "\\Sigma\>"      contained conceal cchar=Σ
-    syntax match texCmdGreek "\\Upsilon\>"    contained conceal cchar=Υ
-    syntax match texCmdGreek "\\Phi\>"        contained conceal cchar=Φ
-    syntax match texCmdGreek "\\Chi\>"        contained conceal cchar=Χ
-    syntax match texCmdGreek "\\Psi\>"        contained conceal cchar=Ψ
-    syntax match texCmdGreek "\\Omega\>"      contained conceal cchar=Ω
-endfunction
 
-" }}}1
-function! s:match_conceal_cites_brackets() abort " {{{1
-    syntax match texCmdRefConcealed
+fun! s:match_conceal_fancy() abort
+    syn match texCmd         '\\colon\>' conceal cchar=:
+    syn match texCmd         '\\dots\>'  conceal cchar=…
+    syn match texCmd         '\\slash\>' conceal cchar=/
+    syn match texCmd         '\\ldots\>' conceal cchar=…
+    syn match texCmdItem     '\\item\>'  conceal cchar=○
+    syn match texTabularChar '\\\\'      conceal cchar=⏎
+endf
+
+
+fun! s:match_conceal_greek() abort
+    syn match texCmdGreek "\\alpha\>"      contained conceal cchar=α
+    syn match texCmdGreek "\\beta\>"       contained conceal cchar=β
+    syn match texCmdGreek "\\gamma\>"      contained conceal cchar=γ
+    syn match texCmdGreek "\\delta\>"      contained conceal cchar=δ
+    syn match texCmdGreek "\\epsilon\>"    contained conceal cchar=ϵ
+    syn match texCmdGreek "\\varepsilon\>" contained conceal cchar=ε
+    syn match texCmdGreek "\\zeta\>"       contained conceal cchar=ζ
+    syn match texCmdGreek "\\eta\>"        contained conceal cchar=η
+    syn match texCmdGreek "\\theta\>"      contained conceal cchar=θ
+    syn match texCmdGreek "\\vartheta\>"   contained conceal cchar=ϑ
+    syn match texCmdGreek "\\iota\>"       contained conceal cchar=ι
+    syn match texCmdGreek "\\kappa\>"      contained conceal cchar=κ
+    syn match texCmdGreek "\\lambda\>"     contained conceal cchar=λ
+    syn match texCmdGreek "\\mu\>"         contained conceal cchar=μ
+    syn match texCmdGreek "\\nu\>"         contained conceal cchar=ν
+    syn match texCmdGreek "\\xi\>"         contained conceal cchar=ξ
+    syn match texCmdGreek "\\pi\>"         contained conceal cchar=π
+    syn match texCmdGreek "\\varpi\>"      contained conceal cchar=ϖ
+    syn match texCmdGreek "\\rho\>"        contained conceal cchar=ρ
+    syn match texCmdGreek "\\varrho\>"     contained conceal cchar=ϱ
+    syn match texCmdGreek "\\sigma\>"      contained conceal cchar=σ
+    syn match texCmdGreek "\\varsigma\>"   contained conceal cchar=ς
+    syn match texCmdGreek "\\tau\>"        contained conceal cchar=τ
+    syn match texCmdGreek "\\upsilon\>"    contained conceal cchar=υ
+    syn match texCmdGreek "\\phi\>"        contained conceal cchar=ϕ
+    syn match texCmdGreek "\\varphi\>"     contained conceal cchar=φ
+    syn match texCmdGreek "\\chi\>"        contained conceal cchar=χ
+    syn match texCmdGreek "\\psi\>"        contained conceal cchar=ψ
+    syn match texCmdGreek "\\omega\>"      contained conceal cchar=ω
+    syn match texCmdGreek "\\Gamma\>"      contained conceal cchar=Γ
+    syn match texCmdGreek "\\Delta\>"      contained conceal cchar=Δ
+    syn match texCmdGreek "\\Theta\>"      contained conceal cchar=Θ
+    syn match texCmdGreek "\\Lambda\>"     contained conceal cchar=Λ
+    syn match texCmdGreek "\\Xi\>"         contained conceal cchar=Ξ
+    syn match texCmdGreek "\\Pi\>"         contained conceal cchar=Π
+    syn match texCmdGreek "\\Sigma\>"      contained conceal cchar=Σ
+    syn match texCmdGreek "\\Upsilon\>"    contained conceal cchar=Υ
+    syn match texCmdGreek "\\Phi\>"        contained conceal cchar=Φ
+    syn match texCmdGreek "\\Chi\>"        contained conceal cchar=Χ
+    syn match texCmdGreek "\\Psi\>"        contained conceal cchar=Ψ
+    syn match texCmdGreek "\\Omega\>"      contained conceal cchar=Ω
+endf
+
+
+fun! s:match_conceal_cites_brackets() abort
+    syn match texCmdRefConcealed
                 \ "\\cite[tp]\?\>\*\?"
                 \ conceal skipwhite nextgroup=texRefConcealedOpt1,texRefConcealedArg
     call vimtex#syntax#core#new_opt('texRefConcealedOpt1', {
@@ -2061,41 +2045,40 @@ function! s:match_conceal_cites_brackets() abort " {{{1
                 \ 'opts': 'keepend contained',
                 \ 'matchgroup': '',
                 \})
-    syntax match texRefConcealedDelim contained "{" cchar=[ conceal
-    syntax match texRefConcealedDelim contained "}" cchar=] conceal
-endfunction
+    syn match texRefConcealedDelim   contained "{" cchar=[ conceal
+    syn match texRefConcealedDelim   contained "}" cchar=] conceal
+endf
 
-" }}}1
-function! s:match_conceal_cites_icon() abort " {{{1
+
+fun! s:match_conceal_cites_icon() abort
     if empty(g:vimtex_syntax_conceal_cites.icon) | return | endif
 
     execute 'syntax match texCmdRefConcealed'
                 \ '"\\cite[tp]\?\*\?\%(\[[^]]*\]\)\{,2}{[^}]*}"'
                 \ 'conceal cchar=' . g:vimtex_syntax_conceal_cites.icon
-endfunction
+endf
 
-" }}}1
-function! s:match_conceal_sections() abort " {{{1
-    syntax match texCmdPart "\v\\%(sub)*section>\*?" contains=texPartConcealed nextgroup=texPartConcArgTitle
 
-    syntax match texPartConcealed "\\"          contained conceal
-    syntax match texPartConcealed "sub"         contained conceal
-    syntax match texPartConcealed "section\*\?" contained conceal cchar=•
+fun! s:match_conceal_sections() abort
+    syn match texPartConcealed      "\\"                contained conceal
+    syn match texPartConcealed      "sub"               contained conceal
+    syn match texPartConcealed      "section\*\?"       contained conceal cchar=•
+    syn match texCmdPart   contains=texPartConcealed   nextgroup=texPartConcArgTitle
+                                  \ "\v\\%(sub)*section>\*?"
 
     call vimtex#syntax#core#new_arg('texPartConcArgTitle', {
                 \ 'opts': 'contained keepend concealends'
                 \})
-endfunction
+endf
 
-" }}}1
 
-function! s:gather_newtheorems() abort " {{{1
+fun! s:gather_newtheorems() abort
     let l:lines = vimtex#parser#preamble(b:vimtex.tex)
 
     call filter(l:lines, {_, x -> x =~# '^\s*\\newtheorem\>'})
     call map(l:lines, {_, x -> matchstr(x, '^\s*\\newtheorem\>\*\?{\zs[^}]*')})
 
     return l:lines
-endfunction
+endf
 
-" }}}1
+

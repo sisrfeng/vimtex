@@ -63,19 +63,23 @@ Associated settings:
 SYNTAX HIGHLIGHTING                                             *vimtex-syntax*
 
 VimTeX provides a core syntax plugin combined with package specific addons.
-The syntax plugin aims to be both consistent, structured, and efficient. The
-package specific addons are generally only loaded when applicable.
+The syntax plugin aims to be both consistent,
+structured,
+and efficient.
+The  package specific addons are generally only loaded when applicable.
 
-LaTeX is a macro expansion language and it is impossible to write a fully
-correct syntax parser without running the `tex` compiler itself. VimTeX aims
-to be pragmatic and provide a best-effort syntax highlighting - a decent trade
+LaTeX is a macro expansion language and
+it is impossible to write a fully  correct syntax parser  without
+running the `tex` compiler itself.
+VimTeX aims  to be pragmatic and provide a best-effort syntax highlighting - a decent trade
 off between simplicity and completeness.
 
-There will probably always be situations where the parser will fail, and in
-some cases it may be hard to "recover". It is therefore possible to manually
-activate a severely reduced syntax zone to handle such situations. The zone is
-activated with the directive `% VimTeX: SynIgnore on` and disabled with the
-similar directive `% VimTeX: SynIgnore off`, e.g.:
+There will probably always be situations where the parser will fail,
+and in  some cases it may be hard to "recover".
+It is therefore possible to manually
+activate a severely ✌reduced syntax zone✌ to handle such situations.
+The zone is  activated with the directive `% VimTeX: SynIgnore on` and
+disabled with the  similar directive `% VimTeX: SynIgnore off`, e.g.:
 
 
   % VimTeX: SynIgnore on
@@ -84,13 +88,14 @@ similar directive `% VimTeX: SynIgnore off`, e.g.:
   \catcode`\$=3
   % VimTeX: SynIgnore off
 
-The above LaTeX code will look plain, but OK with VimTeX. The directive
-is matched case insensitive, and the synonyms `enable` and `disable` may be
-used instead of `on` and `off`.
+The above LaTeX code will look plain (注释),
+    but OK with VimTeX.
+
+The directive  is matched case insensitive,
+and the synonyms `enable` and `disable` may be  used instead of `on` and `off`.
 
 Overleaf's magic comment [0] is also supported similarly as the `SynIgnore`
 method described above, i.e.:
-
 
   %%begin novalidate
   \catcode`\$=11
@@ -99,12 +104,11 @@ method described above, i.e.:
   %%end novalidate
 
 The VimTeX syntax plugin is loosely based on Dr Chip's syntax plugin for LaTeX
-which is shipped by default with Vim and neovim (|ft-tex-syntax|) [1]. There
-are several major differences that users may want to be aware of:
-* VimTeX syntax use different names for almost all syntax groups.
-* VimTeX syntax does not support syntax based folding.
-* VimTeX syntax does not lint `@` in commands, e.g. `\@cmd` (you should know
-  what you are doing).
+which is shipped by default with Vim and neovim (|ft-tex-syntax|) [1].
+There  are several major differences that users may want to be aware of:
+    * VimTeX syntax use different names for almost all syntax groups.
+    * VimTeX syntax does not support syntax based folding.
+    * VimTeX syntax does not lint `@` in commands, e.g. `\@cmd` (you should know  what you are doing).
 
 [0]: https://www.overleaf.com/learn/how-to/Code_Check
 [1]: http://www.drchip.org/astronaut/vim/index.html#SYNTAX_TEX
@@ -125,27 +129,32 @@ VimTeX utilizes the |syn-conceal| feature of Vim to allow displaying commands
 like `\alpha` as `α`. That is, various elements/commands can be concealed or
 substituted with a unicode symbol.
 
-This feature is mostly enabled by default. Various types of concealments can
-be enabled/disabled with |g:vimtex_syntax_conceal|. The entire feature can be
-fully disabled with |g:vimtex_syntax_conceal_disable|.
+This feature is mostly enabled by default.
+Various types of concealments can be enabled/disabled with |g:vimtex_syntax_conceal|.
+The entire feature can be fully disabled with |g:vimtex_syntax_conceal_disable|.
 
-For conceals to work properly, one must set the option 'conceallevel' to 2. It
-is also good to be aware of the 'concealcursor' option.
+For conceals to work properly,
+one must set the option 'conceallevel' to 2.
+It is also good to be aware of the 'concealcursor' option.
 
 It is very important to Not all fonts are suitable for this feature.
 That is, for this feature to work well, you should install and use a font that
-includes unicode characters. For Vim or Neovim in a terminal, this means you
-must configure your terminal to use such a font. This is, of course, an
-exercise for the reader, but here is a list of some possibly useful links:
+includes unicode characters.
+For Vim or Neovim in a terminal,
+this means you  must configure your terminal to use such a font.
+here is a list of some possibly useful links:
 
 * https://www.programmingfonts.org/
   * A convenient site to test different "programming" fonts. Not always easy
-    to see if the unicode support is good, but at least you can see examples
-    of how they look.
+    to see if the unicode support is good,
+    but at least you can see examples  of how they look.
+
 * https://wiki.archlinux.org/index.php/Fonts
-  * The Arch Wiki is famous for being useful, and it does not fail. But it is
-    rather technical and of course refers to Arch Linux packages. It may still
-    be a good source of knowledge and inspiration.
+  * The Arch Wiki is famous for being useful,
+  * and it does not fail.
+  * But it is rather technical and of course refers to Arch Linux packages.
+  * It may still  be a good source of knowledge and inspiration.
+
 * https://www.binarytides.com/gorgeous-looking-fonts-ubuntu-linux/
   * This is a blog post on how to install some modern/good looking/better
     fonts on a Ubuntu system.
@@ -155,18 +164,13 @@ exercise for the reader, but here is a list of some possibly useful links:
 ------------------------------------------------------------------------------
 SYNTAX CORE SPECIFICATION                                  *vimtex-syntax-core*
 
-As it is relatively common for some users to customize their colorschemes, it
-is useful to describe some of the underlying "philosophy" of the syntax rules.
+As it is relatively common for some users to customize their colorschemes,
+it  is useful to describe some of the underlying "philosophy" of the syntax rules.
 Note that, for the following information to be useful, the reader should have
 at least some basic understanding of how to customize their colorschemes and
-syntax highlighting. The best resources to learn about this are:
+syntax highlighting.
+The best resources to learn about this are:
 
-  i)   |usr_06|  "Using syntax highlighting" (READ THIS FIRST)
-  ii)  https://gist.github.com/romainl/379904f91fa40533175dfaec4c833f2f
-       "The right way to override any highlighting if you don't want to edit
-       the colorscheme file directly"
-       This is a good resource that describes how to properly customize
-       the highlighting of syntax groups on top of a basic colorscheme.
   iii) https://github.com/lervag/vimtex/wiki/Syntax
        This wiki page gives an example of how to customize and fine-tune
        syntax highlighting of TeX and BibTeX files.
@@ -2057,3 +2061,4 @@ The new names are, respectively:
 VimTeX was first released on github on this date. The initial version was
 named vim-latex, which conflicted with Vim LaTeX-Suite which is also known as
 vim-latex.
+DIY_2  vim:filetype=help:syntax=help:
