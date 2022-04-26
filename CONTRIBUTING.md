@@ -21,21 +21,22 @@ be [fork based](https://help.github.com/articles/using-pull-requests/).
 Vim help files have their own specific syntax. There is a Vim help section on
 how to write them, see [`:h help-writing`](http://vimdoc.sourceforge.net/htmldoc/helphelp.html#help-writing).
 
-The VimTeX documentation style should be relatively clear, and it should be
-easy to see from the existing documentation how to write it. Still, here are
+The VimTeX documentation style should be relatively clear,
+and it should be easy to see from the existing documentation how to write it.
+Still,
+here are
 some pointers:
 
 - Max 80 columns per line
 - Use the help tag system for pointers to other parts of the Vim documentation
 - Use line of `=`s to separate sections
-- Use line of `-`s to separate subsections
+- Use line of `-`s to separate ´subsections´
 - The section tags should be right aligned at the 79th column
 - Sections should be included and linked to from the table of contents
 
-VimTeX also has a high level code [documentation](./DOCUMENTATION.md) mainly
-for developers. It should provide an overview of the VimTeX code and APIs and
-may help developers (and users) to to understand the functionalities of the
-plugin a little bit faster.
+VimTeX also has a high level code [documentation](./DOCUMENTATION.md) mainly for developers.
+It should provide an overview of the VimTeX code and APIs and
+may help developers (and users) to to understand the functionalities of the plugin a little bit faster.
 
 ## Code style
 
@@ -51,11 +52,10 @@ When submitting code for VimTeX, please adhere to the following standards:
   - Use (single) empty lines to separate logical blocks of code
   - Use good variable names
     - The name should indicate what the variable is/does
-    - Variable names should be lower case
+    - ´Variable names should be lower case´
     - Local function variables should be preceded with `l:`
-  - Prefer single quoted strings
-  - See also the [Google vimscript style
-    guide](https://google.github.io/styleguide/vimscriptguide.xml)
+  - ´Prefer single quoted strings´
+  - See also the [Google vimscript style guide](https://google.github.io/styleguide/vimscriptguide.xml)
 - Use markers for folding
   - I generally only fold functions, and I tend to group similar functions so
     that when folded, I get a nice structural overview of a file
