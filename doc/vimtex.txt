@@ -881,7 +881,6 @@ OPTIONS                                                        *vimtex-options*
 
     *g:vimtex_enabled*
         Set to 0 to disable VimTeX.
-
         Default value: Undefined.
 
     *g:vimtex_cache_root*

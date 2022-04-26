@@ -285,8 +285,9 @@ fun! vimtex#syntax#core#init() abort "
 
         " \begin \end environments
         " syn match texCmdEnv "\v\\%(begin|end)>" nextgroup=texEnvArgName
-        syn match texCmdEnv "\v\\begin" contained conceal cchar=⇒    nextgroup=texEnvArgName
-        syn match texCmdEnv "\v\\end"   contained conceal cchar=⇐    nextgroup=texEnvArgName
+        " syn match texCmdEnv "\v\\begin" contained conceal cchar=⇒    nextgroup=texEnvArgName
+        syn match texCmdEnv "\v\\begin" contained conceal cchar=     nextgroup=texEnvArgName
+        syn match texCmdEnv "\v\\end"   contained conceal cchar=     nextgroup=texEnvArgName
 
         call vimtex#syntax#core#new_arg('texEnvArgName', {
                     \ 'contains': 'texComment,@NoSpell',
@@ -505,27 +506,33 @@ fun! vimtex#syntax#core#init() abort "
 
 
     " Zone: Math
+    " 封印begin end等
         " Define math region group
         call vimtex#syntax#core#new_arg('texMathGroup', {'contains': '@texClusterMath'})
 
         " Define math environment boundaries
+        "
             " syn match texCmdMathEnv "\v\\%(begin|end)>" contained conceal   nextgroup=texMathEnvArgName
-                                          " %():
-                                          " Just like (), but without counting it as a sub-expression.
-            syn match texCmdMathEnv "\v\\begin>" contained conceal cchar=⇒     nextgroup=texMathEnvArgName
-            syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=⇐     nextgroup=texMathEnvArgName
+                                          " %():  Just like (), but without counting it as a sub-expression.
+            syn match texCmdMathEnv "\v\\begin>" contained conceal cchar=      nextgroup=texMathEnvArgName
+            syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=      nextgroup=texMathEnvArgName
+            " syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=⇐     nextgroup=texMathEnvArgName
             call vimtex#syntax#core#new_arg('texMathEnvArgName',
                         \ {'contains': 'texComment,@NoSpell'})
 
         " Environments inside math zones
-        " * This is used to restrict the whitespace between environment name and
-        "   the option group (see https://github.com/lervag/vimtex/issues/2043).
-        syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
-        call vimtex#syntax#core#new_arg('texEnvMArgName', {
-                    \ 'contains': 'texComment,@NoSpell',
-                    \ 'next': 'texEnvOpt',
-                    \ 'skipwhite': v:false
-                    \})
+            " * This is used to restrict the whitespace between environment name and
+            "   the option group (see https://github.com/lervag/vimtex/issues/2043).
+            "
+            " syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
+            syn match texCmdEnvM "\v\\begin>" contained conceal cchar=      nextgroup=texEnvMArgName
+            syn match texCmdEnvM "\v\\end>"   contained conceal cchar=      nextgroup=texEnvMArgName
+            " syn match texCmdEnvM "\v\\end>"   contained conceal cchar=⇐     nextgroup=texEnvMArgName
+            call vimtex#syntax#core#new_arg('texEnvMArgName', {
+                        \ 'contains': 'texComment,@NoSpell',
+                        \ 'next': 'texEnvOpt',
+                        \ 'skipwhite': v:false
+                        \})
 
         " Math regions: environments
             call vimtex#syntax#core#new_region_math('displaymath')
@@ -540,11 +547,13 @@ fun! vimtex#syntax#core#init() abort "
                             \ 'end="\%(\\\@<!\)\@<=\\)"'
                             \ 'contains=@texClusterMath keepend'
                             \ l:conceal
+
             execute 'syntax region texMathZone matchgroup=texMathDelimZone'
                             \ 'start="\\\["'
                             \ 'end="\\]"'
                             \ 'contains=@texClusterMath keepend'
                             \ l:conceal
+
             execute 'syntax region texMathZoneX matchgroup=texMathDelimZone'
                             \ 'start="\$"'
                             \ 'skip="\\\\\|\\\$"'
@@ -552,6 +561,7 @@ fun! vimtex#syntax#core#init() abort "
                             \ 'contains=@texClusterMath'
                             \ 'nextgroup=texMathTextAfter'
                             \ l:conceal
+
             execute 'syntax region texMathZoneXX matchgroup=texMathDelimZone'
                             \ 'start="\$\$"'
                             \ 'end="\$\$"'
@@ -1083,7 +1093,7 @@ fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
 
     execute 'syntax match texMathError  "\\end{'..l:envname ..'}"  '
 
-    execute 'syntax match texMathEnvBgnEnd  "\\\v%(begin|end)>\V{'..l:envname..'}"  contained'
+    execute 'syntax match texMathEnvBgnEnd  "\\\v%(begin|end)>\{'..l:envname..'\}"  contained'
                 \ ' contains=texCmdMathEnv'
                 \ ( empty(l:cfg.next) ?  ''   :   'nextgroup='..l:cfg.next..' skipwhite skipnl' )
 
