@@ -59,7 +59,8 @@ then you can lookup the path in the table of contents and click on it.
 # syntax
     VimTeX is also a syntax plugin and provides a `tex` syntax plugin script.
     The relevant Vim and neovim docs for this is `:help :syn-files`.
-    Essentially,  this  is the entry point for loading the syntax highlighting.
+    Essentially,
+    this  is the entry point for loading the syntax highlighting.
 
 # indent
 
@@ -76,7 +77,6 @@ then you can lookup the path in the table of contents and click on it.
     there're no conflicts with  other plugins such as ´LaTeX-Box´.
 
 # autoload
-
     the bulk VimTeX code is not sourced unless necessary.
     It may also be instructive to read [this chapter](https://learnvimscriptthehardway.stevelosh.com/chapters/42.html) of the well known [Learn Vimscript the Hard
     Way](https://learnvimscriptthehardway.stevelosh.com/chapters/42.html) by Steve  Losh.
@@ -307,21 +307,27 @@ then you can lookup the path in the table of contents and click on it.
 
         ### syntax.vim
         This script implements some convenience functions for the bulk VimTeX code.
-        This may be counter intuitive, so be warned.
+        This may be ✌counter intuitive✌, so be warned.
 
-        The idea is that other parts of VimTeX may rely on the syntax state, e.g. to
-        determine if a position is within math mode (`vimtex#syntax#in_mathzone(...)`).
+        The idea is that other parts of VimTeX may rely on the syntax state,
+        e.g.
+        to determine if a position is within math mode (`vimtex#syntax#in_mathzone(...)`).
 
         The actual syntax rules are defined in the scripts under `syntax/*.vim`.
 
         ### syntax
-        This subdirectory contains the main syntax highlighting scripts. The entry
-        point for the syntax scripts are, as mentioned previously, the top level
-        [`syntax/tex.vim`](#syntax). However, as most of the code, the bulk source is
-        defined in the autoloaded functions.
 
-        In short: `syntax/core.vim` implements the core syntax rules, whereas the
-        scripts under `syntax/p/` define package specific syntax rules.
+            This subdirectory contains the main syntax highlighting scripts.
+            The entry point for the syntax scripts are,
+            as mentioned previously,
+            the top level [`syntax/tex.vim`](#syntax).
+            However,
+            as most of the code,
+            the bulk source is defined in the autoloaded functions.
+
+            In short:
+            `syntax/core.vim` implements the core syntax rules,
+            whereas the scripts under `syntax/p/` define package specific syntax rules.
 
         ### text\_obj.vim
         This submodule defines text objects, see `:help text-objects`. Buffer local
@@ -377,5 +383,4 @@ The `test/` directory also contains some simple LaTeX and VimTeX configuration
 examples under `test/example-...`, as well as some issue specific test files
 under `issues/ISSUE-NUMBER`.
 
-
-DIY_2  vim:filetype=help:syntax=help:
+vim:ft=md

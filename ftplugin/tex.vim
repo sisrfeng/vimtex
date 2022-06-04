@@ -6,7 +6,7 @@
         " *g:vimtex_enabled*
         "     Set to 0 to disable VimTeX.
         "     Default value: Undefined.
-      finish
+        finish
     endif
 
     if exists('b:did_ftplugin')
