@@ -3,8 +3,6 @@ vim:filetype=help:syntax=help:
 *vimtex.txt*    A modern Vim/neovim filetype and syntax plugin for LaTeX files.
 *VimTeX*  *Vimtex*  *vimtex*
 
-很多类似_conceal 的名字被我改成了_xX  或者 _xX_ 为了短
-
 ==============================================================================
 Contents                                                      *vimtex-contents*
 
@@ -3382,6 +3380,3 @@ And in Vimscript, it should look something like this:
 DIY  vim: filetype=leo:syntax=leo:
 DIY_again
 DIY_2  vim:filetype=help:syntax=help:
-
-很多类似_conceal 的名字被我改成了_xX  或者 _xX_ 为了短
-
