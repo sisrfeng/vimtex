@@ -1,11 +1,13 @@
+" echom '我是core.vim'
 " Email:      karl.yngve@gmail.com
-
-"
 
 " This script has a lot of unicode characters (for conceals)
 scriptencoding utf-8
 
 fun! vimtex#syntax#core#init() abort "
+    " echo 'vimtex#syntax#core#init'
+    " let b:current_syntax = 'tex'
+
     syn spell toplevel
 
     syn sync maxlines=500
@@ -255,6 +257,7 @@ fun! vimtex#syntax#core#init() abort "
             syn match texCmdStyle "\\mdseries\>"
 
         " Bold and italic commands
+        " echom g:vimtex_syntax_xX
         call s:match_bold_italic()
 
         " Type sizes
@@ -753,33 +756,33 @@ fun! vimtex#syntax#core#init() abort "
         " Add support for conceal with custom replacement (conceallevel = 2)
         if &encoding ==# 'utf-8'
             " Conceal various commands - be fancy
-            if g:vimtex_syntax_conceal.fancy
-                call s:match_conceal_fancy()
+            if g:vimtex_syntax_xX.fancy
+                call s:match_xX_fancy()
             en
 
             " Conceal replace greek letters
-            if g:vimtex_syntax_conceal.greek
-                call s:match_conceal_greek()
+            if g:vimtex_syntax_xX.greek
+                call s:match_xX_greek()
             en
 
             " Conceal replace accented characters
-            if g:vimtex_syntax_conceal.accents
-                call s:match_conceal_accents()
+            if g:vimtex_syntax_xX.accents
+                call s:match_xX_accents()
             en
 
             " Conceal replace ligatures
-            if g:vimtex_syntax_conceal.ligatures
-                call s:match_conceal_ligatures()
+            if g:vimtex_syntax_xX.ligatures
+                call s:match_xX_ligatures()
             en
 
             " Conceal cite commands
-            if g:vimtex_syntax_conceal.cites
-                call s:match_conceal_cites_{g:vimtex_syntax_conceal_cites.type}()
+            if g:vimtex_syntax_xX.cites
+                call s:match_xX_cites_{g:vimtex_syntax_xX_cites.type}()
             en
 
             " Conceal section commands
-            if g:vimtex_syntax_conceal.sections
-                call s:match_conceal_sections()
+            if g:vimtex_syntax_xX.sections
+                call s:match_xX_sections()
             en
         en
 
@@ -788,7 +791,10 @@ fun! vimtex#syntax#core#init() abort "
         for l:item in g:vimtex_syntax_custom_cmds
             call vimtex#syntax#core#new_cmd(l:item)
         endfor
-    let b:current_syntax = 'tex'
+
+    " 进了这个函数,没到这里
+    " echom 'let b:current_syntax = "tex"'
+    " let b:current_syntax = 'tex'
 endf
 
 fun! vimtex#syntax#core#init_post() abort
@@ -842,7 +848,8 @@ fun! vimtex#syntax#core#init_highlights() abort
         hi def link texRefArg             Ignore
         hi def link texZone               Ignore
 
-        hi def link texSpecialChar        SpecialChar
+        " hi def link texSpecialChar        Ignore
+        " hi def link texSpecialChar        SpecialChar
         hi def link texSymbol             Ignore
 
         hi def link texTitleArg           Ignore
@@ -1243,8 +1250,9 @@ endf
 
 
 fun! s:match_bold_italic() abort
-    let [l:conceal, l:concealends] =
-                \ (g:vimtex_syntax_conceal.styles ? ['conceal', 'concealends'] : ['', ''])
+    let [l:conceal, l:concealends] =  g:vimtex_syntax_xX.styles ?
+                                        \ ['conceal', 'concealends'] :
+                                        \ ['', '']
 
     syn cluster texClusterBold     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold
     syn cluster texClusterItal     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleBoldItal
@@ -1276,7 +1284,7 @@ fun! s:match_bold_italic() abort
     exe     'syntax region texStyleItal matchgroup=texDelim start="{" end="}" contained contains=@texClusterItal' l:concealends
     exe     'syntax region texStyleBoth matchgroup=texDelim start="{" end="}" contained contains=@texClusterItalBold' l:concealends
 
-    if g:vimtex_syntax_conceal.styles
+    if g:vimtex_syntax_xX.styles
         syn match texCmdStyle "\v\\text%(rm|tt|up|normal|sf|sc)>"
                     \ conceal skipwhite skipnl nextgroup=texStyleArgConc
         syn region texStyleArgConc matchgroup=texDelim start="{" end="}"
@@ -1286,9 +1294,9 @@ endf
 
 
 fun! s:match_bold_italic_math() abort
-    let [l:conceal, l:concealends] =
-                \ (g:vimtex_syntax_conceal.styles ? ['conceal', 'concealends'] : ['', ''])
-
+    let [l:conceal, l:concealends] =    g:vimtex_syntax_xX.styles ?
+                                        \ ['conceal', 'concealends']
+                                        \ : ['', '']
     let l:map = {
                 \ 'texMathCmdStyleBold': 'texMathStyleBold',
                 \ 'texMathCmdStyleItal': 'texMathStyleItal',
@@ -1307,7 +1315,7 @@ fun! s:match_bold_italic_math() abort
     exe     'syntax region texMathStyleBold matchgroup=texDelim start="{" end="}" contained contains=@texClusterMath' l:concealends
     exe     'syntax region texMathStyleItal matchgroup=texDelim start="{" end="}" contained contains=@texClusterMath' l:concealends
 
-    if g:vimtex_syntax_conceal.styles
+    if g:vimtex_syntax_xX.styles
         syn match texMathCmdStyle "\v\\math%(rm|tt|normal|sf)>"
                     \ contained conceal skipwhite nextgroup=texMathStyleConcArg
         syn region texMathStyleConcArg matchgroup=texDelim start="{" end="}"
@@ -1331,7 +1339,7 @@ endf
 
 
 fun! s:match_math_sub_super() abort
-    if !g:vimtex_syntax_conceal.math_super_sub | return | endif
+    if !g:vimtex_syntax_xX.math_super_sub | return | endif
 
     " This feature does not work unless &encoding = 'utf-8'
     if &encoding !=# 'utf-8'
@@ -1481,17 +1489,22 @@ let s:map_super = [
 
 fun! s:match_math_symbols() abort
     " Many of these symbols were contributed by Björn Winckler
-    if !g:vimtex_syntax_conceal.math_symbols | return | endif
+    if !g:vimtex_syntax_xX.math_symbols | return | endif
 
-    syn match texMathSymbol '\\[,:;!]'              contained conceal
-    syn match texMathSymbol '\\|'                   contained conceal cchar=‖
-    syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
-    syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
+    " 几个简单的case
+        syn match texMathSymbol '\\[,:;!]'              contained conceal
+        syn match texMathSymbol '\\|'                   contained conceal cchar=‖
+        syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
+        syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
 
     for [l:cmd, l:symbol] in s:cmd_symbols
         exe     'syntax match texMathSymbol'
-                    \ '"\\' . l:cmd . '\ze\%(\>\|[_^]\)"'
-                    \ 'contained conceal cchar=' . l:symbol
+                    \ '"\v\\' . l:cmd . '"'
+                                    "\ $k \leq1$ 可以编译, but can not conceal
+                    "\ \ '"\v\\' . l:cmd . '\ze%(>|[_^])"'
+                    \ 'contained
+                    \ conceal
+                    \ cchar=' . l:symbol
     endfor
 
     for [l:cmd, l:pairs] in items(s:cmd_pairs_dict)
@@ -1961,7 +1974,7 @@ endf
 
 
     fun! s:match_math_fracs() abort
-        if !g:vimtex_syntax_conceal.math_fracs | return | endif
+        if !g:vimtex_syntax_xX.math_fracs | return | endif
 
         syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(2\|{2}\)' contained conceal cchar=½
         syn match texMathSymbol '\\[dt]\?frac\s*\%(1\|{1}\)\s*\%(3\|{3}\)' contained conceal cchar=⅓
@@ -2006,7 +2019,7 @@ endf
         syn match texMathDelim contained "\\updownarrow\>"
         syn match texMathDelim contained "\\Updownarrow\>"
 
-        if !g:vimtex_syntax_conceal.math_delimiters || &encoding !=# 'utf-8'
+        if !g:vimtex_syntax_xX.math_delimiters || &encoding !=# 'utf-8'
             return
         en
 
@@ -2064,7 +2077,7 @@ endf
 
 
 
-fun! s:match_conceal_accents() abort
+fun! s:match_xX_accents() abort
     for [l:chr; l:targets] in s:map_accents
         for i in range(13)
             let l:target = l:targets[i]
@@ -2137,7 +2150,7 @@ endf
                 \]
 
 
-fun! s:match_conceal_ligatures() abort
+fun! s:match_xX_ligatures() abort
     syn match texCmdLigature "\\lq\>"    conceal cchar=‘
     syn match texCmdLigature "\\rq\>"    conceal cchar=′
     syn match texCmdLigature "\\i\>"     conceal cchar=ı
@@ -2163,7 +2176,7 @@ fun! s:match_conceal_ligatures() abort
 endf
 
 
-fun! s:match_conceal_fancy() abort
+fun! s:match_xX_fancy() abort
     syn match texCmd         '\\colon\>' conceal cchar=:
     syn match texCmd         '\\dots\>'  conceal cchar=…
     syn match texCmd         '\\slash\>' conceal cchar=/
@@ -2174,7 +2187,7 @@ fun! s:match_conceal_fancy() abort
 endf
 
 
-fun! s:match_conceal_greek() abort
+fun! s:match_xX_greek() abort
     syn match texCmdGreek "\\alpha\>"      contained conceal cchar=α
     syn match texCmdGreek "\\beta\>"       contained conceal cchar=β
     syn match texCmdGreek "\\gamma\>"      contained conceal cchar=γ
@@ -2219,12 +2232,12 @@ fun! s:match_conceal_greek() abort
 endf
 
 
-fun! s:match_conceal_cites_brackets() abort
+fun! s:match_xX_cites_brackets() abort
     syn match texCmdRefConcealed
                 \ "\\cite[tp]\?\>\*\?"
                 \ conceal skipwhite nextgroup=texRefConcealedOpt1,texRefConcealedArg
     call vimtex#syntax#core#new_opt('texRefConcealedOpt1', {
-                \ 'opts': g:vimtex_syntax_conceal_cites.verbose ? '' : 'conceal',
+                \ 'opts': g:vimtex_syntax_xX_cites.verbose ? '' : 'conceal',
                 \ 'next': 'texRefConcealedOpt2,texRefConcealedArg',
                 \})
     call vimtex#syntax#core#new_opt('texRefConcealedOpt2', {
@@ -2241,16 +2254,16 @@ fun! s:match_conceal_cites_brackets() abort
 endf
 
 
-fun! s:match_conceal_cites_icon() abort
-    if empty(g:vimtex_syntax_conceal_cites.icon) | return | endif
+fun! s:match_xX_cites_icon() abort
+    if empty(g:vimtex_syntax_xX_cites.icon) | return | endif
 
     exe     'syntax match texCmdRefConcealed'
                 \ '"\\cite[tp]\?\*\?\%(\[[^]]*\]\)\{,2}{[^}]*}"'
-                \ 'conceal cchar=' . g:vimtex_syntax_conceal_cites.icon
+                \ 'conceal cchar=' . g:vimtex_syntax_xX_cites.icon
 endf
 
 
-fun! s:match_conceal_sections() abort
+fun! s:match_xX_sections() abort
     syn match texPartConcealed      "\\"                contained conceal
     syn match texPartConcealed      "sub"               contained conceal cchar=-
     syn match texPartConcealed      "section\*\?"       contained conceal cchar=-

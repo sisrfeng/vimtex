@@ -15,3 +15,4 @@
     let b:did_ftplugin = 1
 
 call vimtex#init()
+" echom '来自TeX/ftplugin  的tex.vim     call vimtex#init()'
