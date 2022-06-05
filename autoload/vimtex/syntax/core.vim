@@ -2072,7 +2072,7 @@ endf
 fun! s:match_conceal_sections() abort
     syn match texPartConcealed      "\\"                contained conceal
     syn match texPartConcealed      "sub"               contained conceal
-    syn match texPartConcealed      "section\*\?"       contained conceal cchar=•
+    syn match texPartConcealed      "section\*\?"       contained conceal cchar=-
     syn match texCmdPart   contains=texPartConcealed   nextgroup=texPartConcArgTitle
                                   \ "\v\\%(sub)*section>\*?"
 
