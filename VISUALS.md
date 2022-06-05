@@ -98,21 +98,13 @@ Use `%` to move between matching delimiters, inline-math `$` delimiters, and LaT
 
 ## Text objects
 
-VimTeX provides text objects for commands,
-delimiters,
-environments,
-math zones,
-sections,
-and items.
-Currently only
-delimiters and
-environments have a GIF.
+VimTeX provides text objects for commands, delimiters, environments, math zones,
+sections, and items. Currently only delimiters and environments have a GIF.
 
 ### The delimiter and environment objects
 
-The following GIF uses Vim's visual mode to show highlight the scope of the `id`,
-`ad`, `ie`,
-and `ae` text objects.
+The following GIF uses Vim's visual mode to show highlight the scope of the
+`id`, `ad`, `ie`, and `ae` text objects.
 
 ![Delimiter and environment objects](https://github.com/lervag/vimtex-media/blob/main/gif/text-objects/text-objects.gif)
 
