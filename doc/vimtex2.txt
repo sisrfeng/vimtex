@@ -384,9 +384,10 @@ Table 4: A list of other important groups.~
 ==============================================================================
 NAVIGATION                                                  *vimtex-navigation*
 
-Vim already has a lot of useful navigation related features, such as
-|tags-and-searches| and |include-search|. VimTeX improves the latter feature
-by setting the 'include' and 'includeexpr' options, see |vimtex-includeexpr|.
+Vim already has a lot of useful navigation related features,
+such as |tags-and-searches| and |include-search|.
+VimTeX improves the latter feature by setting the 'include' and 'includeexpr' options,
+see |vimtex-includeexpr|.
 
 VimTeX also provides a separate table-of-content feature. This works by
 parsing the LaTeX project and displaying a table of contents in a separate
@@ -1458,8 +1459,6 @@ Contents:
 * |vimtex-faq-slow-matchparen|
 * |vimtex-faq-surround|
 * |vimtex-faq-isfname|
-* |vimtex-faq-tags|
-* |vimtex-faq-tags-bibtex|
 * |vimtex-faq-texmfhome|
 * |vimtex-faq-wsl|
 * |vimtex-faq-zathura-macos|
@@ -1534,54 +1533,6 @@ A: This might be due to the |isfname| setting, which by default contains `{,}`
 
   set isfname-={,}
 
-------------------------------------------------------------------------------
-*vimtex-faq-tags*
-Q: How can I jump from a `\ref{label}` to the corresponding label?
-A: This is not a feature provided by VimTeX itself, but vim has very good
-   support for tag navigation, see |tags-and-searches|. It is worth mentioning
-   that the |ctags| support for LaTeX is somewhat lacking. This can be amended
-   by adding some lines to your `~/.ctags` configuration file (or
-   `.ctags.d/default.ctags` if you use Universal ctags), e.g.:
-
-
-    --langdef=tex2
-    --langmap=tex2:.tex
-    --regex-tex2=/\\label[ \t]*\*?\{[ \t]*([^}]*)\}/\1/l,label/
-
-   See [0,1] for references. I also find |gutentags| [2] to be very convenient
-   for automatically generating and updating tag files.
-
-   [0]: http://stackoverflow.com/q/8119405/51634
-   [1]: https://github.com/lervag/vimtex/issues/348
-   [2]: https://github.com/ludovicchabant/vim-gutentags
-
-------------------------------------------------------------------------------
-*vimtex-faq-tags-bibtex*
-Q: How can I jump from a `\cite{key}` to the corresponding bibtex entry?
-A: This is not a feature provided by VimTeX itself. Similar to
-   |vimtex-faq-tags|, the feature is available through |tags-and-searches|.
-   The following `~/.ctags` configuration will be useful (or
-   `.ctags.d/default.ctags` if you use Universal ctags):
-
-
-    --langdef=bib
-    --langmap=bib:.bib
-    --regex-bib=/^@[A-Za-z]+\{([^,]+),/\1/e,entry/i
-    --regex-bib=/^@article\{([^,]*)/\1/a,article/i
-    --regex-bib=/^@book\{([^,]*)/\1/b,book/i
-    --regex-bib=/^@booklet\{([^,]*)/\1/L,booklet/i
-    --regex-bib=/^@conference\{([^,]*)/\1/c,conference/i
-    --regex-bib=/^@inbook\{([^,]*)/\1/B,inbook/i
-    --regex-bib=/^@incollection\{([^,]*)/\1/C,incollection/i
-    --regex-bib=/^@inproceedings\{([^,]*)/\1/P,inproceedings/i
-    --regex-bib=/^@manual\{([^,]*)/\1/m,manual/i
-    --regex-bib=/^@mastersthesis\{([^,]*)/\1/T,mastersthesis/i
-    --regex-bib=/^@misc\{([^,]*)/\1/M,misc/i
-    --regex-bib=/^@phdthesis\{([^,]*)/\1/t,phdthesis/i
-    --regex-bib=/^@proceedings\{([^,]*)/\1/p,proceedings/i
-    --regex-bib=/^@string\{([^ "#%')(,=}{]+)/\1/s,string/i
-    --regex-bib=/^@techreport\{([^,]*)/\1/r,techreport/i
-    --regex-bib=/^@unpublished\{([^,]*)/\1/u,unpublished/i
 
 ------------------------------------------------------------------------------
 *vimtex-faq-texmfhome*
@@ -2060,5 +2011,5 @@ The new names are, respectively:
 2013-10-05: First public release~
 VimTeX was first released on github on this date. The initial version was
 named vim-latex, which conflicted with Vim LaTeX-Suite which is also known as
-vim-latex.
+DIY_again
 DIY_2  vim:filetype=help:syntax=help:
