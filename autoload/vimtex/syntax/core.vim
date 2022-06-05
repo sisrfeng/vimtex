@@ -1106,7 +1106,11 @@ fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
 endf
 
 
-fun! vimtex#syntax#core#conceal_cmd_pairs(cmd, pairs) abort
+" conceal 太长, 以后用xX代替? x像封条
+" 貌似是改了这个,导致git bisect了半天, 还是少改插件源码吧
+" fun! vimtex#syntax#core#xX_math_cmd(cmd, pairs) abort
+fun! vimtex#syntax#core#conceal_math_cmd(cmd, pairs) abort
+
     for [l:from, l:to] in a:pairs
         execute 'syntax match texMathSymbol'
                     \ '"\\' . a:cmd . '\%({\s*' . l:from . '\s*}\|\s\+' . l:from . '\)"'
@@ -1369,7 +1373,7 @@ fun! s:match_math_symbols() abort
     endfor
 
     for [l:cmd, l:pairs] in items(s:cmd_pairs_dict)
-        call vimtex#syntax#core#conceal_cmd_pairs(l:cmd, l:pairs)
+        call vimtex#syntax#core#conceal_math_cmd(l:cmd, l:pairs)
     endfor
 endf
 
