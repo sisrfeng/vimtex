@@ -1993,7 +1993,7 @@ OPTIONS                                                        *vimtex-options*
         macros.
 
         This option is read during initialization of VimTeX, and so it must be
-                    set early. I.e., it can not be set in `after/ftplugin/tex.vim`.
+        set early. I.e., it can not be set in `after/ftplugin/tex.vim`.
 
         Default value: ['input', 'include']
 
