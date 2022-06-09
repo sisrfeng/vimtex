@@ -861,30 +861,7 @@ Possible actions:
 ==============================================================================
 CODE STRUCTURE                                                    *vimtex-code*
 
-The VimTeX code is based on the |autoload| feature of vim. For each new
-latex buffer, the function *vimtex#init* initializes a state variable as well
-as buffer local mappings and commands, all based on the desired options (see
-|vimtex-options|).
-
-The main init function calls `vimtex#mymodule#init_buffer` for each submodule,
-if it exists. This function should take care of defining buffer local
-mappings, commands, and autocommands.
-
-The state variable is a |Dictionary| that contains data that is specific to
-a single LaTeX project. Such a project may consist of several buffers for
-different files if the project is a multi-file project (see
-|vimtex-multi-file|). A submodule may add to the state during initialization
-with `vimtex#mymodule#init_state`, which takes the state object as a single
-argument.
-
-The command |:VimtexInfo| (mapped to <localleader>li by default) will show the
-(relevant) contents of the local state, as well as some auxiliary information
-that may be useful for debugging purposes.
-
-See also the supplementary high-level code documentation [0] for more detailed
-information about the VimTeX code.
-
-[0]: https://github.com/lervag/vimtex/blob/master/DOCUMENTATION.md
+/home/wf/.local/share/nvim/PL/TeX/Documentation.txt
 
 ------------------------------------------------------------------------------
 API REFERENCE                                                 *vimtex-code-api*

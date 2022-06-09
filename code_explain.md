@@ -1,10 +1,45 @@
 # Documentation
 
 Welcome to the "high-level documentation" of VimTeX.
-The goal of this document is to help developers (and curious users) to understand the structure of the plugin and how it works.
-That is,
-it should essentially provide a useful and quick overview of the most important files and directories.
+The goal of this document is to help developers (and curious users)
+to understand the structure of the plugin and how it works.
+
+It should essentially provide a useful and quick overview of the most important files and directories.
 See also `:help vimtex-code` for some related information.
+
+```help
+    The VimTeX code is based on
+    the |autoload| feature of vim.
+    For each new latex buffer,
+        the function *vimtex#init* initializes a state variable as well as buffer local mappings and
+        commands,
+    all based on  the desired options (see |vimtex-options|).
+
+    The main init function calls `vimtex#mymodule#init_buffer` for each submodule,
+    if it exists.
+        This function should take care of defining buffer local mappings,
+        commands,
+        and autocommands.
+
+    The state variable
+    is a |Dictionary| that contains data that
+    is specific to a single ¿LaTeX project¿.
+    Such a project may consist of several buffers
+    for different files if the project is a multi-file project (see |vimtex-multi-file|).
+    A submodule may add to the state during initialization with `vimtex#mymodule#init_state`,
+    which takes the state object as a single argument.
+
+
+    The command |:VimtexInfo| (  mapped to <localleader>li by default)
+    will show the (relevant)  contents of the local state,
+    as well as some auxiliary information that may be useful for debugging purposes.
+
+    See also the supplementary high-level code documentation [0] for ¿more detailed¿
+    information about the VimTeX code.
+
+    [0]: https://github.com/lervag/vimtex/blob/master/DOCUMENTATION.md
+```
+
 
 The table of contents has the same structure as the essential file structure of VimTeX.
 E.g.,
@@ -12,7 +47,7 @@ if you want to know something about `vimtex/autoload/vimtex/somefile.vim`,
 then you can lookup the path in the table of contents and click on it.
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN ¿doctoc¿ TO UPDATE -->
 
 
 - [ftplugin](#ftplugin)
