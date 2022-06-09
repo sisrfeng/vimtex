@@ -367,15 +367,17 @@ This script defines a VimTeX table-of-content source for the
 vimtex-denite`.
 
 # test
-This directory is used to, you guessed it, define tests for the VimTeX code.
-The tests are built on top of a Makefile based workflow. The `test/Makefile`
-runs all tests defined in sub directories named `test-...`. It is a fundamental
-requirement that all tests run with `make` from the top level `test` directory
-should pass for VimTeX to be deemed stable and fully functional.
+
+This directory is used to,
+define tests for the VimTeX code.
+The tests are built on top of a Makefile based workflow.
+The `test/Makefile` runs all tests defined in sub directories named `test-...`.
+It is a fundamental requirement that all tests run with `make` from the top level `test` directory should pass for VimTeX to be deemed stable and
+fully functional.
 
 The `test/` directory also contains some simple LaTeX and VimTeX configuration
-examples under `test/example-...`, as well as some issue specific test files
-under `issues/ISSUE-NUMBER`.
+examples under `test/example-...`,
+as well as some issue specific test files  under `issues/ISSUE-NUMBER`.
 
 
 DIY_2  vim:filetype=help:syntax=help:

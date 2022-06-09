@@ -1,22 +1,22 @@
 set nocompatible
 let &rtp = '../..,' . &rtp
 filetype plugin on
-syntax enable
+syn    enable
 
-set nomore
+" set nomore
 
-nnoremap q :qall!<cr>
+nno      q :qall!<cr>
 
 " Use a more colorful colorscheme
-colorscheme morning
+" colorscheme morning
 
-function! SynNames()
-  return join(vimtex#syntax#stack(), ' -> ')
-endfunction
+fun! SynNames()
+    return join(vimtex#syntax#stack(), ' -> ')
+endf
 
 if empty($INMAKE)
-  augroup Testing
-    autocmd!
-    autocmd CursorMoved * echo SynNames()
-  augroup END
-endif
+    aug  Testing
+        au!
+        au  CursorMoved * echo SynNames()
+    aug  END
+en
