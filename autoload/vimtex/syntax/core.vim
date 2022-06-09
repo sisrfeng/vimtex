@@ -57,18 +57,24 @@ fun! vimtex#syntax#core#init() abort "
     " }}}2
 
     " TeX symbols and special characters
-        syn match texLigature "--"
-        syn match texLigature "---"
-        syn match texLigature "\v%(``|''|,,)"
-        syn match texTabularChar "&"
-        syn match texTabularChar "\\\\"
+        syn match texLigature     "--"
+        syn match texLigature     "---"
+        syn match texLigature     "\v%(``|''|,,)"
+        syn match texTabularChar  "&"
+        syn match texTabularChar  "\\\\"
 
-        " E.g.:  \$ \& \% \# \{ \} \_ \S \P
-        syn match texSpecialChar "\\[$&%#{}_]"
-        syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"
-        syn match texSpecialChar "\^\^\%(\S\|[0-9a-f]\{2}\)"
-        syn match texSpecialChar "\\[,;:!]"
+        " E.g.:  \$ \& \% \# \{ \} \_
+            syn match texSpecialChar "\\[$&%#{}_]"
+            syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"
+                                       " \S  花体S,
+                                         " \P 旗帜
+            syn match texSpecialChar "\\[,;:!]"
+            syn match texSpecialChar "\^\^\%(\S\|[0-9a-f]\{2}\)"
     " }}}2
+
+            " 不行:
+            " syn match texBrace "{"  conceal contained containedin=ALL
+            " syn match texBrace "}"  conceal contained containedin=ALL
     "
     " Commands: general
         " Unspecified TeX groups
@@ -86,22 +92,23 @@ fun! vimtex#syntax#core#init() abort "
         syn match texLength contained "\<\d\+\([.,]\d\+\)\?\s*\(true\)\?\s*\(bp\|cc\|cm\|dd\|em\|ex\|in\|mm\|pc\|pt\|sp\)\>"
 
         " Match general commands first
-        syn match texCmd   "\\[a-zA-Z@]\+"   nextgroup=texOpt,texArg  skipwhite skipnl
-        call vimtex#syntax#core#new_opt('texOpt', {'next': 'texArg'})
-        call vimtex#syntax#core#new_arg('texArg', {'next': 'texArg', 'opts': 'contained transparent'})
+            syn match texCmd   "\v\\[a-zA-Z@]+"   nextgroup=texOpt,texArg  skipwhite skipnl
+            call vimtex#syntax#core#new_opt('texOpt', {'next': 'texArg'})
+            call vimtex#syntax#core#new_arg('texArg', {'next': 'texArg',     'opts': 'contained transparent'})
 
         " Define separate "generic" commands inside math regions
-        " Note: Defined here because order matters!
-        syn match texMathCmd contained nextgroup=texMathArg skipwhite skipnl "\\\a\+"
-        call vimtex#syntax#core#new_arg('texMathArg', {'contains': '@texClusterMath'})
+            " Note: Defined here because order matters!
+            syn match texMathCmd  "\v\\\a+"       nextgroup=texMathArg  contained  skipwhite skipnl
+                                                                   " 没有Opt?
+            call vimtex#syntax#core#new_arg('texMathArg', {'contains': '@texClusterMath'})
 
         " Commands: core set
 
         " Accents and ligatures
         syn match texCmdAccent "\\[bcdvuH]$"
         syn match texCmdAccent "\\[bcdvuH]\ze[^a-zA-Z@]"
-        syn match texCmdAccent /\\[=^.~"`']/
-        syn match texCmdAccent /\\['=t'.c^ud"vb~Hr]{\a}/
+        syn match texCmdAccent #\\[=^.~"`']#
+        syn match texCmdAccent #\\['=t'.c^ud"vb~Hr]{\a}#
         syn match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)$"
         syn match texCmdLigature "\v\\%([ijolL]|ae|oe|ss|AA|AE|OE)\ze[^a-zA-Z@]"
 
@@ -253,14 +260,14 @@ fun! vimtex#syntax#core#init() abort "
         syn match texLetArgEqual contained nextgroup=texLetArgBody skipwhite skipnl "="
 
         " Reference and cite commands
-        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\nocite\>"
-        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\label\>"
-        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\\(page\|eq\)ref\>"
-        syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl "\\v\?ref\>"
-        syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite\>"
-        syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl "\\cite[tp]\>\*\?"
-        call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
-        call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\nocite>"          conceal
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\label>"           conceal
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\(page|eq)ref>"    conceal
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\v?ref>"           conceal
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite>"            conceal
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite[tp]>\*?"     conceal
+            call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
+            call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
 
         " \bibitem[label]{marker}
         syn match texCmdBibitem "\\bibitem\>"
@@ -272,13 +279,13 @@ fun! vimtex#syntax#core#init() abort "
                     \ {'contains': 'texComment,@NoSpell'})
 
         " Sections and parts
-        syn match texCmdPart "\\\(front\|main\|back\)matter\>"
-        syn match texCmdPart "\\part\>"                    nextgroup=texPartArgTitle
-        syn match texCmdPart "\\chapter\>\*\?"             nextgroup=texPartArgTitle
-        syn match texCmdPart "\v\\%(sub)*section>\*?"      nextgroup=texPartArgTitle
-        syn match texCmdPart "\v\\%(sub)?paragraph>"       nextgroup=texPartArgTitle
-        syn match texCmdPart "\v\\add%(part|chap|sec)>\*?" nextgroup=texPartArgTitle
-        call vimtex#syntax#core#new_arg('texPartArgTitle')
+            syn match texCmdPart "\\\(front\|main\|back\)matter\>"                          conceal
+            syn match texCmdPart "\\part\>"                    nextgroup=texPartArgTitle    conceal
+            syn match texCmdPart "\\chapter\>\*\?"             nextgroup=texPartArgTitle    conceal
+            syn match texCmdPart "\v\\%(sub)*section>\*?"      nextgroup=texPartArgTitle    conceal
+            syn match texCmdPart "\v\\%(sub)?paragraph>"       nextgroup=texPartArgTitle    conceal
+            syn match texCmdPart "\v\\add%(part|chap|sec)>\*?" nextgroup=texPartArgTitle    conceal
+            call vimtex#syntax#core#new_arg('texPartArgTitle')
 
         " Item elements in lists
         syn match texCmdItem "\\item\>"
@@ -409,10 +416,10 @@ fun! vimtex#syntax#core#init() abort "
             syn match texComment "\^\^A.*$"
             syn match texComment "^%\+"
         elseif g:vimtex_syntax_nospell_comments
-            syn match texComment "%.*$" contains=@NoSpell
-        else
-            syn match texComment "%.*$" contains=@Spell
-        endif
+            syn match texComment "%.*$" contains=@NoSpell,@In_fancY
+        el
+            syn match texComment "%.*$" contains=@Spell,@In_fancY
+        en
 
         " Don't spell check magic comments/directives
         syn match texComment "^\s*%\s*!.*" contains=@NoSpell
@@ -431,18 +438,23 @@ fun! vimtex#syntax#core#init() abort "
         syn case match
 
         " Highlight \iffalse ... \fi blocks as comments
-        syn region texComment matchgroup=texCmdConditional
-                    \ start="^\s*\\iffalse\>" end="\\\%(fi\|else\)\>"
-                    \ contains=texCommentConditionals
+        syn region texComment   matchgroup=texCmdConditional
+                    \ start="^\s*\\iffalse\>"
+                    \ end="\\\%(fi\|else\)\>"
+                    \ contains=texCommentConditionals,@In_fancY
 
         syn region texCommentConditionals matchgroup=texComment
-                    \ start="\\if\w\+" end="\\fi\>"
-                    \ contained transparent
+                    \ start="\\if\w\+"
+                    \ end="\\fi\>"
+                    \ contained
+                    \ transparent
 
-        " Highlight \iftrue ... \else ... \fi blocks as comments
+        " Highlight \iftrue ... \else ... \fi   blocks as comments
         syn region texConditionalTrueZone matchgroup=texCmdConditional
-                    \ start="^\s*\\iftrue\>"  end="\v\\fi>|%(\\else>)@="
-                    \ contains=TOP nextgroup=texCommentFalse
+                    \ start="^\s*\\iftrue\>"
+                    \ end="\v\\fi>|%(\\else>)@="
+                    \ contains=TOP
+                    \ nextgroup=texCommentFalse
                     \ transparent
 
         syn region texConditionalNested matchgroup=texCmdConditional
@@ -450,8 +462,9 @@ fun! vimtex#syntax#core#init() abort "
                     \ contained contains=TOP
                     \ containedin=texConditionalTrueZone,texConditionalNested
 
-        syn region texCommentFalse matchgroup=texCmdConditional
-                    \ start="\\else\>"  end="\\fi\>"
+        syn region texCommentFalse  matchgroup=texCmdConditional
+                    \ start="\\else\>"
+                    \ end="\\fi\>"
                     \ contained contains=texCommentConditionals
     " }}}2
 
@@ -542,19 +555,19 @@ fun! vimtex#syntax#core#init() abort "
 
         " Math regions: Inline Math Zones
             let l:conceal = g:vimtex_syntax_conceal.math_bounds ? 'concealends' : ''
-            execute 'syntax region texMathZone matchgroup=texMathDelimZone'
+            exe     'syntax region texMathZone matchgroup=texMathDelimZone'
                             \ 'start="\%(\\\@<!\)\@<=\\("'
                             \ 'end="\%(\\\@<!\)\@<=\\)"'
                             \ 'contains=@texClusterMath keepend'
                             \ l:conceal
 
-            execute 'syntax region texMathZone matchgroup=texMathDelimZone'
+            exe     'syntax region texMathZone matchgroup=texMathDelimZone'
                             \ 'start="\\\["'
                             \ 'end="\\]"'
                             \ 'contains=@texClusterMath keepend'
                             \ l:conceal
 
-            execute 'syntax region texMathZoneX matchgroup=texMathDelimZone'
+            exe     'syntax region texMathZoneX matchgroup=texMathDelimZone'
                             \ 'start="\$"'
                             \ 'skip="\\\\\|\\\$"'
                             \ 'end="\$"'
@@ -562,7 +575,7 @@ fun! vimtex#syntax#core#init() abort "
                             \ 'nextgroup=texMathTextAfter'
                             \ l:conceal
 
-            execute 'syntax region texMathZoneXX matchgroup=texMathDelimZone'
+            exe     'syntax region texMathZoneXX matchgroup=texMathDelimZone'
                             \ 'start="\$\$"'
                             \ 'end="\$\$"'
                             \ 'contains=@texClusterMath keepend'
@@ -589,22 +602,24 @@ fun! vimtex#syntax#core#init() abort "
                     \ 'intertext',
                     \ '[mf]box',
                     \]
-            execute 'syntax match texMathCmdText'
+            exe     'syntax match texMathCmdText'
                         \ '"\v\\' . l:re_cmd . '>"'
-                        \ 'contained skipwhite nextgroup=texMathTextArg'
+                        \ 'contained
+                         \ skipwhite
+                         \ nextgroup=texMathTextArg'
         endfor
         call vimtex#syntax#core#new_arg('texMathTextArg')
 
         " Math style commands
-        syn match texMathCmdStyle contained "\\mathbb\>"
-        syn match texMathCmdStyle contained "\\mathbf\>"
-        syn match texMathCmdStyle contained "\\mathcal\>"
-        syn match texMathCmdStyle contained "\\mathfrak\>"
-        syn match texMathCmdStyle contained "\\mathit\>"
-        syn match texMathCmdStyle contained "\\mathnormal\>"
-        syn match texMathCmdStyle contained "\\mathrm\>"
-        syn match texMathCmdStyle contained "\\mathsf\>"
-        syn match texMathCmdStyle contained "\\mathtt\>"
+            syn match texMathCmdStyle contained "\\mathbb\>"
+            syn match texMathCmdStyle contained "\\mathbf\>"
+            syn match texMathCmdStyle contained "\\mathcal\>"
+            syn match texMathCmdStyle contained "\\mathfrak\>"
+            syn match texMathCmdStyle contained "\\mathit\>"
+            syn match texMathCmdStyle contained "\\mathnormal\>"
+            syn match texMathCmdStyle contained "\\mathrm\>"
+            syn match texMathCmdStyle contained "\\mathsf\>"
+            syn match texMathCmdStyle contained "\\mathtt\>"
 
         " Bold and italic commands
         call s:match_bold_italic_math()
@@ -625,17 +640,18 @@ fun! vimtex#syntax#core#init() abort "
 
 
     " Zone: SynIgnore
-        syn region texSynIgnoreZone matchgroup=texComment
+        syn region texSynIgnoreZone
+                    \ matchgroup=texComment
                     \ start="^\c\s*% VimTeX: SynIgnore\%( on\| enable\)\?\s*$"
                     \ end="^\c\s*% VimTeX: SynIgnore\%( off\| disable\).*"
                     \ contains=texComment,texCmd
 
         " Also support Overleafs magic comment
-        " https://www.overleaf.com/learn/how-to/Code_Check
-        syn region texSynIgnoreZone matchgroup=texComment
-                    \ start="^%%begin novalidate\s*$"
-                    \ end="^%%end novalidate\s*$"
-                    \ contains=texComment,texCmd
+            " https://www.overleaf.com/learn/how-to/Code_Check
+            syn region texSynIgnoreZone matchgroup=texComment
+                        \ start="^%%begin novalidate\s*$"
+                        \ end="^%%end novalidate\s*$"
+                        \ contains=texComment,texCmd
 
 
 
@@ -645,37 +661,34 @@ fun! vimtex#syntax#core#init() abort "
             " Conceal various commands - be fancy
             if g:vimtex_syntax_conceal.fancy
                 call s:match_conceal_fancy()
-            endif
+            en
 
-            " Conceal replace greek letters
             if g:vimtex_syntax_conceal.greek
                 call s:match_conceal_greek()
-            endif
+            en
 
             " Conceal replace accented characters
             if g:vimtex_syntax_conceal.accents
                 call s:match_conceal_accents()
-            endif
+            en
 
-            " Conceal replace ligatures
             if g:vimtex_syntax_conceal.ligatures
                 call s:match_conceal_ligatures()
-            endif
+            en
 
-            " Conceal cite commands
             if g:vimtex_syntax_conceal.cites
                 call s:match_conceal_cites_{g:vimtex_syntax_conceal_cites.type}()
-            endif
+            en
 
-            " Conceal section commands
             if g:vimtex_syntax_conceal.sections
                 call s:match_conceal_sections()
-            endif
-        endif
+            en
+        en
 
 
 
     " Apply custom command syntax specifications
+    " 自定义syntax conceal等
         for l:item in g:vimtex_syntax_custom_cmds
             call vimtex#syntax#core#new_cmd(l:item)
         endfor
@@ -688,7 +701,7 @@ fun! vimtex#syntax#core#init_post() abort
 
     " Add texTheoremEnvBgn for custom theorems
     for l:envname in s:gather_newtheorems()
-        execute 'syntax match texTheoremEnvBgn'
+        exe     'syntax match texTheoremEnvBgn'
                     \ printf('"\\begin{%s}"', l:envname)
                     \ 'nextgroup=texTheoremEnvOpt skipwhite skipnl'
                     \ 'contains=texCmdEnv'
@@ -710,11 +723,11 @@ fun! vimtex#syntax#core#init_highlights() abort
         hi def link texCmdTodo            Ignore
         hi def link texCmdType            Ignore
 
-        hi def link texComment            Ignore
         hi def link texCommentTodo        Ignore
 
         " hi def link texDelim              Delimiter
-        hi texDelim guifg=none guibg=none gui=none
+        hi link texDelim              HidE
+        " hi texDelim guifg=none guibg=none gui=none
             " 大括号的fg还受其他位置控制
 
         hi def link texEnvArgName         Ignore
@@ -740,39 +753,16 @@ fun! vimtex#syntax#core#init_highlights() abort
 
         hi def link texTitleArg           Ignore
 
-                    " 本来是
-        " hi def link texArg                Include吧
-        " hi def link texCmd                Statement
-        " hi def link texCmdSpaceCodeChar   Special
-        " hi def link texCmdTodo            Todo
-        " hi def link texCmdType            Type
-        " hi def link texComment            Comment
-        " hi def link texCommentTodo        Todo
-        " hi def link texDelim              Delimiter
-        " hi def link texEnvArgName         PreCondit
-        " hi def link texError              Error
-        " hi def link texLength             Number
-        " hi def link texMathDelim          Type
-        " hi def link texMathEnvArgName     Delimiter
-        " hi def link texMathOper           Operator
-        " hi def link texMathZone           Special
-        " hi def link texOpt                Identifier
-        " hi def link texOptSep             NormalNC
-        " hi def link texParm               Special
-        " hi def link texPartArgTitle       String
-        " hi def link texRefArg             Special
-        " hi def link texZone               PreCondit
-        " hi def link texSpecialChar        SpecialChar
-        " hi def link texSymbol             SpecialChar
-        " hi def link texTitleArg           Underlined
 
 
 
         hi def texMathStyleBold         gui=bold
-        hi def texMathStyleItal         gui=italic
+        hi def texMathStyleItal         gui=bold
+        " hi def texMathStyleItal         gui=italic
 
         hi def texStyleBold             gui=bold
-        hi def texStyleItal             gui=italic
+        hi def texStyleItal             gui=bold
+        " hi def texStyleItal             gui=italic
         hi def texStyleBoth             gui=bold,italic
         hi def texStyleUnder            gui=underline
         hi def texStyleBoldUnder        gui=bold,underline
@@ -804,7 +794,7 @@ fun! vimtex#syntax#core#init_highlights() abort
     "     hi def link texCmdInput           texCmd
     "     hi def link texCmdItem            texCmdEnv
     "     hi def link texCmdLet             texCmdNew
-    "     hi def link texCmdLigature        texSpecialChar
+        hi def link texCmdLigature        texSpecialChar
     "     hi def link texCmdMathEnv         texCmdEnv
     "     hi def link texCmdNew             texCmd
     "     hi def link texCmdNewcmd          texCmdNew
@@ -812,7 +802,7 @@ fun! vimtex#syntax#core#init_highlights() abort
     "     hi def link texCmdNewthm          texCmd
     "     hi def link texCmdPackage         texCmd
     "     hi def link texCmdParbox          texCmd
-    "     hi def link texCmdPart            texCmd
+        hi def link texCmdPart            texCmd
     "     hi def link texCmdRef             texCmd
     "     hi def link texCmdRefConcealed    texCmdRef
     "     hi def link texCmdSize            texCmdType
@@ -821,13 +811,13 @@ fun! vimtex#syntax#core#init_highlights() abort
     "     hi def link texCmdStyle           texCmdType
     "     hi def link texCmdStyleBold       texCmd
     "     hi def link texCmdStyleBoldItal   texCmd
-    "     hi def link texCmdStyleItal       texCmd
+        hi def link texCmdStyleItal       texCmd
     "     hi def link texCmdStyleItalBold   texCmd
     "     hi def link texCmdTitle           texCmd
     "     hi def link texCmdVerb            texCmd
-    "     hi def link texCommentAcronym     texComment
-    "     hi def link texCommentFalse       texComment
-    "     hi def link texCommentURL         texComment
+        hi def link texCommentAcronym     texComment
+        hi def link texCommentFalse       texComment
+        hi def link texCommentURL         texComment
     "     hi def link texConditionalArg     texArg
     "     hi def link texConditionalINCChar texSymbol
     "     hi def link texDefArgName         texArgNew
@@ -908,15 +898,17 @@ endf
 
 fun! vimtex#syntax#core#new_arg(grp, ...) abort
     let l:cfg = extend({
-                \ 'contains': 'TOP,@NoSpell',
-                \ 'matcher': 'start="{" skip="\\\\\|\\}" end="}"',
-                \ 'next': '',
-                \ 'matchgroup': 'matchgroup=texDelim',
-                \ 'opts': 'contained',
-                \ 'skipwhite': v:true,
-                \}, a:0 > 0 ? a:1 : {})
+                   \ 'contains'   : 'TOP,@NoSpell'                       ,
+                   \ 'matcher'    : 'start="{" skip="\\\\\|\\}" end="}"' ,
+                   \ 'next'       : ''                                   ,
+                   \ 'matchgroup' : 'matchgroup=texDelim'                ,
+                   \ 'opts'       : 'contained'                          ,
+                   \ 'skipwhite'  : v:true                               ,
+                   \},
+                   \ a:0 > 0 ? a:1 : {}
+                \ )
 
-    execute 'syntax region' a:grp
+    exe     'syntax region' a:grp
                 \ l:cfg.matchgroup
                 \ l:cfg.matcher
                 \ l:cfg.opts
@@ -933,9 +925,9 @@ fun! vimtex#syntax#core#new_opt(grp, ...) abort
                 \ 'contains': '@texClusterOpt',
                 \}, a:0 > 0 ? a:1 : {})
 
-    execute 'syntax region' a:grp
-                \ 'contained matchgroup=texDelim'
-                \ 'start="\[" skip="\\\\\|\\\]" end="\]"'
+    exe     'syntax region' a:grp
+                \ 'contained    matchgroup=texDelim'
+                \ 'start="\["   skip="\\\\\|\\\]"   end="\]"'
                 \ l:cfg.opts
                 \ (empty(l:cfg.contains) ? '' : 'contains=' . l:cfg.contains)
                 \ (empty(l:cfg.next) ? '' : 'nextgroup=' . l:cfg.next . ' skipwhite skipnl')
@@ -946,17 +938,18 @@ fun! vimtex#syntax#core#new_cmd(cfg) abort "
 
     " Parse options/config
     let l:cfg = extend({
-                \ 'mathmode': v:false,
-                \ 'conceal': v:false,
-                \ 'concealchar': '',
-                \ 'opt': v:true,
-                \ 'arg': v:true,
-                \ 'argstyle': '',
-                \ 'argspell': v:true,
-                \ 'arggreedy': v:false,
-                \ 'nextgroup': '',
-                \ 'hlgroup': '',
-                \}, a:cfg)
+                    \ 'mathmode'    : v:false ,
+                    \ 'conceal'     : v:false ,
+                    \ 'concealchar' : ''      ,
+                    \ 'opt'         : v:true  ,
+                    \ 'arg'         : v:true  ,
+                    \ 'argstyle'    : ''      ,
+                    \ 'argspell'    : v:true  ,
+                    \ 'arggreedy'   : v:false ,
+                    \ 'nextgroup'   : ''      ,
+                    \ 'hlgroup'     : ''      ,
+                   \},
+                   \ a:cfg)
 
     " Intuitive handling of concealchar
     if !empty(l:cfg.concealchar)
@@ -964,25 +957,27 @@ fun! vimtex#syntax#core#new_cmd(cfg) abort "
         if empty(l:cfg.argstyle)
             let l:cfg.opt = v:false
             let l:cfg.arg = v:false
-        endif
-    endif
+        en
+    en
 
     " Conceal optional group unless otherwise specified
     if !has_key(l:cfg, 'optconceal')
         let l:cfg.optconceal = l:cfg.conceal
-    endif
+    en
 
     " Define group names
-    let l:name = 'C' . toupper(l:cfg.name[0]) . l:cfg.name[1:]
-    let l:pre = l:cfg.mathmode ? 'texMath' : 'tex'
-    let l:group_cmd = l:pre . 'Cmd' . l:name
-    let l:group_opt = l:pre . l:name . 'Opt'
-    let l:group_arg = l:pre . l:name . 'Arg'
+        let l:name = 'C' . toupper(l:cfg.name[0]) . l:cfg.name[1:]
+                  " C: 表示Custom
+        let l:pre = l:cfg.mathmode ? 'texMath' : 'tex'
+        let l:group_cmd = l:pre . 'Cmd' . l:name
+        let l:group_opt = l:pre . l:name . 'Opt'
+        let l:group_arg = l:pre . l:name . 'Arg'
 
     " Specify rules for next groups
-    if !empty(l:cfg.nextgroup)
-        let l:nextgroups = 'skipwhite nextgroup=' . l:cfg.nextgroup
-    else
+        if !empty(l:cfg.nextgroup)
+            let l:nextgroups = 'skipwhite nextgroup=' . l:cfg.nextgroup
+        el
+
         " Add syntax rules for the optional group
         let l:nextgroups = []
         if l:cfg.opt
@@ -991,11 +986,11 @@ fun! vimtex#syntax#core#new_cmd(cfg) abort "
             let l:opt_cfg = {'opts': l:cfg.optconceal ? 'conceal' : ''}
             if l:cfg.arg
                 let l:opt_cfg.next = l:group_arg
-            endif
+            en
             call vimtex#syntax#core#new_opt(l:group_opt, l:opt_cfg)
 
-            execute 'highlight def link' l:group_opt 'texOpt'
-        endif
+            exe     'highlight def link' l:group_opt 'texOpt'
+        en
 
         " Add syntax rules for the argument group
         if l:cfg.arg
@@ -1004,54 +999,68 @@ fun! vimtex#syntax#core#new_cmd(cfg) abort "
             let l:arg_cfg = {'opts': 'contained'}
             if l:cfg.conceal && empty(l:cfg.concealchar)
                 let l:arg_cfg.opts .= ' concealends'
-            endif
+            en
             if l:cfg.mathmode
                 let l:arg_cfg.contains = '@texClusterMath'
             elseif !l:cfg.argspell
                 let l:arg_cfg.contains = 'TOP,@Spell'
-            endif
+            en
             if l:cfg.arggreedy
                 let l:arg_cfg.next = l:group_arg
-            endif
+            en
             call vimtex#syntax#core#new_arg(l:group_arg, l:arg_cfg)
 
             let l:style = get({
-                        \ 'bold': 'texStyleBold',
-                        \ 'ital': 'texStyleItal',
-                        \ 'under': 'texStyleUnder',
-                        \ 'boldital': 'texStyleBoth',
-                        \ 'boldunder': 'texStyleBoldUnder',
-                        \ 'italunder': 'texStyleItalUnder',
-                        \ 'bolditalunder': 'texStyleBoldItalUnder',
-                        \}, l:cfg.argstyle,
-                        \ l:cfg.mathmode ? 'texMathArg' : '')
+                          \ 'bold'          : 'texStyleBold'          ,
+                          \ 'ital'          : 'texStyleItal'          ,
+                          \ 'under'         : 'texStyleUnder'         ,
+                          \ 'boldital'      : 'texStyleBoth'          ,
+                          \ 'boldunder'     : 'texStyleBoldUnder'     ,
+                          \ 'italunder'     : 'texStyleItalUnder'     ,
+                          \ 'bolditalunder' : 'texStyleBoldItalUnder' ,
+                        \},
+                        \ l:cfg.argstyle,
+                        \ l:cfg.mathmode ?
+                         \ 'texMathArg'
+                         \: '')
             if !empty(l:style)
-                execute 'highlight def link' l:group_arg l:style
-            endif
-        endif
+                exe     'highlight def link' l:group_arg l:style
+            en
+        en
 
         let l:nextgroups = !empty(l:nextgroups)
                     \ ? 'skipwhite nextgroup=' . join(l:nextgroups, ',')
                     \ : ''
-    endif
+    en
 
     " Add to cluster if necessary
     if l:cfg.mathmode
-        execute 'syntax cluster texClusterMath add=' . l:group_cmd
-    endif
+        exe     'syntax cluster texClusterMath add=' . l:group_cmd
+    en
 
-    " Create the final syntax rule
-    execute 'syntax match' l:group_cmd
-                \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . '>') . '"'
-                \ l:cfg.conceal ? 'conceal' : ''
-                \ !empty(l:cfg.concealchar) ? 'cchar=' . l:cfg.concealchar : ''
-                \ l:nextgroups
-                \ l:cfg.mathmode ? 'contained' : ''
+    " 核心:  finally  Create the  syntax rule
+    " use ¿match¿
+    exe     'syntax match' l:group_cmd
+              \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name) . '"'
+              "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . "\ze(\d|>)") . '"'
+              "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . '>') . '"'
+                                                             "\ 这会导致2\times3无法变成x
+                                        " cmdre: cmd regex吧
+              \ l:cfg.conceal ?
+                  \ 'conceal'
+                  \ : ''
+              \ !empty(l:cfg.concealchar) ?
+                  \ 'cchar=' . l:cfg.concealchar
+                  \ : ''
+              \ l:nextgroups
+              \ l:cfg.mathmode ?
+                  \ 'contained'
+                  \ : ''
 
     " Define default highlight rule
-    execute 'highlight def link' l:group_cmd
-                \ !empty(l:cfg.hlgroup)
-                \   ? l:cfg.hlgroup
+    exe     'hi def link' l:group_cmd
+                \ !empty(l:cfg.hlgroup)  ?
+                  \ l:cfg.hlgroup
                 \   : l:pre . 'Cmd'
 endf
 
@@ -1066,17 +1075,17 @@ fun! vimtex#syntax#core#new_region_env(grp, envname, ...) abort
     let l:contains = 'contains=texCmdEnv'
     if !empty(l:cfg.contains)
         let l:contains .= ',' . l:cfg.contains
-    endif
+    en
 
     let l:options = 'keepend'
     if l:cfg.transparent
         let l:options .= ' transparent'
-    endif
+    en
     if !empty(l:cfg.opts)
         let l:options .= ' ' . l:cfg.opts
-    endif
+    en
 
-    execute 'syntax region' a:grp
+    exe     'syntax region' a:grp
                 \ 'start="\\begin{' . a:envname .'}"'
                 \ 'end="\\end{' . a:envname .'}"'
                 \ l:contains
@@ -1091,13 +1100,13 @@ fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
 
     let l:envname = a:mathzone . (l:cfg.starred ? '\*\?' : '')
 
-    execute 'syntax match texMathError  "\\end{'..l:envname ..'}"  '
+    exe     'syntax match texMathError  "\\end{'..l:envname ..'}"  '
 
-    execute 'syntax match texMathEnvBgnEnd  "\\\v%(begin|end)>\{'..l:envname..'\}"  contained'
+    exe     'syntax match texMathEnvBgnEnd  "\\\v%(begin|end)>\{'..l:envname..'\}"  contained'
                 \ ' contains=texCmdMathEnv'
                 \ ( empty(l:cfg.next) ?  ''   :   'nextgroup='..l:cfg.next..' skipwhite skipnl' )
 
-    execute 'syntax region texMathZoneEnv'
+    exe     'syntax region texMathZoneEnv'
                 \ 'start="\\begin{\z('..l:envname..'\)}"'
                 \ 'end="\\end{\z1}"'
                 \ 'contains=texMathEnvBgnEnd,@texClusterMath'
@@ -1112,7 +1121,7 @@ endf
 fun! vimtex#syntax#core#conceal_math_cmd(cmd, pairs) abort
 
     for [l:from, l:to] in a:pairs
-        execute 'syntax match texMathSymbol'
+        exe     'syntax match texMathSymbol'
                     \ '"\\' . a:cmd . '\%({\s*' . l:from . '\s*}\|\s\+' . l:from . '\)"'
                     \ 'contained conceal cchar=' . l:to
     endfor
@@ -1122,44 +1131,78 @@ endf
 
 fun! s:match_bold_italic() abort
     let [l:conceal, l:concealends] =
-                \ (g:vimtex_syntax_conceal.styles ? ['conceal', 'concealends'] : ['', ''])
+            \ (g:vimtex_syntax_conceal.styles ?
+            \ ['conceal', 'concealends'] :
+            \ ['', ''])
 
     syn cluster texClusterBold     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold
     syn cluster texClusterItal     contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleBoldItal
-    syn cluster texClusterItalBold contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold,texCmdStyleBoldItal
+    syn cluster texClusterItalBold contains=TOP,@NoSpell,texCmdStyleItal,texCmdStyleBold,texCmdStyleItalBold,
+                                                \ texCmdStyleBoldItal
 
     let l:map = {
-                \ 'texCmdStyleBold': 'texStyleBold',
-                \ 'texCmdStyleBoldItal': 'texStyleBoth',
-                \ 'texCmdStyleItal': 'texStyleItal',
-                \ 'texCmdStyleItalBold': 'texStyleBoth',
-                \}
+              \ 'texCmdStyleBold'     : 'texStyleBold',
+              \ 'texCmdStyleBoldItal' : 'texStyleBoth',
+              \ 'texCmdStyleItal'     : 'texStyleItal',
+              \ 'texCmdStyleItalBold' : 'texStyleBoth',
+           \}
 
     for [l:group, l:pattern] in [
-                \ ['texCmdStyleBoldItal', 'emph'],
-                \ ['texCmdStyleBoldItal', 'textit'],
-                \ ['texCmdStyleBoldItal', 'textsl'],
-                \ ['texCmdStyleItalBold', 'textbf'],
-                \ ['texCmdStyleBold', 'textbf'],
-                \ ['texCmdStyleItal', 'emph'],
-                \ ['texCmdStyleItal', 'textit'],
-                \ ['texCmdStyleItal', 'textsl'],
-                \]
-        execute 'syntax match' l:group '"\\' . l:pattern . '\>"'
-                    \ 'skipwhite skipnl nextgroup=' . l:map[l:group]
-                    \ l:conceal
+    \ ['texCmdStyleBoldItal' , 'emph']   ,
+    \ ['texCmdStyleBoldItal' , 'textit'] ,
+    \ ['texCmdStyleBoldItal' , 'textsl'] ,
+    \ ['texCmdStyleItalBold' , 'textbf'] ,
+    \ ['texCmdStyleBold'     , 'textbf'] ,
+    \ ['texCmdStyleItal'     , 'emph']   ,
+    \ ['texCmdStyleItal'     , 'textit'] ,
+    \ ['texCmdStyleItal'     , 'textsl'] ,
+                             \]
+        " 处理\emph 等
+        exe     'syntax match' l:group
+                \ '"\\' . l:pattern . '\>"'
+                \ 'skipwhite skipnl nextgroup=' . l:map[l:group]
+                \ l:conceal
     endfor
 
-    execute 'syntax region texStyleBold matchgroup=texDelim start="{" end="}" contained contains=@texClusterBold' l:concealends
-    execute 'syntax region texStyleItal matchgroup=texDelim start="{" end="}" contained contains=@texClusterItal' l:concealends
-    execute 'syntax region texStyleBoth matchgroup=texDelim start="{" end="}" contained contains=@texClusterItalBold' l:concealends
+    exe     'syntax region texStyleBold
+            \ matchgroup=texDelim
+            \ start="{"
+            \ end="}"
+            \ contained
+            \ contains=@texClusterBold'
+            \ l:concealends
+
+    exe     'syntax region texStyleItal
+            \ matchgroup=texDelim
+            \ start="{"
+            \ end="}"
+            \ contained
+            \ contains=@texClusterItal'
+            \ l:concealends
+
+    exe     'syntax region texStyleBoth
+            \ matchgroup=texDelim
+            \ start="{"
+            \ end="}"
+            \ contained
+            \ contains=@texClusterItalBold'
+            \ l:concealends
 
     if g:vimtex_syntax_conceal.styles
         syn match texCmdStyle "\v\\text%(rm|tt|up|normal|sf|sc)>"
-                    \ conceal skipwhite skipnl nextgroup=texStyleArgConc
-        syn region texStyleArgConc matchgroup=texDelim start="{" end="}"
-                    \ contained contains=TOP,@NoSpell concealends
-    endif
+                            \ conceal
+                            \ skipwhite
+                            \ skipnl
+                            \ nextgroup=texStyleArgConc
+
+        syn region texStyleArgConc
+                            \ matchgroup=texDelim
+                            \ start="{"
+                            \ end="}"
+                            \ contained
+                            \ contains=TOP,@NoSpell
+                            \ concealends
+    en
 endf
 
 
@@ -1177,13 +1220,17 @@ fun! s:match_bold_italic_math() abort
                 \ ['texMathCmdStyleBold', 'mathbf'],
                 \ ['texMathCmdStyleItal', 'mathit'],
                 \]
-        execute 'syntax match' l:group '"\\' . l:pattern . '\>"'
+        exe     'syntax match' l:group '"\\' . l:pattern . '\>"'
                     \ 'contained skipwhite nextgroup=' . l:map[l:group]
                     \ l:conceal
     endfor
 
-    execute 'syntax region texMathStyleBold matchgroup=texDelim start="{" end="}" contained contains=@texClusterMath' l:concealends
-    execute 'syntax region texMathStyleItal matchgroup=texDelim start="{" end="}" contained contains=@texClusterMath' l:concealends
+    exe     'syntax region texMathStyleBold
+                \ matchgroup=texDelim start="{" end="}"
+                \ contained contains=@texClusterMath' l:concealends
+    exe     'syntax region texMathStyleItal
+                \ matchgroup=texDelim start="{" end="}"
+                \ contained contains=@texClusterMath' l:concealends
 
     if g:vimtex_syntax_conceal.styles
         syn match texMathCmdStyle "\v\\math%(rm|tt|normal|sf)>"
@@ -1196,14 +1243,14 @@ fun! s:match_bold_italic_math() abort
                     \ 'intertext',
                     \ '[mf]box',
                     \]
-            execute 'syntax match texMathCmdText'
+            exe     'syntax match texMathCmdText'
                         \ '"\v\\' . l:re_cmd . '>"'
                         \ 'contained skipwhite nextgroup=texMathTextConcArg'
                         \ 'conceal'
         endfor
         syn region texMathTextConcArg matchgroup=texDelim start="{" end="}"
                     \ contained contains=TOP,@NoSpell concealends
-    endif
+    en
 endf
 
 
@@ -1216,28 +1263,28 @@ fun! s:match_math_sub_super() abort
         call vimtex#log#warning(
                     \ "Conceals for math_super_sub require `set encoding='utf-8'`!")
         return
-    endif
+    en
 
-    execute 'syntax match texMathSuperSub'
+    exe     'syntax match texMathSuperSub'
                 \ '"\^\%(' . s:re_super . '\)"'
                 \ 'conceal contained contains=texMathSuper'
-    execute 'syntax match texMathSuperSub'
+    exe     'syntax match texMathSuperSub'
                 \ '"\^{\%(' . s:re_super . '\|\s\)\+}"'
                 \ 'conceal contained contains=texMathSuper'
     for [l:from, l:to] in s:map_super
-        execute 'syntax match texMathSuper'
+        exe     'syntax match texMathSuper'
                     \ '"' . l:from . '"'
                     \ 'contained conceal cchar=' . l:to
     endfor
 
-    execute 'syntax match texMathSuperSub'
+    exe     'syntax match texMathSuperSub'
                 \ '"_\%(' . s:re_sub . '\)"'
                 \ 'conceal contained contains=texMathSub'
-    execute 'syntax match texMathSuperSub'
+    exe     'syntax match texMathSuperSub'
                 \ '"_{\%(' . s:re_sub . '\|\s\)\+}"'
                 \ 'conceal contained contains=texMathSub'
     for [l:from, l:to] in copy(s:map_sub)
-        execute 'syntax match texMathSub'
+        exe     'syntax match texMathSub'
                     \ '"' . l:from . '"'
                     \ 'contained conceal cchar=' . l:to
     endfor
@@ -1366,9 +1413,14 @@ fun! s:match_math_symbols() abort
     syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
     syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
 
+    " vimtex_syntax_custom_cmds 用mathmode即可:
+        " syn match texMathSymbol '\\times'                contained conceal cchar=x
+        " syn match texMathSymbol '\\emph'                contained conceal
+        " $命令名$
+
     for [l:cmd, l:symbol] in s:cmd_symbols
-        execute 'syntax match texMathSymbol'
-                    \ '"\\' . l:cmd . '\ze\%(\>\|[_^]\)"'
+        exe     'syntax match texMathSymbol'
+                    \ '"\v\\' . l:cmd . '\ze%([_^]|>)"'
                     \ 'contained conceal cchar=' . l:symbol
     endfor
 
@@ -1558,7 +1610,7 @@ let s:cmd_symbols += &ambiwidth ==# 'double'
             \ ]
 
 let s:cmd_pairs_dict = {
-            \ 'bar': [
+        \ 'bar': [
             \   ['a', 'ā'],
             \   ['e', 'ē'],
             \   ['g', 'ḡ'],
@@ -1572,7 +1624,7 @@ let s:cmd_pairs_dict = {
             \   ['O', 'Ō'],
             \   ['U', 'Ū'],
             \ ],
-            \ 'dot': [
+        \ 'dot': [
             \   ['A', 'Ȧ'],
             \   ['a', 'ȧ'],
             \   ['B', 'Ḃ'],
@@ -1613,7 +1665,7 @@ let s:cmd_pairs_dict = {
             \   ['Z', 'Ż'],
             \   ['z', 'ż'],
             \ ],
-            \ 'hat': [
+        \ 'hat': [
             \   ['a', 'â'],
             \   ['A', 'Â'],
             \   ['c', 'ĉ'],
@@ -1635,7 +1687,7 @@ let s:cmd_pairs_dict = {
             \   ['y', 'ŷ'],
             \   ['Y', 'Ŷ'],
             \ ],
-            \ '\%(var\)\?math\%(bb\%(b\|m\%(ss\|tt\)\?\)\?\|ds\)': [
+        \ '\%(var\)\?math\%(bb\%(b\|m\%(ss\|tt\)\?\)\?\|ds\)': [
             \   ['0', '𝟘'],
             \   ['1', '𝟙'],
             \   ['2', '𝟚'],
@@ -1832,7 +1884,7 @@ fun! s:match_math_delims() abort
 
     if !g:vimtex_syntax_conceal.math_delimiters || &encoding !=# 'utf-8'
         return
-    endif
+    en
 
     syn match texMathDelim contained conceal cchar=| "\\left|"
     syn match texMathDelim contained conceal cchar=| "\\right|"
@@ -1880,10 +1932,10 @@ fun! s:match_math_delims() abort
     if &ambiwidth ==# 'double'
         syn match texMathDelim contained conceal cchar=〈 "\\\%([bB]igg\?l\?\|left\)\\langle\>"
         syn match texMathDelim contained conceal cchar=〉 "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
-    else
+    el
         syn match texMathDelim contained conceal cchar=⟨ "\\\%([bB]igg\?l\?\|left\)\\langle\>"
         syn match texMathDelim contained conceal cchar=⟩ "\\\%([bB]igg\?r\?\|right\)\\rangle\>"
-    endif
+    en
 endf
 
 
@@ -1897,7 +1949,7 @@ fun! s:match_conceal_accents() abort
             let l:accent = s:key_accents[i]
             let l:re_ws = l:accent =~# '^\\\\\a$' ? '\s\+' : '\s*'
             let l:re = l:accent . '\%(\s*{' . l:chr . '}\|' . l:re_ws . l:chr . '\)'
-            execute 'syntax match texCmdAccent /' . l:re . '/'
+            exe     'syntax match texCmdAccent /' . l:re . '/'
                         \ 'conceal cchar=' . l:target
         endfor
     endfor
@@ -1993,7 +2045,8 @@ fun! s:match_conceal_fancy() abort
     syn match texCmd         '\\slash\>' conceal cchar=/
     syn match texCmd         '\\ldots\>' conceal cchar=…
     syn match texCmdItem     '\\item\>'  conceal cchar=○
-    syn match texTabularChar '\\\\'      conceal cchar=⏎
+    syn match texTabularChar '\\\\'      conceal
+    " syn match texTabularChar '\\\\'      conceal cchar=⏎
 endf
 
 
@@ -2067,7 +2120,7 @@ endf
 fun! s:match_conceal_cites_icon() abort
     if empty(g:vimtex_syntax_conceal_cites.icon) | return | endif
 
-    execute 'syntax match texCmdRefConcealed'
+    exe     'syntax match texCmdRefConcealed'
                 \ '"\\cite[tp]\?\*\?\%(\[[^]]*\]\)\{,2}{[^}]*}"'
                 \ 'conceal cchar=' . g:vimtex_syntax_conceal_cites.icon
 endf
@@ -2075,8 +2128,10 @@ endf
 
 fun! s:match_conceal_sections() abort
     syn match texPartConcealed      "\\"                contained conceal
-    syn match texPartConcealed      "sub"               contained conceal
+    syn match texPartConcealed      "sub"               contained conceal cchar=-
     syn match texPartConcealed      "section\*\?"       contained conceal cchar=-
+    " 不行
+    " syn match texPartConcealed      "section\*\?\zs{"       contained conceal cchar=  "
     syn match texCmdPart   contains=texPartConcealed   nextgroup=texPartConcArgTitle
                                   \ "\v\\%(sub)*section>\*?"
 

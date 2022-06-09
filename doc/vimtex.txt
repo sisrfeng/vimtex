@@ -145,6 +145,7 @@ FEATURE OVERVIEW                                              *vimtex-features*
     - file names for figures, input/include, includepdf, includestandalone
     - glossary entries
     - package and documentclass names based on available `.sty` and `.cls` files
+
 - Document navigation through
     - table of content
     - proper settings for |'include'|, |'includeexpr'|, |'suffixesadd'| and
@@ -310,7 +311,6 @@ is tried last if there are no explicit declarations that yield an appropriate
 main LaTeX file candidate.
 
 The methods are tried in the following order:
-
     1. Buffer variable
     2. TeX root directive
     3. Subfiles package
@@ -366,15 +366,13 @@ TeX root directive
                 are multiple matches, then VimTeX will ask for input when the buffer
                 is opened.
 
-*vimtex-subfiles*
-*vimtex-import*
-Subfiles package
+Subfiles package  *vimtex-subfiles*  *vimtex-import*
     VimTeX also supports the `import` [0] and the `subfiles` [1] packages that
-    can be used to make it easier to work with multi-file projects. If one uses
-    the `subfiles` package, the |:VimtexToggleMain| command is particularly
-    useful. Also note the option |g:vimtex_subfile_start_local|, which can be
-    used to automatically start in the local mode when opening a subfile
-    document.
+    can be used to make it easier to work with multi-file projects.
+    If one uses  the `subfiles` package,
+        the |:VimtexToggleMain| command is particularly  useful.
+       Also note the option |g:vimtex_subfile_start_local|,
+       which can be  used to automatically start in the local mode when opening a subfile  document.
 
     With `subfiles`, included files will typically look like this:
 
@@ -472,33 +470,38 @@ dictionaries. See also [0,1].
 ------------------------------------------------------------------------------
 PACKAGE DETECTION                                    *vimtex-package-detection*
 
-VimTeX maintains a list of latex packages that are required by the current
-project. This list is used by VimTeX for instance to determine which commands
-to suggest during command completion (see |vimtex-complete-commands|) and
-which packages to look up documentation for (see |vimtex-doc-package|). The
-list can be viewed with |:VimtexInfo|.
+VimTeX maintains a list of latex packages that
+are required by the current project.
+This list is used by VimTeX for instance to determine which
+commands to suggest during command completion (see |vimtex-complete-commands|)
+and which  packages to look up documentation for (see |vimtex-doc-package|).
+The list can be viewed with |:VimtexInfo|.
 
 The package list is determined in two ways:
 
 
-1. If a `.fls` file exists having the name of the main file, it is scanned.
-     This file is created by `latex` (or `pdflatex`, `xelatex`, ...) if it is
-     run with the `-recorder` option (which is set by default when using
-     latexmk, unless overridden in an initialization file). Parsing the `.fls`
-     file is done both at VimTeX initialization and after each successful
-     compilation, if possible.
+1. If a `.fls` file exists having the name of the main file,
+        it is scanned.
+   This file is created by `latex` (or `pdflatex`, `xelatex`, ...)
+        if it is  run with the `-recorder` option
+        (which is set by default when using  latexmk,
+        unless overridden in an initialization file).
 
-     Parsing after successful compilations requires that one uses
-                 a) continuous compilation with callbacks (see the `callback` option
-                        for |g:vimtex_compiler_latexmk|), or
-                 b) single-shot compilation.
+    Parsing the `.fls`  file is done both at VimTeX initialization and
+    after each ¿successful¿  compilation,  if possible.
 
-2. Otherwise, the preamble is parsed for `\usepackage` statements. This is
-     slower and less accurate than `.fls` file parsing. Therefore, it is only
-     done during VimTeX initialization. If desired, one may manually reload
-     VimTeX to parse the preamble again during an editing session. See
-     |:VimtexReload| and |<plug>(vimtex-reload)| (by default mapped to
-     `<localleader>lx`).
+    Parsing after successful compilations requires that one uses
+        a) continuous compilation with callbacks
+            (see the `callback` option  for |g:vimtex_compiler_latexmk|), or
+        b) single-shot compilation.
+
+2. Otherwise, the preamble is parsed for `\usepackage` statements.
+    This is  slower and less accurate than `.fls` file parsing.
+    Therefore, it is only  done during VimTeX initialization.
+    If desired, one may manually reload  VimTeX to parse the preamble again
+    during an editing session.
+
+    See  |:VimtexReload| and |<plug>(vimtex-reload)| (by default mapped to  `<localleader>lx`).
 
 ------------------------------------------------------------------------------
 INTEGRATION WITH OTHER PLUGINS                             *vimtex-and-friends*
@@ -2281,334 +2284,6 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: 0.
 
-    *g:vimtex_syntax_enabled*
-        Use this option to disable/enable syntax highlighting as provided by VimTeX.
-
-        Default value: 1.
-
-    *g:vimtex_syntax_conceal*
-
-            A dictionary for specifying
-            which  core conceal features to activate.
-            This mostly implies concealing particular elements with a replacement unicode character.
-            For more info,
-                    see |vimtex-syntax-conceal|.
-            To disable all conceal features in one go,
-                    use |g:vimtex_syntax_conceal_disable|.
-
-        The following keys are available:
-
-            accents
-                Conceal accented characters, e.g. `\^a` --> `â`.
-
-            ligatures
-                Conceal ligatures such as `\aa` --> `å` and `''` --> `“`.
-
-            cites
-                Conceal LaTeX cite commands such as `\citet[...]{ref00}`. The conceal
-                style is specified by |g:vimtex_syntax_conceal_cites|.
-
-            fancy
-                Some extra fancy replacements, e.g. `\item` --> ○.
-
-            greek
-                Replace TeX greek letter commands into the equivalent unicode greek
-                letter.
-
-            math_bounds
-                Conceal the TeX math bounds characters: pairs of `$` and `$$`, `\(` ...
-                `\)`, and `\[` ... `\]`.
-
-            math_delimiters
-                Replace possibly modified math delimiters with a single unicode
-                letter. Modified means delimiters prepended with e.g. `\left` or
-                `\bigl`. As an example, this will perform the replacement
-
-                    `\Biggl\langle ... \Biggr\rangle` --> `〈 ... 〉`
-
-            math_fracs
-                Replace some simple fractions like `\frac 1 2` --> ½.
-
-            math_super_sub
-                Replace simple math super and sub operators, e.g. `x^2` --> `x²`.
-
-            math_symbols
-                Replace various math symbol commands to an equivalent unicode character.
-                This includes quite a lot of replacements, so be warned!
-
-            sections
-                Conceal `\(sub)*section` commands. The titles are replaced with Markdown
-                style ATX headers, e.g.:
-
-                    `\section{Test}`    --> `# Test`
-                    `\subsection{Test}` --> `## Test`
-
-            styles
-                Conceal the LaTeX command "boundaries" for italicized and bolded style
-                commands, i.e. `\emph`, `\textit`, and `\textbf`. This means that one
-                will see something like:
-
-                    `\emph{text here}` --> `text here`
-
-        Default value:
-
-
-            let g:vimtex_syntax_conceal = {
-                        \ 'accents': 1,
-                        \ 'cites': 1,
-                        \ 'fancy': 1,
-                        \ 'greek': 1,
-                        \ 'math_bounds': 1,
-                        \ 'math_delimiters': 1,
-                        \ 'math_fracs': 1,
-                        \ 'math_super_sub': 1,
-                        \ 'math_symbols': 1,
-                        \ 'sections': 0,
-                        \ 'styles': 1,
-                        \}
-
-    *g:vimtex_syntax_conceal_disable*
-        This option allows to disable all conceal features at once.
-        For more fine  tuned control,
-                see |g:vimtex_syntax_conceal|
-        For more info, see  |vimtex-syntax-conceal|.
-
-        Default value: 0
-
-    *g:vimtex_syntax_conceal_cites*
-        A simple dictionary to control how citation conceal should work. It has
-        three keys:
-
-            type
-                Specify the type of concealment. There are two options, and the
-                difference is best explained by example:
-
-                    Value       LaTeX             Concealed
-                    -----       -----             ---------
-                    `'icon'`      `\cite{Knuth1981}`  `📖`
-                    `'brackets'`  `\cite{Knuth1981}`  `[Knuth1981]`
-
-            icon
-                Specify an icon for `icon` conceal. This must be a single (possibly
-                multibyte) character.
-
-            verbose
-                Specify how much to conceal in bracket mode (`type` set to `'bracket'`).
-                The following table shows how the concealed result depending on the
-                `'verbose'` value for `\cite[Figure 1]{Knuth1981}`:
-
-                    Value    Concealed
-                    -----    ---------
-                    |v:true|   `[Figure 1][Knuth1981]`
-                    |v:false|  `[Knuth1981]`
-
-        Default value:
-
-
-            let g:vimtex_syntax_conceal_cites = {
-                        \ 'type': 'brackets',
-                        \ 'icon': '📖',
-                        \ 'verbose': v:true,
-                        \}
-
-    *g:vimtex_syntax_custom_cmds*
-        A list of "simple" commands for which to apply custom styling. This includes
-        bolded or italized text arguments, conceals, or similar - see the below
-        keys. Each command is expected to be of the following type:
-
-
-            \cmdname[optional]{argument}
-
-        Each element in the list must be a dictionary with the following keys:
-
-            name
-                Default: Undefined (REQUIRED)
-                The command to highlight (`cmdname`). This is also for defining the
-                syntax group names.
-
-            cmdre
-                Default: Undefined
-                If this is defined, then it is used instead of `name` for matching the
-                `cmdname` part. It is interpreted as a regular expression with "very
-                magic" mode activated (see |/\v|).
-
-            mathmode
-                Default: |v:false|
-                If true, then the command is a math mode command.
-
-            conceal
-                Default: |v:false|
-                If true, the `\cmdname` part and delimiters `{` and `}` are concealed.
-
-            concealchar
-                Default: Undefined
-                Specify a conceal character for the `\cmdname` part. With this, one can
-                easily create simple rules to display e.g. `\R` as `ℝ` (see config
-                example below).
-
-            opt
-                Default: |v:true|
-                If true, assumes `\cmdname` can be followed by an `[optional]` group.
-
-            optconceal
-                Default: Same as `conceal` key
-                If true, the option group `[optional]` is concealed.
-
-            arg
-                Default: |v:true|
-                If true, assumes `\cmdname` can be followed by an `{argument}` group.
-
-            argstyle
-                Default: Undefined.
-                Can be set to  apply styling to the command argument. The following are
-                currently supported:
-                    * `bold`
-                    * `ital`
-                    * `under`
-                    * `boldital`
-                    * `boldunder`
-                    * `italunder`
-                    * `bolditalunder`
-
-            argspell
-                Default: |v:true|
-                Specify this as |v:false| or 0 to disable spell checking of the command
-                argument.
-
-            arggreedy
-                Default: |v:false|
-                If |v:true| or 1, the syntax rule will "eat" as many arguments as
-                possible: `\cmdname[opt]{arg1}{arg2}...{argn}`
-
-            nextgroup
-                Default: Undefined
-                This is a string that, if defined and not empty, specifies
-                a comma-separated list of possible next syntax groups.
-
-            hlgroup
-                Default: Undefined
-                A string that can be used to indicate the target highlight group of the
-                command (`\cmdname`).
-
-        A couple of examples may be helpful: The first in the following list shows
-        how to use bolded style on a custom vector macro such as `\vct{v}`. The
-        second example shows how to conceal `\R` with `ℝ`. The third example shows
-        how one may use the `nextgroup` key, and the fourth shows how to define
-        a command whose argument shoult not be spell checked.
-
-
-            let g:vimtex_syntax_custom_cmds = [
-                        \ {'name': 'vct', 'mathmode': 1, 'argstyle': 'bold'},
-                        \ {'name': 'R', 'mathmode': 1, 'concealchar': 'ℝ'},
-                        \ {'name': 'mathnote', 'mathmode': 1, 'nextgroup': 'texMathTextArg'},
-                        \ {'name': 'nospell', 'argspell': 0},
-                        \]
-
-        Default value: []
-
-    *g:vimtex_syntax_nested*
-        A dictionary for configuring nested syntaxes. The following keys are
-        available for configuration:
-
-            aliases
-                Holds a dictionary of aliases, such as mapping `C` to `c`. This is
-                useful e.g. because the Vim syntax files are case sensitive.
-
-            ignored
-                Holds a dictionary of ignore lists for each language. This is useful to
-                ignore some groups that may conflict in e.g. the `\begin{...}` or
-                `\end{...}` part of the nested syntax regions.
-
-        Default value:
-
-
-            let g:vimtex_syntax_nested = {
-                        \ 'aliases' : {
-                        \   'C' : 'c',
-                        \   'csharp' : 'cs',
-                        \ },
-                        \ 'ignored' : {
-                        \   'sh' : ['shSpecial'],
-                        \   'bash' : ['shSpecial'],
-                        \   'cs' : [
-                        \     'csBraces',
-                        \   ],
-                        \   'python' : [
-                        \     'pythonEscape',
-                        \     'pythonBEscape',
-                        \     'pythonBytesEscape',
-                        \   ],
-                        \   'java' : [
-                        \     'javaError',
-                        \   ],
-                        \   'haskell' : [
-                        \     'hsVarSym',
-                        \   ],
-                        \ }
-                        \}
-
-    *g:vimtex_syntax_nospell_comments*
-        Set to 1 to disable spell checking in comments.
-
-        Default value: 0
-
-    *g:vimtex_syntax_packages*
-        A dictionary for package specific syntax configuration. Each key represent
-        a single package and the values are themselves configuration dictionaries.
-        All packages share the following options:
-
-            `load`  Specify when to load the package syntax addon.
-                0 = disable this syntax package
-                1 = enable this syntax package if it is detected (DEFAULT)
-                2 = always enable this syntax package
-
-        The following is a list of the available packages and, if applicable, their
-        configuration keys or where they deviate from the above specified defaults.
-
-            amsmath
-                `load`  is 2 by default
-            amssymb
-            array
-            asymptote
-            babel
-                `conceal`  whether to enable conceal; enabled by default
-            beamer
-            biblatex
-            booktabs
-            breqn
-            cases
-            circuitikz
-            cleveref
-            comment
-            csquotes
-            dot2texi
-            geometry
-            glossaries_extra
-            glossaries
-            gnuplottex
-            hyperref
-                `conceal`  whether to enable conceal; enabled by default
-            ieeetrantools
-            listings
-            luacode
-            markdown
-            mathtools
-            mhequ
-            minted
-            moreverb
-            natbib
-            pdfpages
-            pgfplots
-            pythontex
-            siunitx
-            subfile
-            tabularx
-            tcolorbox
-            tikz
-            todonotes
-            url
-            varioref
-            wiki
 
     *g:vimtex_texcount_custom_arg*
         Option that makes it possible to add custom arguments to `texcount` for
