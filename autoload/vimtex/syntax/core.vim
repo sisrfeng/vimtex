@@ -63,14 +63,14 @@ fun! vimtex#syntax#core#init() abort "
         syn match texTabularChar  "&"
         syn match texTabularChar  "\\\\"
 
-        " E.g.:  \$ \& \% \# \{ \} \_
-            syn match texSpecialChar "\\[$&%#{}_]"
-            syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"
+                                       "  \$ \& \% \# \{ \} \_
+            syn match texSpecialChar "\\[$&%#{}_]"           contains=texPartConcealed
+            syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"  conceal
                                        " \S  花体S,
                                          " \P 旗帜
             syn match texSpecialChar "\\[,;:!]"
-            syn match texSpecialChar "\^\^\%(\S\|[0-9a-f]\{2}\)"
-    " }}}2
+            syn match texSpecialChar "\v\^\^%(\S|[0-9a-f]{2})"
+                                         " ^^A 在dtx里表示注释
 
             " 不行:
             " syn match texBrace "{"  conceal contained containedin=ALL
@@ -114,13 +114,14 @@ fun! vimtex#syntax#core#init() abort "
 
         " Spacecodes (TeX'isms)
         " * See e.g. https://en.wikibooks.org/wiki/TeX/catcode
-        " * \mathcode`\^^@ = "2201
-        " * \delcode`\( = "028300
-        " * \sfcode`\) = 0
-        " * \uccode`X = `X
-        " * \lccode`x = `x
+          " change the ¿cat¿egory ¿code¿ of a character
+            " * \mathcode`\^^@ = "2201
+            " * \delcode`\( = "028300
+            " * \sfcode`\) = 0
+            " * \uccode`X = `X
+            " * \lccode`x = `x
         syn match texCmdSpaceCode "\v\\%(math|cat|del|lc|sf|uc)code`"me=e-1
-                    \ nextgroup=texCmdSpaceCodeChar
+                                \ nextgroup=texCmdSpaceCodeChar
         syn match texCmdSpaceCodeChar "\v`\\?.%(\^.)?\?%(\d|\"\x{1,6}|`.)" contained
 
         " Todo commands
@@ -260,12 +261,12 @@ fun! vimtex#syntax#core#init() abort "
         syn match texLetArgEqual contained nextgroup=texLetArgBody skipwhite skipnl "="
 
         " Reference and cite commands
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\nocite>"          conceal
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\label>"           conceal
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\(page|eq)ref>"    conceal
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\v?ref>"           conceal
-            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite>"            conceal
-            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite[tp]>\*?"     conceal
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\nocite>"
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\label>"
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\(page|eq)ref>"
+            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\v?ref>"
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite>"
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite[tp]>\*?"
             call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
             call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
 
@@ -406,13 +407,13 @@ fun! vimtex#syntax#core#init() abort "
     " }}}2
     "
     " Comments
-        " * In documented TeX Format, actual comments are defined by leading "^^A".
-        "   Almost all other lines start with one or more "%",
-        "   which may be matched  as comment characters.
-        "   ✌The remaining part of the line can be interpreted  as TeX syntax✌.
-        " * For more info on dtx files, see e.g.
-        "   https://ctan.uib.no/info/dtxtut/dtxtut.pdf
         if expand('%:e') ==# 'dtx'
+            " In documented TeX Format,
+              " actual comments are defined by leading "^^A".
+                "   Almost all other lines start with one or more "%",
+                "   which may be matched  as comment characters.
+                "   ✌The remaining part of the line can be interpreted  as TeX syntax✌.
+             "  For more info on dtx files, see  https://ctan.uib.no/info/dtxtut/dtxtut.pdf
             syn match texComment "\^\^A.*$"
             syn match texComment "^%\+"
         elseif g:vimtex_syntax_nospell_comments
@@ -1039,23 +1040,39 @@ fun! vimtex#syntax#core#new_cmd(cfg) abort "
     en
 
     " 核心:  finally  Create the  syntax rule
-    " use ¿match¿
-    exe     'syntax match' l:group_cmd
-              \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name) . '"'
-              "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . "\ze(\d|>)") . '"'
-              "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . '>') . '"'
-                                                             "\ 这会导致2\times3无法变成x
-                                        " cmdre: cmd regex吧
-              \ l:cfg.conceal ?
-                  \ 'conceal'
-                  \ : ''
-              \ !empty(l:cfg.concealchar) ?
-                  \ 'cchar=' . l:cfg.concealchar
-                  \ : ''
-              \ l:nextgroups
-              \ l:cfg.mathmode ?
-                  \ 'contained'
-                  \ : ''
+                    " use ¿match¿
+        exe     'syntax match' l:group_cmd
+                  \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name) . '"'
+                  "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . "\ze(\d|>)") . '"'
+                  "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . '>') . '"'
+                                                                 "\ 这会导致2\times3无法变成x
+                                            "\ cmdre: cmd regex吧  (之前这行 用`"` 而非 `"\` 注释 导致出错)
+                  \ l:cfg.conceal ?
+                      \ 'conceal'
+                      \ : ''
+                  \ !empty(l:cfg.concealchar) ?
+                      \ 'cchar=' . l:cfg.concealchar
+                      \ : ''
+                  \ l:nextgroups
+                  \ l:cfg.mathmode ?
+                      \ 'contained'
+                      \ : ''
+        " echom     'syntax match' l:group_cmd
+                  " \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name) . '"'
+                  " "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . "\ze(\d|>)") . '"'
+                  " "\ \ '"\v\\' . get(l:cfg, 'cmdre', l:cfg.name . '>') . '"'
+                  "                                                "\ 这会导致2\times3无法变成x
+                  "                           "\ cmdre: cmd regex吧
+                  " \ l:cfg.conceal ?
+                  "     \ 'conceal'
+                  "     \ : ''
+                  " \ !empty(l:cfg.concealchar) ?
+                  "     \ 'cchar=' . l:cfg.concealchar
+                  "     \ : ''
+                  " \ l:nextgroups
+                  " \ l:cfg.mathmode ?
+                  "     \ 'contained'
+                  "     \ : ''
 
     " Define default highlight rule
     exe     'hi def link' l:group_cmd
@@ -1413,7 +1430,7 @@ fun! s:match_math_symbols() abort
     syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
     syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
 
-    " vimtex_syntax_custom_cmds 用mathmode即可:
+    " 在vimtex_syntax_custom_cmds 里用mathmode即可:
         " syn match texMathSymbol '\\times'                contained conceal cchar=x
         " syn match texMathSymbol '\\emph'                contained conceal
         " $命令名$
