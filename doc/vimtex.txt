@@ -1173,8 +1173,8 @@ OPTIONS                                                        *vimtex-options*
             options should work well for most people. For anyone who wishes to modify
             these, please note:
             - Don't use `--outdir` or `-o` here. Use the `build_dir` option instead.
-            - Without `--keep-logs` (or `--keep-intermediates` or `-k)`, you won't see
-                errors/warnings in the quickfix list when compilations finish.
+            - Without `--keep-logs` (or `--keep-intermediates` or `-k)`,
+                you won't see  errors/warnings in the quickfix list when compilations finish.
             - By default, `tectonic` cleans all auxiliary files (such as `.aux`,
                 `.toc`, etc.). If you omit the `--keep-logs` (or similar) options that
                 specify to keep these files, |:VimtexClean| and |<plug>(vimtex-clean)|
@@ -2176,107 +2176,7 @@ OPTIONS                                                        *vimtex-options*
         be turned off e.g. for debugging or testing purposes.
 
         Default: 1
-
-    *g:vimtex_quickfix_enabled*
-        Use this option to disable/enable the quickfix integration.
-
-        Default value: 1
-
-    *g:vimtex_quickfix_method*
-        This option sets the quickfix method. The following methods are available:
-
-        latexlog
-            This is the standard method which parses the normal LaTeX output.
-
-        pplatex
-            Uses `pplatex` (https://github.com/stefanhepp/pplatex) to parse the LaTeX
-            output file. `pplatex` is a command line utility used to prettify the
-            output of the LaTeX compiler.
-
-        pulp
-            Uses `pulp` (https://github.com/dmwit/pulp) to parse the LaTeX output
-            file, similar to `pplatex`.
-
-        `pplatex` and `pulp` require that `-file-line-error` is NOT passed to the LaTeX
-        compiler. |g:vimtex_compiler_latexmk| will be updated automatically if one
-        uses `latexmk` through VimTeX. However, if one uses other compiler
-        methods, either through VimTeX (see |g:vimtex_compiler_method|) or
-        externally, this requirement must be ensured by the user.
-
-        Default value: 'latexlog'
-
-    *g:vimtex_quickfix_blgparser*
-        This option controls the parsing of `blg` log files (created by bibtex or
-        biber) for warnings and errors.  The option is a dictionary with the
-        following keys:
-
-            disable
-                Disable the parsing of `blg` entries.
-
-        Default value: {}
-
-    *g:vimtex_quickfix_autojump*
-        This option controls if vim should automatically jump to the first error
-        whenever the |quickfix| window is opened.
-
-        This option does not go well with continuous compilation and
-                    callbacks, since the callbacks will open the quickfix window if there
-                    are errors.  Thus I recommend to keep it disabled for continuous
-                    compilation, and rather enable it if one prefers single shot
-                    compilations.
-
-        Default value: 0
-
-    *g:vimtex_quickfix_ignore_filters*
-        This option allows to provide a list of |regular-expression|s for filtering
-        out undesired errors and warnings. This works regardless of which quickfix
-        method is enabled.
-
-        The following example will ignore any messages that match "Marginpar on
-        page":
-
-
-            " Disable custom warnings based on regexp
-            let g:vimtex_quickfix_ignore_filters = [
-                        \ 'Marginpar on page',
-                        \]
-
-        Default: []
-
-    *g:vimtex_quickfix_mode*
-        This option controls the behaviour of the |quickfix| window in case errors
-        and/or warnings are found.  The recognized options are:
-
-        Value  Effect
-        0      The quickfix window is never opened/closed automatically.
-        1      The quickfix window is opened automatically when there are errors,
-                     and it becomes the active window.
-        2      The quickfix window is opened automatically when there are errors,
-                     but it does not become the active window.
-
-        The quickfix window will only be opened automatically if the compiler
-                    is set to `continuous` mode and has `callbacks` enabled, or if
-                    `continuous` mode is disabled.
-
-        Default value: 2
-
-    *g:vimtex_quickfix_autoclose_after_keystrokes*
-        If set to value greater than zero, then the quickfix window will close after
-        this number of motions (i.e. |CursorMoved| and |CursorMovedI| events). This
-        is most useful if one sets |g:vimtex_quickfix_mode| to 2, in which case this
-        option allows one to continue editing and removing the distraction of the
-        quickfix window automatically.
-
-        The count is reset when the quickfix window is entered.
-
-        Default value: 0
-
-    *g:vimtex_quickfix_open_on_warning*
-        Control whether or not to automatically open the |quickfix| window in case
-        there are warning messages and no error messages.
-
-        Default value: 1
-
+    quick fix / quickfix
     *g:vimtex_subfile_start_local*
         This option allows to specify that one should start with the local file for
         subfile'd documents instead of the main project file. See |vimtex-subfiles|
@@ -2805,49 +2705,53 @@ COMMANDS                                                      *vimtex-commands*
 
     *:VimtexCompile*
     *<plug>(vimtex-compile)*
-    :VimtexCompile            If the compiler supports and is set to run in
-                                                        continuous mode, then this command works as
-                                                        a compiler toggle. If not, this command will run
-                                                        a single shot compilation.
+    :VimtexCompile
+        If the compiler supports and
+        is set to run in continuous mode,
+        then this command works as a compiler toggle.
+        If not,
+        this command will run a single shot compilation.
+
 
     *:VimtexCompileSS*
     *<plug>(vimtex-compile-ss)*
-    :VimtexCompileSS          Start single shot compilation.
+    :VimtexCompileSS
+        Start single shot compilation.
 
     *:VimtexCompileSelected*
     *<plug>(vimtex-compile-selected)*
-    :VimtexCompileSelected    Compile the selected part of the current LaTeX file.
-                                                        When used as a command, it takes a range, e.g.:
+    :VimtexCompileSelected
+        Compile the selected part of the current LaTeX file.
+        When used as a command,
+        it takes a range, e.g.:
+
+            :start,end VimtexCompileSelected
+
+        When used as a normal mode mapping,
+            the mapping will act as an |operator| on the following motion or  text object.
+        when used as a visual mode mapping,
+            it will act on the selected lines.
+
+        This always works linewise
+
+        Compiles the selected text by
+        copying it to a temporary file with the same preamble as the current file.
+        It will be compiled similarly to a single shot compile, see |:VimtexCompileSS|.
+        ¿If there are errors¿,
+            they will be shown in the quickfix list.
 
 
-                                                            :start,end VimtexCompileSelected
+        One may specify a custom template with a template file in which
+            any (single!)  line with the exact content `%%% VIMTEX PLACEHOLDER`
+            will be interchanged with the selected lines.
+            This allows to customize the preamble and  surrounding content.
+            The template file should be named `vimtex-template.tex` or `<head>-vimtex-template.tex`,
+            where `<head>` implies the head of the current file name with the extension removed.
+            E.g.,
+                for a file `foo.tex`,
+                one may specify a custom template `foo-vimtex-template.tex`.
+                This will have a higher priority than  `vimtex-template.tex`.
 
-                                                        When used as a normal mode mapping, the mapping
-                                                        will act as an |operator| on the following motion or
-                                                        text object. Finally, when used as a visual mode
-                                                        mapping, it will act on the selected lines.
-
-                                                        This always works linewise!
-
-                                                        The command compiles the selected text by copying it
-                                                        to a temporary file with the same preamble as the
-                                                        current file. It will be compiled similarly to
-                                                        a single shot compile (see |:VimtexCompileSS|. If
-                                                        there are errors, they will be shown in the quickfix
-                                                        list.
-
-                                                        One may specify a custom template with a template
-                                                        file in which any (single!) line with the exact
-                                                        content `%%% VIMTEX PLACEHOLDER` will be
-                                                        interchanged with the selected lines. This allows to
-                                                        customize the preamble and surrounding content. The
-                                                        template file should be named `vimtex-template.tex`
-                                                        or `<head>-vimtex-template.tex`, where `<head>`
-                                                        implies the head of the current file name with the
-                                                        extension removed. E.g., for a file `foo.tex`, one
-                                                        may specify a custom template
-                                                        `foo-vimtex-template.tex`. This will have a higher
-                                                        priority than `vimtex-template.tex`.
 
     *:VimtexCompileOutput*
     *<plug>(vimtex-compile-output)*
@@ -2885,10 +2789,9 @@ COMMANDS                                                      *vimtex-commands*
     *<plug>(vimtex-clean-full)*
     :VimtexClean!             As |:VimtexClean|, but also remove output files.
 
-    *:VimtexErrors*
     *<plug>(vimtex-errors)*
-    :VimtexErrors             Open |quickfix| window if there are errors or
-                                                        warnings.
+    :VimtexErrors
+        Open |quickfix| window if there are errors or  warnings.  *:VimtexErrors*
 
     *:VimtexView*
     *<plug>(vimtex-view)*
