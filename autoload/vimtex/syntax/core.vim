@@ -72,9 +72,12 @@ fun! vimtex#syntax#core#init() abort "
             syn match texSpecialChar "\v\^\^%(\S|[0-9a-f]{2})"
                                          " ^^A 在dtx里表示注释
 
+            "\ 我的bye_tex搞定了
             " 不行:
-            " syn match texBrace "{"  conceal contained containedin=ALL
-            " syn match texBrace "}"  conceal contained containedin=ALL
+                "\ syn match texDelim "{"  conceal contained containedin=ALL
+                "\ syn match texDelim "}"  conceal contained containedin=ALL
+                " syn match texBrace "{"  conceal contained containedin=ALL
+                " syn match texBrace "}"  conceal contained containedin=ALL
     "
     " Commands: general
         " Unspecified TeX groups
@@ -557,29 +560,33 @@ fun! vimtex#syntax#core#init() abort "
         " Math regions: Inline Math Zones
             let l:conceal = g:vimtex_syntax_conceal.math_bounds ? 'concealends' : ''
             exe     'syntax region texMathZone matchgroup=texMathDelimZone'
-                            \ 'start="\%(\\\@<!\)\@<=\\("'
-                            \ 'end="\%(\\\@<!\)\@<=\\)"'
-                            \ 'contains=@texClusterMath keepend'
+                            \ 'start="\v%(\\@<!)\zs\\\("'
+                                                    "\ \(, 且前面不能紧贴着\
+                            "\ \ 'start="\%(\\\@<!\)\@<=\\("'
+                            \ 'end="\v%(\\@<!)\zs\\\)"'
+                                                    "\ \), 且前面不能紧贴着\
+                            \ 'contains=@texClusterMath,@In_fancY keepend'
                             \ l:conceal
 
             exe     'syntax region texMathZone matchgroup=texMathDelimZone'
                             \ 'start="\\\["'
                             \ 'end="\\]"'
-                            \ 'contains=@texClusterMath keepend'
+                            \ 'contains=@texClusterMath,@In_fancY keepend'
                             \ l:conceal
 
             exe     'syntax region texMathZoneX matchgroup=texMathDelimZone'
                             \ 'start="\$"'
                             \ 'skip="\\\\\|\\\$"'
+                                      "\ 跳过¿\\¿ 或¿\¿结尾
                             \ 'end="\$"'
-                            \ 'contains=@texClusterMath'
+                            \ 'contains=@texClusterMath,@In_fancY'
                             \ 'nextgroup=texMathTextAfter'
                             \ l:conceal
 
             exe     'syntax region texMathZoneXX matchgroup=texMathDelimZone'
                             \ 'start="\$\$"'
                             \ 'end="\$\$"'
-                            \ 'contains=@texClusterMath keepend'
+                            \ 'contains=@texClusterMath,@In_fancY keepend'
                             \ l:conceal
 
         " This is to disable spell check for text just after "$" (e.g. "$n$th")
@@ -712,9 +719,14 @@ fun! vimtex#syntax#core#init_post() abort
 endf
 
 
+" See :help group-name for list of conventional group names
 fun! vimtex#syntax#core#init_highlights() abort
-    " See :help group-name for list of conventional group names
+
     " Primitive TeX highlighting groups
+        hi link texDelim Conceal
+        "\ syn list texDelim为空, 它只出现在:
+                "\ matchgroup=texDelim
+
         hi def link texArg                Ignore
 
         hi def link texCmd                Ignore
@@ -770,141 +782,36 @@ fun! vimtex#syntax#core#init_highlights() abort
     "
     "
     " " Inherited groups
-    "     hi def link texArgNew             texCmd
-    "     hi def link texAuthorOpt          texOpt
-    "     hi def link texBibitemArg         texArg
-    "     hi def link texBibitemOpt         texOpt
-    "     hi def link texBoxOptPosVal       texSymbol
-    "     hi def link texBoxOptIPosVal      texBoxOptPosVal
-    "     hi def link texCmdAccent          texCmd
-    "     hi def link texCmdAuthor          texCmd
-    "     hi def link texCmdBib             texCmd
-    "     hi def link texCmdBibitem         texCmd
-    "     hi def link texCmdClass           texCmd
-    "     hi def link texCmdConditional     texCmd
-    "     hi def link texCmdConditionalINC  texCmdConditional
-    "     hi def link texCmdDef             texCmdNew
-    "     hi def link texCmdEnv             texCmd
-    "     hi def link texCmdEnvM            texCmdEnv
-    "     hi def link texCmdE3              texCmd
-    "     hi def link texCmdFootnote        texCmd
         hi def link texCmdGreek           texMathCmd
         hi def link texCmdMath            texCmd
-    "     hi def link texCmdInput           texCmd
-    "     hi def link texCmdItem            texCmdEnv
-    "     hi def link texCmdLet             texCmdNew
         hi def link texCmdLigature        texSpecialChar
-    "     hi def link texCmdMathEnv         texCmdEnv
-    "     hi def link texCmdNew             texCmd
-    "     hi def link texCmdNewcmd          texCmdNew
-    "     hi def link texCmdNewenv          texCmd
-    "     hi def link texCmdNewthm          texCmd
-    "     hi def link texCmdPackage         texCmd
-    "     hi def link texCmdParbox          texCmd
         hi def link texCmdPart            texCmd
         hi def link texCmdRef             texCmd
         hi def link texCmdRefConcealed    texCmdRef
-    "     hi def link texCmdSize            texCmdType
-    "     hi def link texCmdSpaceCode       texCmd
-    "     hi def link texCmdStyle           texCmd
-    "     hi def link texCmdStyle           texCmdType
-    "     hi def link texCmdStyleBold       texCmd
-    "     hi def link texCmdStyleBoldItal   texCmd
         hi def link texCmdStyleItal       texCmd
-    "     hi def link texCmdStyleItalBold   texCmd
-    "     hi def link texCmdTitle           texCmd
-    "     hi def link texCmdVerb            texCmd
         hi def link texCommentAcronym     texComment
         hi def link texCommentFalse       texComment
         hi def link texCommentURL         texComment
-    "     hi def link texConditionalArg     texArg
-    "     hi def link texConditionalINCChar texSymbol
-    "     hi def link texDefArgName         texArgNew
-    "     hi def link texDefParm            texParm
-    "     hi def link texE3Cmd              texCmd
         hi def link texE3Delim            texDelim
         hi def link texRefConcealedDelim  texDelim
         hi def link texMathDelimZone      texDelim
-    "     hi def link texE3Function         texCmdType
-    "     hi def link texE3Opt              texOpt
-    "     hi def link texE3Parm             texParm
-    "     hi def link texE3Type             texParm
-    "     hi def link texE3Variable         texCmd
-    "     hi def link texE3Constant         texE3Variable
-    "     hi def link texEnvOpt             texOpt
-    "     hi def link texEnvMArgName        texEnvArgName
-    "     hi def link texFileArg            texArg
-    "     hi def link texFileOpt            texOpt
-    "     hi def link texFilesArg           texFileArg
-    "     hi def link texFilesOpt           texFileOpt
         hi def link texGroupError         texError
-    "     hi def link texLetArgEqual        texSymbol
-    "     hi def link texLetArgName         texArgNew
-    "     hi def link texLigature           texSymbol
-    "     hi def link texMinipageOptHeight  texError
-    "     hi def link texMinipageOptIPos    texError
-    "     hi def link texMinipageOptPos     texError
-    "     hi def link texMathArg            texMathZone
-    "     hi def link texMathArrayArg       texOpt
-    "     hi def link texMathCmd            texCmd
         hi def link texMathCmdStyle       texMathCmd
-    "     hi def link texMathCmdStyleBold   texMathCmd
-    "     hi def link texMathCmdStyleItal   texMathCmd
-    "     hi def link texMathCmdText        texCmd
-    "     hi def link texMathDelimMod       texMathDelim
-    "     hi def link texMathError          texError
-    "     hi def link texMathErrorDelim     texError
-    "     hi def link texMathGroup          texMathZone
-    "     hi def link texMathZoneEnsured    texMathZone
-    "     hi def link texMathZoneEnv        texMathZone
-    "     hi def link texMathZoneEnvStarred texMathZone
-    "     hi def link texMathZoneX          texMathZone
-    "     hi def link texMathZoneXX         texMathZone
-    "     hi def link texMathStyleConcArg   texMathZone
-    "     hi def link texMathSub            texMathZone
-    "     hi def link texMathSuper          texMathZone
-    "     hi def link texMathSuperSub       texMathOper
-    "     hi def link texMathSymbol         texCmd
-    "     hi def link texNewcmdArgName      texArgNew
-    "     hi def link texNewcmdOpt          texOpt
-    "     hi def link texNewcmdParm         texParm
-    "     hi def link texNewenvArgName      texEnvArgName
-    "     hi def link texNewenvOpt          texOpt
-    "     hi def link texNewenvParm         texParm
-    "     hi def link texNewthmArgName      texArg
-    "     hi def link texNewthmOptCounter   texOpt
-    "     hi def link texNewthmOptNumberby  texOpt
-    "     hi def link texOptEqual           texSymbol
-    "     hi def link texParboxOptHeight    texError
-    "     hi def link texParboxOptIPos      texError
-    "     hi def link texParboxOptPos       texError
         hi def link texPartConcealed      texCmdPart
-    "     hi def link texPartConcArgTitle   texPartArgTitle
-    "     hi def link texRefOpt             texOpt
-    "     hi def link texRefConcealedOpt1   texRefOpt
-    "     hi def link texRefConcealedOpt2   texRefOpt
-    "     hi def link texRefConcealedArg    texRefArg
-    "     hi def link texTabularArg         texOpt
-    "     hi def link texTabularAtSep       texMathDelim
-    "     hi def link texTabularChar        texSymbol
-    "     hi def link texTabularCol         texOpt
-    "     hi def link texTabularOpt         texEnvOpt
-    "     hi def link texTheoremEnvOpt      texEnvOpt
-    "     hi def link texVerbZone           texZone
-    "     hi def link texVerbZoneInline     texVerbZone
 endf
 
 
 fun! vimtex#syntax#core#new_arg(grp, ...) abort
-    let l:cfg = extend({
-                   \ 'contains'   : 'TOP,@NoSpell'                       ,
-                   \ 'matcher'    : 'start="{" skip="\\\\\|\\}" end="}"' ,
-                   \ 'next'       : ''                                   ,
+    let l:cfg = extend(
+                 \ {
                    \ 'matchgroup' : 'matchgroup=texDelim'                ,
+                   \ 'matcher'    : 'start="{" skip="\\\\\|\\}" end="}"' ,
                    \ 'opts'       : 'contained'                          ,
+                   \ 'contains'   : 'TOP,@NoSpell'                       ,
+                   \ 'next'       : ''                                   ,
                    \ 'skipwhite'  : v:true                               ,
                    \},
-                   \ a:0 > 0 ? a:1 : {}
+                   \ a:0 > 0   ?   a:1    : {}
                 \ )
 
     exe     'syntax region' a:grp

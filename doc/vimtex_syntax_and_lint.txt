@@ -262,30 +262,32 @@ settings:
                 Default: Undefined
                 This is a string that,
                     if defined and
-                    not empty, specifies  a comma-separated list of possible next syntax groups.
+                    not empty,
+                        specifies  a comma-separated list of possible next syntax groups.
 
             hlgroup
                 Default: Undefined
-                A string that can be used to indicate the target highlight group of the
-                command (`\cmdname`).
+                A string that can be used to indicate the target highlight group of the command (`\cmdname`).
 
-        The first in the following list shows
-        how to use bolded style on a custom vector macro such as `\vct{v}`.
+        In the following list :
+                let g:vimtex_syntax_custom_cmds = [
+                            \ {'name': 'vct'      , 'mathmode': 1  , 'argstyle': 'bold'}            ,
+                            \ {'name': 'R'        , 'mathmode': 1  , 'concealchar': 'ℝ'}            ,
+                            \ {'name': 'mathnote' , 'mathmode': 1  , 'nextgroup': 'texMathTextArg'} ,
+                            \ {'name': 'nospell'  , 'argspell': 0} ,
+                            \]
 
-        The  second example shows how to conceal `\R` with `ℝ`.
-        The third example shows
-            how one may use the `nextgroup` key,
+            The first shows
+            how to use bolded style on a custom vector macro such as `\vct{v}`.
 
-        the fourth shows how to define
-            a command whose argument shoult not be spell checked.
+            The  second example shows how to conceal `\R` with `ℝ`.
+            The third example shows
+                how one may use the `nextgroup` key,
+
+            the fourth shows how to define
+                a command whose argument shoult not be spell checked.
 
 
-            let g:vimtex_syntax_custom_cmds = [
-                        \ {'name': 'vct'      , 'mathmode': 1  , 'argstyle': 'bold'}            ,
-                        \ {'name': 'R'        , 'mathmode': 1  , 'concealchar': 'ℝ'}            ,
-                        \ {'name': 'mathnote' , 'mathmode': 1  , 'nextgroup': 'texMathTextArg'} ,
-                        \ {'name': 'nospell'  , 'argspell': 0} ,
-                        \]
 
         Default value: []
 
