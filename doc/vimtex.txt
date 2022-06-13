@@ -74,7 +74,6 @@ Contents                                                      *vimtex-contents*
             Okular                                    |vimtex-view-okular|
             qpdfview                                  |vimtex-view-qpdfview|
             Sioyek                                    |vimtex-view-sioyek|
-            Skim                                      |vimtex-view-skim|
             SumatraPDF                                |vimtex-view-sumatrapdf|
             Zathura                                   |vimtex-view-zathura|
         Synctex                                     |vimtex-synctex|
@@ -950,152 +949,6 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: 1
 
-    *g:vimtex_compiler_enabled*
-        Use this option to disable/enable the `compiler` interface, see |vimtex-compiler|.
-
-        Default value: 1
-
-    *g:vimtex_compiler_silent*
-        Set this to 1 or |v:true| to silence the compiler messages during start,
-        stop, and callbacks.
-
-        Default: 0
-
-    *g:vimtex_compiler_method*
-        Set the compiler method. Available choices are:
-
-            Value      Documentation              Configuration
-            `latexmk`    |vimtex-compiler-latexmk|    |g:vimtex_compiler_latexmk|
-            `latexrun`   |vimtex-compiler-latexrun|   |g:vimtex_compiler_latexrun|
-            `tectonic`   |vimtex-compiler-tectonic|   |g:vimtex_compiler_tectonic|
-            `arara`      |vimtex-compiler-arara|      |g:vimtex_compiler_arara|
-            `generic`    |vimtex-compiler-generic|    |g:vimtex_compiler_generic|
-
-        Default value: 'latexmk'
-
-    *g:vimtex_compiler_latexmk*
-        This dictionary allows customization of the |vimtex-compiler-latexmk|
-        compiler. The values set by the user will take precedence over the default
-        values.
-
-        Default value:
-
-
-            let g:vimtex_compiler_latexmk = {
-                    \ 'build_dir' : '',
-                    \ 'callback' : 1,
-                    \ 'continuous' : 1,
-                    \ 'executable' : 'latexmk',
-                    \ 'hooks' : [],
-                    \ 'options' : [
-                    \   '-verbose',
-                    \   '-file-line-error',
-                    \   '-synctex=1',
-                    \   '-interaction=nonstopmode',
-                    \ ],
-                    \}
-
-        The default value shows which entries may be changed. Here the different
-        keys are explained in more detail:
-
-        build_dir
-            This option sets the compilation build directory. It corresponds to the
-            `-output-directory` option in `latexmk`. If the path is a relative path,
-            then it will be considered relative to the main project file.
-
-            Although the value of this option should be a string that represents
-            a path, it is also possible to make it a function. This makes it possible
-            to specify a dynamic `build_dir`. It may be easier to understand from an
-            example:
-
-
-                let g:vimtex_compiler_latexmk = {'build_dir': {-> expand("%:t:r")}}
-
-            With the above setting, the `build_dir` is set to the base name of the
-            current file. E.g., If you do `vim test.tex`, the value becomes `test`.
-
-            If `build_dir` is specified, then the specified build directory is created
-            if it does not exist.
-
-            Note 1: This option only works with `latexmk` version 4.27 and later.
-            Note 2: If `$out_dir` is added to `.latexmkrc`, then the `.latexmkrc` setting
-                            will have priority.
-            Note 3: If |$VIMTEX_OUTPUT_DIRECTORY| is defined, it will have the highest
-                            priority.
-
-        callback
-            If enabled, this option tells `latexmk` to run |vimtex#compiler#callback|
-            after compilation is finished.
-
-        continuous
-            If enabled, `latexmk` will run in continuous mode, i.e. with the `-pvc`
-            argument. This means that the document is compiled automatically by
-            `latexmk` every time a related file has been changed, until the processes
-            is stopped.
-
-            If disabled, `latexmk` will run single shot compilations.
-
-            The events |VimtexEventCompileStarted| and |VimtexEventCompileStopped|
-                        are only relevant when this option is enabled.
-
-        executable
-            The name/path to the `latexmk` executable.
-
-        hooks
-            A list of |Funcref|s. If running in continuous mode, each hook will be
-            called for each line of output from `latexmk`, with that line as argument.
-            E.g., to show information about the compilation run numbers, one could do
-            this:
-
-
-                function! Callback(msg)
-                    let l:m = matchlist(a:msg, '\vRun number (\d+) of rule ''(.*)''')
-                    if !empty(l:m)
-                        echomsg l:m[2] . ' (' . l:m[1] . ')'
-                    endif
-                endfunction
-                let g:vimtex_compiler_latexmk = { 'hooks': [function('Callback')] }
-
-        options
-            This is a list of options that are passed to `latexmk`. The default
-            options should work well for most people.
-
-            Options like `-pdf` or `-lualatex` should NOT be added to this list.
-                        These are options used to specify the LaTeX processor/engine, see
-                        instead |g:vimtex_compiler_latexmk_engines|.
-
-            Options may also be specified indirectly to `latexmk` through both
-                        a global and a project specific `.latexmkrc` file. One should know,
-                        though, that options specified on the command line has priority, and
-                        so if one wants to override one of the above default options, then
-                        one has to set this key to a list that contains the desired options.
-
-    *g:vimtex_compiler_latexmk_engines*
-        Defines a map between TeX program directive (|vimtex-tex-program|) and
-        compiler engine. This is used by |vimtex-compiler-latexmk| to define the
-        LaTeX program. The `_` key defines the default engine.
-
-        If the TeX program directive is not specified within the main project
-                    file, and if `$pdf_mode` is added to a project-specific `.latexmkrc`
-                    file, then the compiler engine will be deduced from the value of
-                    `$pdf_mode`. The supported values of `$pdf_mode` are 0 (pdflatex), 4
-                    (lualatex) and 5 (xelatex). See the latexmk documentation for details.
-
-        Default value:
-
-
-            let g:vimtex_compiler_latexmk_engines = {
-                    \ '_'                : '-pdf',
-                    \ 'pdfdvi'           : '-pdfdvi',
-                    \ 'pdfps'            : '-pdfps',
-                    \ 'pdflatex'         : '-pdf',
-                    \ 'luatex'           : '-lualatex',
-                    \ 'lualatex'         : '-lualatex',
-                    \ 'xelatex'          : '-xelatex',
-                    \ 'context (pdftex)' : '-pdf -pdflatex=texexec',
-                    \ 'context (luatex)' : '-pdf -pdflatex=context',
-                    \ 'context (xetex)'  : '-pdf -pdflatex=''texexec --xtx''',
-                    \}
 
     *g:vimtex_compiler_latexrun*
         This dictionary allows customization of the |vimtex-compiler-latexrun|
@@ -2645,19 +2498,6 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: Undefined
 
-    *$VIMTEX_OUTPUT_DIRECTORY*
-        This environment variable allows to specify the output directory of
-        auxiliary LaTeX files. If it exists and is a valid path, this path will be
-        used as the output directory (aka build directory). That is, it overrides
-        options such as |g:vimtex_compiler_latexmk| / `build_dir`. This has two main
-        use cases:
-
-            1. It allows to use a custom build directory for different projects.
-            2. It allows to specify an output directory for projects where one uses
-                 compiler backends such as |vimtex-compiler-arara|. This makes it
-                 possible to make e.g. the |vimtex-view| feature to work as expected if
-                 output directories are used with arara.
-
 ------------------------------------------------------------------------------
 COMMANDS                                                      *vimtex-commands*
 
@@ -2703,25 +2543,24 @@ COMMANDS                                                      *vimtex-commands*
                                                         raised. To close the log buffer, one may press `q`
                                                         or `<esc>`.
 
-    *:VimtexCompile*
-    *<plug>(vimtex-compile)*
-    :VimtexCompile
-        If the compiler supports and
-        is set to run in continuous mode,
-        then this command works as a compiler toggle.
-        If not,
-        this command will run a single shot compilation.
-
-
-    *:VimtexCompileSS*
     *<plug>(vimtex-compile-ss)*
-    :VimtexCompileSS
+    :VimtexCompileSS  *:VimtexCompileSS*
         Start single shot compilation.
 
-    *:VimtexCompileSelected*
+    *<plug>(vimtex-compile)*
+    :VimtexCompile  *:VimtexCompile*
+        If the compiler supports and
+            is set to run in continuous mode,
+                then this command works as a ¿compiler¿ toggle.
+        If not,
+            同VimtexCompileSS
+
+
     *<plug>(vimtex-compile-selected)*
-    :VimtexCompileSelected
+    :VimtexCompileSelected  *:VimtexCompileSelected*
         Compile the selected part of the current LaTeX file.
+        This always works linewise
+
         When used as a command,
         it takes a range, e.g.:
 
@@ -2729,14 +2568,15 @@ COMMANDS                                                      *vimtex-commands*
 
         When used as a normal mode mapping,
             the mapping will act as an |operator| on the following motion or  text object.
+
         when used as a visual mode mapping,
             it will act on the selected lines.
 
-        This always works linewise
 
         Compiles the selected text by
         copying it to a temporary file with the same preamble as the current file.
-        It will be compiled similarly to a single shot compile, see |:VimtexCompileSS|.
+        It will be compiled similarly to a single shot compile,
+        see |:VimtexCompileSS|.
         ¿If there are errors¿,
             they will be shown in the quickfix list.
 
@@ -2751,6 +2591,8 @@ COMMANDS                                                      *vimtex-commands*
                 for a file `foo.tex`,
                 one may specify a custom template `foo-vimtex-template.tex`.
                 This will have a higher priority than  `vimtex-template.tex`.
+                在某文件中 通过 echom "l:file.tex 是: "   l:file.tex
+                发现是同一目录下的  '原文件名_vimtex_selected.tex'
 
 
     *:VimtexCompileOutput*

@@ -118,23 +118,29 @@ endf
 
 " }}}1
 fun! vimtex#compiler#compile_selected(type) abort range " {{{1
-    " Values of a:firstline and a:lastline are not available in ¿nested¿ function  calls,
-    " so we must handle them here.
+    " Values of a:firstline  and a:lastline are not available in ¿nested¿ function  calls,
+        " so we must handle them here.
     let l:opts = a:type ==# 'command'
-                \ ? {'type': 'range', 'range': [a:firstline, a:lastline]}
-                \ : {'type':  a:type =~# 'line\|char\|block' ? 'operator' : a:type}
+                \ ? {
+                    \ 'type': 'range',
+                    \ 'range': [a:firstline, a:lastline],
+                   \ }
+                \ : {'type':  a:type =~# '\vline|char|block' ? 'operator' : a:type}
 
     let l:file = vimtex#parser#selection_to_texfile(l:opts)
+
     if empty(l:file) | return | endif
+
     let l:tex_program = b:vimtex.get_tex_program()
     let l:file.get_tex_program = {-> l:tex_program}
 
     " Create and initialize temporary compiler
     let l:compiler = s:init_compiler({
-                \ 'state' : l:file,
-                \ 'continuous' : 0,
-                \ 'callback' : 0,
-                \})
+                                \ 'state' : l:file,
+                                \ 'continuous' : 0,
+                                \ 'callback' : 0,
+                                \})
+
     if empty(l:compiler) | return | endif
 
     call vimtex#log#info('Compiling selected lines ...')
@@ -147,7 +153,7 @@ fun! vimtex#compiler#compile_selected(type) abort range " {{{1
         call vimtex#log#set_silent_restore()
         call vimtex#log#warning('Compiling selected lines ... failed!')
         botright cwindow
-            "\ 设了它, 还是过滤不了, 只好注释掉cwindow:    let g:vimtex_quickfix_ignore_filters =
+        "\ 有错误时,弹出quickfix
         return
     el
         call l:compiler.clean(0)

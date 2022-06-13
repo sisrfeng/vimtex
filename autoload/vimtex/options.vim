@@ -1,9 +1,3 @@
-" VimTeX - LaTeX plugin for Vim
-"
-" Maintainer: Karl Yngve Lervåg
-" Email:      karl.yngve@gmail.com
-"
-
 fun! vimtex#options#init() abort " {{{1
     if s:initialized | return | endif
 
@@ -424,12 +418,12 @@ fun! vimtex#options#init() abort " {{{1
                 \ 'FIXME': 'FIXME: '
                 \})
 
-    call s:init_option('vimtex_view_enabled', 1)
-    call s:init_option('vimtex_view_automatic', 1)
-    call s:init_option('vimtex_view_method', 'general')
-    call s:init_option('vimtex_view_use_temp_files', 0)
-    call s:init_option('vimtex_view_forward_search_on_start', 1)
-    call s:init_option('vimtex_view_reverse_search_edit_cmd', 'edit')
+    call s:init_option('vimtex_view_enabled'                 , 1)
+    call s:init_option('vimtex_view_automatic'               , 1)
+    call s:init_option('vimtex_view_method'                  , 'general')
+    call s:init_option('vimtex_view_use_temp_files'          , 0)
+    call s:init_option('vimtex_view_forward_search_on_start' , 1)
+    call s:init_option('vimtex_view_reverse_search_edit_cmd' , 'edit')
 
     " OS dependent defaults
     let l:os = vimtex#util#get_os()
@@ -453,14 +447,15 @@ fun! vimtex#options#init() abort " {{{1
         call s:init_option('vimtex_view_general_options', '@pdf')
     en
 
-    call s:init_option('vimtex_view_mupdf_options', '')
-    call s:init_option('vimtex_view_mupdf_send_keys', '')
-    call s:init_option('vimtex_view_sioyek_exe', 'sioyek')
-    call s:init_option('vimtex_view_skim_activate', 0)
-    call s:init_option('vimtex_view_skim_sync', 0)
-    call s:init_option('vimtex_view_skim_reading_bar', 0)
-    call s:init_option('vimtex_view_zathura_options', '')
-    call s:init_option('vimtex_view_zathura_check_libsynctex', 1)
+    call s:init_option('vimtex_view_mupdf_options'            , '')
+    call s:init_option('vimtex_view_mupdf_send_keys'          , '')
+    call s:init_option('vimtex_view_sioyek_exe'               , 'sioyek')
+    call s:init_option('vimtex_view_skim_activate'            , 0)
+    call s:init_option('vimtex_view_skim_sync'                , 0)
+    call s:init_option('vimtex_view_skim_reading_bar'         , 0)
+
+    call s:init_option('vimtex_view_zathura_options'          , '')
+    call s:init_option('vimtex_view_zathura_check_libsynctex' , 1)
 
     " Fallback option
     if g:vimtex_context_pdf_viewer ==# 'NONE'
@@ -596,13 +591,21 @@ fun! s:init_highlights() abort " {{{1
 endf
 
 " }}}1
-fun! s:init_option(option, default) abort " {{{1
-    let l:option = 'g:' . a:option
-    if !exists(l:option)
-        let {l:option} = a:default
+fun! s:init_option(opt, default) abort " {{{1
+    let l:global_opt = 'g:' . a:opt
+                    "\ 虽然l:global_opt是函数的var, 但'g:'让它能改变全局变量
+                    "\ 这个函数不需要return
+    if !exists(l:global_opt)
+        let {l:global_opt} = a:default
+
     elseif type(a:default) == v:t_dict
-        call vimtex#util#extend_recursive({l:option}, a:default, 'keep')
+        call vimtex#util#extend_recursive(
+                                    \ {l:global_opt},
+                                    \ a:default,
+                                    \ 'keep',
+                                  \ )
     en
+    "\ echom "l:global_opt 是: "   l:global_opt
 endf
 
 " }}}1

@@ -234,31 +234,33 @@ example, if you've defined `g:fzf_layout`, then those options can be passed to
 ==============================================================================
 COMPILER                                                      *vimtex-compiler*
 
-VimTeX provides an interface to the following LaTeX compilers/compiler
-backends:
+VimTeX provides an interface to the following LaTeX compilers/compiler  backends:
 
-* |vimtex-compiler-latexmk|   http://users.phys.psu.edu/~collins/software/latexmk-jcc
-* |vimtex-compiler-latexrun|  https://github.com/aclements/latexrun
-* |vimtex-compiler-tectonic|  https://tectonic-typesetting.github.io/
-* |vimtex-compiler-arara|     https://github.com/cereda/arara
-* |vimtex-compiler-generic|
+    * |vimtex-compiler-latexmk|   http://users.phys.psu.edu/~collins/software/latexmk-jcc
+    * |vimtex-compiler-generic|
 
-The interface is implemented in a general way, which makes it relatively easy
-to add new compilers.
+The interface is implemented in a general way,
+which makes it relatively easy  to add new compilers.
 
-Compilation is started and stopped with |:VimtexCompile| and |:VimtexStop|.
-Although, |:VimtexStop| stopping is only relevant for continuous compilations,
-and in this case, |:VimtexCompile| itself works as a toggle.  Single shot
-compilation is always available through |:VimtexCompileSS|.  The default
-mappings for these commands are listed here: |vimtex-default-mappings|.
+Compilation is started and
+stopped with |:VimtexCompile| and |:VimtexStop|.
+Although,  |:VimtexStop| stopping is only relevant for continuous compilations,
+and in this case,
+    |:VimtexCompile| itself works as a toggle.
+Single shot compilation is always available through
+    |:VimtexCompileSS|.
+Default mappings:  |vimtex-default-mappings|.
 
-It is also possible to compile a selection of the file. To do this, one may
-either use the mapping, |<plug>(vimtex-compile-selected)|, or the command
-|:VimtexCompileSelected|.
+
+It is also possible to compile a selection of the file.
+To do this,
+    |<plug>(vimtex-compile-selected)|,
+or  command |:VimtexCompileSelected|.
+
 
 The compilers should respect the TeX program directive as described here:
-|vimtex-tex-program|, except for |vimtex-compiler-arara|, which uses its own
-set of directives and rules.
+|vimtex-tex-program|,
+
 
 Associated commands:
 * |:VimtexCompile|
@@ -297,123 +299,226 @@ Associated events:
 ------------------------------------------------------------------------------
 LATEXMK                                               *vimtex-compiler-latexmk*
 
-                      http://users.phys.psu.edu/~collins/software/latexmk-jcc
-> latexmk is a perl script for running LaTeX the correct number of times to
-> resolve cross references, etc; it also runs auxiliary programs (bibtex,
-> makeindex if necessary, and dvips and/or a previewer as requested).  It has
-> a number of other useful capabilities, for example to start a previewer and
-> then run latex whenever the source files are updated, so that the previewer
-> gives an up-to-date view of the document. The script runs on both UNIX and
-> MS-WINDOWS (XP, etc).
-
-`latexmk` is a compiler backend that handles recompilation of LaTeX documents
-when source files have been changed.  VimTeX uses the continuous mode by
-default, but `latexmk` also allows single shot compilations.  The compiler may
-be configured through the |g:vimtex_compiler_latexmk| option.
-
-If the `callback` key is enabled (it is by default and there is really no
-reason to disable it!), then compilation errors will be parsed automatically.
-This is done by utilizing the tricks explained below. Although `latexmk`
-can control viewers directly, VimTeX disables this feature with `-view=none`
-so as to get full control of the viewers.
-
-As stated, one may customize the `latexmk` options through
-|g:vimtex_compiler_latexmk|.  However, one may also configure `latexmk`
-explicitly through a global `~/.latexmkrc` file, or a project specific
-`.latexmkrc` file. It is important to know that command line arguments have
-priority, so one may want to use custom options if one wants to specify
-particular things in a configuration file.
-
-A particular set of options are very convenient for a good coupling between
-`latexmk` and Vim: `$compiling_cmd`, `$success_cmd`, and `$failure_cmd`. These
-options can be used to specify commands that are run by `latexmk` before and
-after compilation. This is used by VimTeX to achieve callbacks after
-compilation has finished through |vimtex#compiler#callback| with something
-like this:
+    http://users.phys.psu.edu/~collins/software/latexmk-jcc
+    > latexmk is a ¿perl¿ script for running LaTeX the correct number of times to
+    > resolve cross references, etc; it also runs auxiliary programs (bibtex,
+    > makeindex if necessary, and dvips and/or a previewer as requested).  It has
+    > a number of other useful capabilities, for example to start a previewer and
+    > then run latex whenever the source files are updated, so that the previewer
+    > gives an up-to-date view of the document. The script runs on both UNIX and
+    > MS-WINDOWS (XP, etc).
 
 
-  $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
-  $success_cmd = "vim --remote-expr 'vimtex#compiler#callback(2)'";
-  $failure_cmd = "vim --remote-expr 'vimtex#compiler#callback(3)'";
+    `latexmk` is a compiler backend that handles recompilation of
+        LaTeX documents when source files have been changed.
 
-Another neat way to use this is to use `xdotool` to change the window title of
-the viewer to indicate the compilation status:
+    VimTeX uses the continuous mode by default,
+    but `latexmk` also allows single shot compilations.
+    The compiler may be configured through:
+
+        *g:vimtex_compiler_latexmk*
+            The values set by the user will take precedence over the default  values.
+
+            Default
+
+                let g:vimtex_compiler_latexmk = {
+                        \ 'build_dir'  : '',
+                        \ 'callback'   : 1,
+                        \ 'continuous' : 1,
+                        \ 'executable' : 'latexmk',
+                        \ 'hooks'      : [],
+                        \ 'options'    : [
+                        \   '-verbose',
+                        \   '-file-line-error',
+                        \   '-synctex=1',
+                        \   '-interaction=nonstopmode',
+                        \ ],
+                        \}
 
 
-  $compiling_cmd = "xdotool search --name \"%D\" " .
-                   "set_window --name \"%D compiling...\"";
-  $success_cmd   = "xdotool search --name \"%D\" " .
-                   "set_window --name \"%D OK\"";
-  $failure_cmd   = "xdotool search --name \"%D\" " .
-                   "set_window --name \"%D FAILURE\"";
+            The default value shows which
+            entries may be changed.
+            Here the different keys are explained in more detail:
 
-If you define these options similar to the above `xdotool` trick and
-      still want to enable the VimTeX callbacks, then one must include
-      a semicolon at the end of the `cmd` strings so that VimTeX may append
-      safely to the options.
 
-More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
+            build_dir
+                This option sets the compilation build directory.
+                It corresponds to the `-output-directory` option in `latexmk`.
+                If the path is a relative path,
+                    then it will be considered relative to the main project file.
 
-------------------------------------------------------------------------------
-LATEXRUN                                             *vimtex-compiler-latexrun*
 
-                                        https://github.com/aclements/latexrun
-> See LaTeX run. Run latexrun.
+                Although the value of this option should be a string that represents a path,
+                it is also possible to make it  a function.
+                This makes it possible to specify a dynamic `build_dir`:
+                Example
 
-> latexrun fits LaTeX into a modern build environment. It hides LaTeX's
-> circular dependencies, surfaces errors in a standard and user-friendly
-> format, and generally enables other tools to do what they do best.
+                    let g:vimtex_compiler_latexmk = {'build_dir': {-> expand("%:t:r")}}
 
-`latexrun` is a compiler backend that handles recompilation of LaTeX documents
-when source files have been changed. However, it is a much simpler backend,
-and does not support e.g. continuous mode.
+                        If you edit `vim test.tex`,
+                            the value becomes `test`.
 
-The compiler may be configured through the |g:vimtex_compiler_latexrun| option.
+                If `build_dir` is specified,
+                then the specified build directory is created if it does not exist.
 
-------------------------------------------------------------------------------
-TECTONIC                                             *vimtex-compiler-tectonic*
+                Note 1: This option only works with `latexmk` version 4.27 and later.
+                Note 2: If `$out_dir` is added to `.latexmkrc`,
+                        then the `.latexmkrc` setting  will have priority.
+                Note 3: If  *$VIMTEX_OUTPUT_DIRECTORY* is defined,
+                        it will have the highest  priority.
 
-                                      https://tectonic-typesetting.github.io/
-> Tectonic is a modernized, complete, self-contained TeX/LaTeX engine, powered
-> by XeTeX and TeXLive.
+                        This environment variable allows to specify the output directory of auxiliary LaTeX files.
+                        If it exists and
+                        is a valid path,
+                            this path will be used as the output directory (aka build directory).
 
-`tectonic` is a compiler backend that features automatic support file
-downloading along with reproducible builds and full Unicode and OpenType
-fonts support thanks to the power of XeTeX. It does not support continuous
-compilation like |vimtex-compiler-latexmk|, so the only relevant commands are
-|:VimtexCompile| to start (single shot) compilation, and
-|:VimtexCompileOutput| to see the compilation output.
+                        This has two main use cases:
 
-`tectonic` cleans up intermediate files like `.aux` and log files by default.
-However, VimTeX's backend invoke it with the flags `--keep-logs` and
-`--keep-synctex` which enables us to see the errors on the quickfix and it
-gives us synctex support. Therefor, by default, |<plug>(vimtex-clean)|
-and |:VimtexClean| clean these files.
+                            1. It allows to use a custom build directory for different projects.
+                            2. It allows to specify an output directory for projects where one uses
+                                compiler backends such as |arara|
+                                This makes it  possible to make e.g. the |vimtex-view| feature to work as expected
+                                if  output directories are used with arara.
 
-The compiler may be configured through the |g:vimtex_compiler_tectonic| option.
 
-------------------------------------------------------------------------------
-ARARA                                                   *vimtex-compiler-arara*
+            callback
+                If enabled,
+                this option tells `latexmk` to run |vimtex#compiler#callback|
+                after compilation is finished.
 
-                                        https://github.com/cereda/arara
-> arara is a TeX automation tool based on rules and directives. It gives you
-> subsidies to enhance your TeX experience.
+            continuous
+                If enabled, `latexmk` will run in continuous mode, i.e. with the `-pvc`
+                argument. This means that the document is compiled automatically by
+                `latexmk` every time a related file has been changed, until the processes
+                is stopped.
 
-`arara` is a TeX automation tool that uses rules and directives that are
-defined in the preamble of a LaTeX project. The user manual can be found here:
-https://ctan.uib.no/support/arara/doc/arara-manual.pdf
+                If disabled, `latexmk` will run single shot compilations.
 
-`arara` does not do continuous compilation, so the only relevant commands are
-|:VimtexCompile| to start (single shot) compilation, and
-|:VimtexCompileOutput| to see the compilation output.
+                The events |VimtexEventCompileStarted| and |VimtexEventCompileStopped|
+                            are only relevant when this option is enabled.
 
-The compiler may be configured through the |g:vimtex_compiler_arara| option.
+            executable
+                The name/path to the `latexmk` executable.
 
-It is not possible to directly specify an output directory from VimTeX.
-      This is a restriction caused by the design of arara. However, since one
-      may still want to specify custom output directories, VimTeX allows to
-      customize the output directory through the environment variable
-      |$VIMTEX_OUTPUT_DIRECTORY|.
+            hooks
+                A list of |Funcref|s. If running in continuous mode, each hook will be
+                called for each line of output from `latexmk`, with that line as argument.
+                E.g., to show information about the compilation run numbers, one could do
+                this:
+
+
+                    function! Callback(msg)
+                        let l:m = matchlist(a:msg, '\vRun number (\d+) of rule ''(.*)''')
+                        if !empty(l:m)
+                            echomsg l:m[2] . ' (' . l:m[1] . ')'
+                        endif
+                    endfunction
+                    let g:vimtex_compiler_latexmk = { 'hooks': [function('Callback')] }
+
+            options
+                This is a list of options that are passed to `latexmk`. The default
+                options should work well for most people.
+
+                Options like `-pdf` or `-lualatex` should NOT be added to this list.
+                            These are options used to specify the LaTeX processor/engine, see
+                            instead |g:vimtex_compiler_latexmk_engines|.
+
+                Options may also be specified indirectly to `latexmk` through both
+                            a global and a project specific `.latexmkrc` file. One should know,
+                            though, that options specified on the command line has priority, and
+                            so if one wants to override one of the above default options, then
+                            one has to set this key to a list that contains the desired options.
+
+        *g:vimtex_compiler_latexmk_engines*
+            Defines a map between TeX program directive (|vimtex-tex-program|) and
+            compiler engine. This is used by |vimtex-compiler-latexmk| to define the
+            LaTeX program. The `_` key defines the default engine.
+
+            If the TeX program directive is not specified within the main project
+                        file, and if `$pdf_mode` is added to a project-specific `.latexmkrc`
+                        file, then the compiler engine will be deduced from the value of
+                        `$pdf_mode`. The supported values of `$pdf_mode` are 0 (pdflatex), 4
+                        (lualatex) and 5 (xelatex). See the latexmk documentation for details.
+
+            Default value:
+
+
+                let g:vimtex_compiler_latexmk_engines = {
+                        \ '_'                : '-pdf',
+                        \ 'pdfdvi'           : '-pdfdvi',
+                        \ 'pdfps'            : '-pdfps',
+                        \ 'pdflatex'         : '-pdf',
+                        \ 'luatex'           : '-lualatex',
+                        \ 'lualatex'         : '-lualatex',
+                        \ 'xelatex'          : '-xelatex',
+                        \ 'context (pdftex)' : '-pdf -pdflatex=texexec',
+                        \ 'context (luatex)' : '-pdf -pdflatex=context',
+                        \ 'context (xetex)'  : '-pdf -pdflatex=''texexec --xtx''',
+                        \}
+
+        *g:vimtex_compiler_enabled*
+            Use this option to disable/enable the `compiler` interface, see |vimtex-compiler|.
+
+            Default value: 1
+
+        *g:vimtex_compiler_silent*
+            Set this to 1 or |v:true| to silence the compiler messages during start,
+            stop, and callbacks.
+
+            Default: 0
+
+        *g:vimtex_compiler_method*
+            Set the compiler method. Available choices are:
+
+                Value      Documentation              Configuration
+                `latexmk`    |vimtex-compiler-latexmk|    |g:vimtex_compiler_latexmk|
+                `generic`    |vimtex-compiler-generic|    |g:vimtex_compiler_generic|
+
+            Default value: 'latexmk'
+
+    If the `callback` key is enabled (it is by default and there is really no
+    reason to disable it!), then compilation errors will be parsed automatically.
+    This is done by utilizing the tricks explained below. Although `latexmk`
+    can control viewers directly, VimTeX disables this feature with `-view=none`
+    so as to get full control of the viewers.
+
+    As stated, one may customize the `latexmk` options through
+    |g:vimtex_compiler_latexmk|.  However, one may also configure `latexmk`
+    explicitly through a global `~/.latexmkrc` file, or a project specific
+    `.latexmkrc` file. It is important to know that command line arguments have
+    priority, so one may want to use custom options if one wants to specify
+    particular things in a configuration file.
+
+    A particular set of options are very convenient for a good coupling between
+    `latexmk` and Vim: `$compiling_cmd`, `$success_cmd`, and `$failure_cmd`. These
+    options can be used to specify commands that are run by `latexmk` before and
+    after compilation. This is used by VimTeX to achieve callbacks after
+    compilation has finished through |vimtex#compiler#callback| with something
+    like this:
+
+
+    $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
+    $success_cmd = "vim --remote-expr 'vimtex#compiler#callback(2)'";
+    $failure_cmd = "vim --remote-expr 'vimtex#compiler#callback(3)'";
+
+    Another neat way to use this is to use `xdotool` to change the window title of
+    the viewer to indicate the compilation status:
+
+
+    $compiling_cmd = "xdotool search --name \"%D\" " .
+                    "set_window --name \"%D compiling...\"";
+    $success_cmd   = "xdotool search --name \"%D\" " .
+                    "set_window --name \"%D OK\"";
+    $failure_cmd   = "xdotool search --name \"%D\" " .
+                    "set_window --name \"%D FAILURE\"";
+
+    If you define these options similar to the above `xdotool` trick and
+        still want to enable the VimTeX callbacks, then one must include
+        a semicolon at the end of the `cmd` strings so that VimTeX may append
+        safely to the options.
+
+    More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
+
 
 ------------------------------------------------------------------------------
 GENERIC COMPILER                                      *vimtex-compiler-generic*
@@ -593,32 +698,6 @@ configuration are `%2` and `%1`, not `%l` and `%f`.
 Associated settings:
 * |g:vimtex_view_sioyek_exe|
 
-*vimtex-view-skim*
-Skim~
-https://skim-app.sourceforge.net/
-https://sourceforge.net/p/skim-app/wiki/TeX_and_PDF_Synchronization
-Skim is a PDF reader and note-taker for OS X. It is designed to help you read
-and annotate scientific papers in PDF, but is also great for viewing any PDF
-file. The VimTeX implementation supports forward search and uses a callback to
-update Skim after successful compilations.
-
-Configuration:
-
-  let g:vimtex_view_method = 'skim'
-
-To configure inverse search: Open the `Sync` tab in the settings panel in Skim
-and set the options according to your desired version of Vim. With MacVim, one
-may use the `MacVim` preset. However, it may be more convenient to use a
-`Custom` setting and configure the inverse search option as explained in
-|vimtex-synctex-inverse-search|. The interpolation variables should
-be `%line` and `%file`, not `%l` and `%f`.
-
-Inverse search is activated by pressing `Shift` and `Command`, then clicking
-the text you want to search.
-
-Associated settings:
-* |g:vimtex_view_skim_activate|
-* |g:vimtex_view_skim_reading_bar|
 
 *vimtex-view-sumatrapdf*
 SumatraPDF~
@@ -866,46 +945,61 @@ CODE STRUCTURE                                                    *vimtex-code*
 ------------------------------------------------------------------------------
 API REFERENCE                                                 *vimtex-code-api*
 
-This is an API reference of the most useful VimTeX functions available to
-users for customization.
+    This is an API reference of the most useful VimTeX functions
+    available to  users for customization.
 
-This API is currently a work in progress!
+    This API is currently a work in progress!
 
-*vimtex#compiler#callback*
-  Utility function to be used as a compiler callback function. Takes a single
-  argument, which is the compiler status:
+    *vimtex#compiler#callback*
+        Utility function to be used as a compiler callback function.
+        Takes a single argument,
+        which is the compiler status:
 
-    1: Compilation cycle has started
-    2: Compilation complete - Success
-    3: Compilation complete - Failed
+            1: Compilation cycle has started
+            2: Compilation complete - Success
+            3: Compilation complete - Failed
 
-  The function does several useful things based on the status, such as running
-  the |VimtexEventCompiling|, |VimtexEventCompileFailed| and
-  |VimtexEventCompileSuccess| events.
 
-*vimtex#syntax#in_mathzone*
-  Returns 1 if the position is inside a math zone. If called without
-  arguments, the position refers to the cursor position. Else must be called
-  with two arguments: the line number and column number.
+        The function does several useful things based on  the status,
+        such as running the
+        |VimtexEventCompiling|,
+        |VimtexEventCompileFailed| and |VimtexEventCompileSuccess| events.
 
-*vimtex#view#inverse_search*
-  Utility function for reverse search from pdf viewer. Takes two arguments:
-  the line number and a filename. The function runs the event
-  |VimtexEventViewReverse| at the end, which allows more user customization.
 
-*vimtex#env#get_inner*
-*vimtex#env#get_outer*
-*vimtex#env#get_all*
-  Functions that return the surrounding inner or outer environment, or all
-  surrounding environments. The return value is a dictionary with the
-  following keys:
+    *vimtex#syntax#in_mathzone*
+        if the position is inside a math zone.
+            Returns 1
 
-    `name`: The environment name
-    `open`: The environment opening delimiter object
-    `close`: The environment closing delimiter object
+        If called without arguments,
+            the position refers to the cursor position.
+        Else
+            must be called with two arguments:
+                the line number and
+                column number.
 
-  The delimiter objects contain information about the locations and arguments
-  of the corresponding `\begin{...}[...]` and `\end{...}` commands.
+    *vimtex#view#inverse_search*
+        Utility function for reverse search from pdf viewer.
+        Takes two arguments:
+            the line number and
+            a filename.
+        The function runs the event |VimtexEventViewReverse| at the end,
+            which allows more user customization.
+
+
+    *vimtex#env#get_inner*
+    *vimtex#env#get_outer*
+    *vimtex#env#get_all*
+        Functions that return the surrounding inner or
+        outer environment,
+        or all surrounding environments.
+        The return value is a dictionary with the following keys:
+
+        `name`  : The environment name
+        `open`  : The environment opening delimiter object
+        `close` : The environment closing delimiter object
+
+        The delimiter objects contain information about the locations and
+        arguments of the corresponding `\begin{...}[...]` and `\end{...}` commands.
 
 ==============================================================================
 FAQ                                                                *vimtex-faq*
@@ -1209,266 +1303,5 @@ to VimTeX, as I would be happy to hear of it.
 [1]: https://www.msf.org/
 
 ==============================================================================
-CHANGELOG                                                    *vimtex-changelog*
-
-The following changelog only logs particularly important changes, such as
-changes that break backwards compatibility.  See the git log for the detailed
-changelog.
-
-2021-10-25: Better inverse search~
-Deprecate *g:vimtex_compiler_progname* as it is no longer necessary.
-
-2021-10-09: Better options for syntax conceal~
-Deprecate *g:vimtex_syntax_conceal_default* in favor of
-|g:vimtex_syntax_conceal_disable|. The new option makes things more explicit
-and makes better sense (at least to me).
-
-2020-11-16: More flexible package syntax options~
-Deprecate *g:vimtex_syntax_autoload_packages* in favor of
-|g:vimtex_syntax_packages|, which allows more fine grained control over each
-package.
-
-2020-09-24: More concise grammar options~
-Deprecate *g:vimtex_textidote_jar* in favor of |g:vimtex_grammar_textidote|.
-
-2020-08-11: Remove g:vimtex_quickfix_latexlog~
-The option *g:vimtex_quickfix_latexlog* was deprecated in favor of the more
-general mechanism provided by |g:vimtex_quickfix_ignore_filters|.
-
-2020-07-31: Use events for callback hooks~
-The events |VimtexEventCompileSuccess|, |VimtexEventCompileFailed|, and
-|VimtexEventView| have been added to make it easier to hook personal
-customizations. This deprecates the following options:
-* *g:vimtex_compiler_callback_hooks*
-* *g:vimtex_view_general_callback*
-* *g:vimtex_view_general_hook_callback*
-* *g:vimtex_view_general_hook_view*
-* *g:vimtex_view_mupdf_hook_callback*
-* *g:vimtex_view_mupdf_hook_view*
-* *g:vimtex_view_skim_hook_callback*
-* *g:vimtex_view_skim_hook_view*
-* *g:vimtex_view_zathura_hook_callback*
-* *g:vimtex_view_zathura_hook_view*
-
-2020-07-19: Released version 1.0~
-Version 1.0 (and earlier) works on Vim 7.4 and with neovim 0.1.7. Later
-versions require Vim 8.0 or neovim 0.4.3.
-
-2018-08-15: Refactored the ToC interface~
-I've made a large update to the code for the ToC window in order to simplify
-and unify the interface. In the new version, |g:vimtex_toc_config| replaces
-all of the following options:
-* *g:vimtex_index_split_width*
-* *g:vimtex_index_split_pos*
-* *g:vimtex_index_show_help*
-* *g:vimtex_index_resize*
-* *g:vimtex_index_hide_line_numbers*
-* *g:vimtex_index_mode*
-* *g:vimtex_toc_layers*
-* *g:vimtex_toc_fold*
-* *g:vimtex_toc_fold_level_start*
-* *g:vimtex_toc_hotkeys*
-* *g:vimtex_toc_refresh_always*
-* *g:vimtex_toc_show_numbers*
-* *g:vimtex_toc_tocdepth*
-
-2017-07-27: Major refactoring of the folding feature~
-I've made a large update to the code for folding. The configuration of the
-various folded elements is now done through a single option:
-|g:vimtex_fold_types|.
-
-Deprecated options:
-* *g:vimtex_fold_comments*
-* *g:vimtex_fold_preamble*
-* *g:vimtex_fold_envs*
-* *g:vimtex_fold_env_blacklist*
-* *g:vimtex_fold_env_whitelist*
-* *g:vimtex_fold_markers*
-* *g:vimtex_fold_parts*
-* *g:vimtex_fold_sections*
-* *g:vimtex_fold_commands*
-* *g:vimtex_fold_commands_default*
-*vimtex-lacheck*
-2017-06-05: Removed Lacheck support~
-Removed support for using `lacheck` for checking LaTeX syntax. The reason is
-that there exist several (good) external plugins for syntax checking files.
-These are general purpose plugins that work for multiple file types. For more
-info, see |vimtex-and-friends|.
-
-2017-05-20: Updated TOC options~
-There's been a few updates to the TOC. During this work, I removed some
-unnecessary options.
-
-Deprecated options:
-* *g:vimtex_toc_fold_levels*  (was not necessary)
-* *g:vimtex_toc_number_width*  (see |g:vimtex_toc_tocdepth|)
-
-2017-03-31: Refactored quickfix related features~
-I've added a more general layer for handling different error parsers.
-Currently there are few or now changes from the user point of view, but this
-should make it possible to add other methods for showing errors in a LaTeX
-project than the current one that parses the `.log` file directly.
-
-Deprecated options:
-* *g:vimtex_quickfix_warnings*  (see |g:vimtex_quickfix_latexlog|)
-
-2017-03-28: Major refactoring of initialization~
-Added a general compiler interface, see |vimtex-compiler|.  To configure the
-`latexmk` compiler, see |g:vimtex_compiler_latexmk|.
-
-Deprecated options:
-* *g:vimtex_latexmk_enabled* (use |g:vimtex_compiler_enabled|)
-* *g:vimtex_latexmk_progname* (use |g:vimtex_compiler_progname|)
-* *g:vimtex_latexmk_callback_hooks* (use |g:vimtex_compiler_callback_hooks|)
-* *g:vimtex_latexmk_callback*
-* *g:vimtex_latexmk_autojump*
-* *g:vimtex_latexmk_continuous*
-* *g:vimtex_latexmk_background*
-* *g:vimtex_latexmk_options*
-
-Deprecated commands:
-* *VimtexCompileToggle* (use |:VimtexCompile|)
-
-2017-03-28: Major refactoring of initialization~
-The initialization has been refactored in order to provide a more consistent
-separation of buffer initialization and state initialization. This has no
-major consequence for users, but it makes maintenance and further development
-easier.
-
-2017-03-02: Changed how to set ignored warnings~
-I'm updating the changelog to notify of a change to the quickfix settings.
-
-Deprecated options:
-* *g:vimtex_quickfix_ignore_all_warnings*
-* *g:vimtex_quickfix_ignored_warnings*
-
-See instead:
-  |g:vimtex_quickfix_warnings|
-
-2016-05-31: A lot of things have updated~
-I know that people would like to see a simple list of changes. Unfortunately,
-I am bad at keeping this changelog updated. All details are available in the
-git log, though. The reason I added this entry is to I have removed
-an option:
-
-* *g:vimtex_env_complete_list* --- It is no longer necessary. Completion
-                                 candidates are instead parsed from the
-                                 project.
-
-2016-02-06: Large refactoring of delimiter parsing~
-I've refactored a lot of the code in order to make the parsing of delimiters
-and features that rely on delimiter detection and similar more consistent.
-This results in some changes in option names and similar, but it should make
-it easier to provide improved and more robust features.
-
-There is one feature change: The delimiter toggle now consistently toggles the
-modifier, not the delimiter itself, and it toggles between a range of
-modifiers by default. For customization, see |g:vimtex_delim_toggle_mod_list|.
-
-The following options have changed names:
-* *g:vimtex_change_set_formatexpr* ---> |g:vimtex_format_enabled|
-* *g:vimtex_change_complete_envs*  ---> |g:vimtex_env_complete_list|
-* *g:vimtex_change_toggled_delims* ---> |g:vimtex_delim_toggle_mod_list|
-
-The following options have been removed:
-* *g:vimtex_change_ignored_delims_pattern* --- It was no longer necessary
-
-The following mappings have been renamed:
-* *<plug>(vimtex-delete-env)*   ---> |<plug>(vimtex-env-delete)|
-* *<plug>(vimtex-delete-cmd)*   ---> |<plug>(vimtex-cmd-delete)|
-* *<plug>(vimtex-change-env)*   ---> |<plug>(vimtex-env-change)|
-* *<plug>(vimtex-change-cmd)*   ---> |<plug>(vimtex-cmd-change)|
-* *<plug>(vimtex-toggle-star)*  ---> |<plug>(vimtex-env-toggle-star)|
-* *<plug>(vimtex-toggle-delim)* ---> |<plug>(vimtex-delim-toggle-modifier)|
-* *<plug>(vimtex-create-cmd)*   ---> |<plug>(vimtex-cmd-create)|
-* *<plug>(vimtex-close-env)*    ---> |<plug>(vimtex-delim-close)|
-
-2015-10-19: Added convenient insert mode mappings~
-I've merged the `math_mappings` branch (see #172 and #251). It adds the
-feature that is explained in |vimtex-imaps|.
-
-2015-06-06: Minor but convenient restructuring (++)~
-I've changed a lot of the code structure in relatively small ways.  For
-instance, instead of referring to the particular data blobs through the global
-array, I instead linked a buffer variable to the correct global array element.
-
-One particular change is that all modules are now initialized in three steps:
-
-  1. Initialize module options
-  2. Initialize script variables and single execution functionalities
-  3. Initialize buffer options
-
-Finally, I've cleaned up a lot of the code by removing some deprecation
-warnings and similar.
-
-2015-03-21: Implemented index buffers, deprecated vimtex_toc filetype~
-The system for displaying the table of content relied on a dedicated filetype
-plugin.  This was inherited from LaTeX-Box, and worked quite well.  However,
-I intend to implement more functionality that uses the same kind of buffer to
-display similar things, such as a list of labels.  I realized I wanted the ToC
-window to be more adaptable, so I implemented the `index` interface for such
-buffers.  The `index` in itself may be used to create ToC-like buffers with
-simple actions.  The |vimtex-toc| uses and expands the `index` in such a way
-that the changes should barely be noticeable from the user perspective.  Note
-however the following variable name changes:
-
-* *g:vimtex_toc_numbers_width*     ---> |g:vimtex_toc_number_width|
-* *g:vimtex_toc_hide_preamble*     ---> |g:vimtex_toc_show_preamble|
-* *g:vimtex_toc_numbers*           ---> |g:vimtex_toc_show_numbers|
-
-* *g:vimtex_toc_hide_line_numbers* ---> |g:vimtex_index_hide_line_numbers|
-* *g:vimtex_toc_resize*            ---> |g:vimtex_index_resize|
-* *g:vimtex_toc_hide_help*         ---> |g:vimtex_index_show_help|
-* *g:vimtex_toc_split_pos*         ---> |g:vimtex_index_split|
-* *g:vimtex_toc_width*             -/
-
-*vim-latex-namechange*
-2015-03-08: Changed the name to VimTeX~
-The old name `vim-latex` was already used by LaTeX-Suite.  I was not aware of
-the name clash in the beginning.  Due to the rising popularity of this plugin,
-it has become clear that such a name clash is very inconvenient.  The present
-change is therefore very much needed.
-
-The name change is reflected throughout the plugin in the names of commands,
-mappings, functions, and options.  People should update their `vimrc` settings
-accordingly.  For instance, every option name should be changed from
-
-
-  g:latex_... = ...
-
-to
-
-
-  g:vimtex_... = ...
-
-2014-12-07: Added more general view functionality~
-Added new module for view functionality.  This allows more complex view
-functions (and commands), for instance to do forward (and possibly inverse)
-searching through `synctex`.  In the first version, I added forward search for
-mupdf by use of the `synctex` command and `xdotool`.
-
-The `g:latex_viewer` option has now been deprecated.  Instead one should use
-|g:vimtex_view_method| and |g:vimtex_view_general_viewer|.
-
-Deprecated option:
-* *g:latex_viewer*
-
-2014-06-13: Changed some option names~
-Some VimTeX option names were changed in an attempt to make the names
-more consistent.  These options are listed here for reference:
-* *g:latex_errorformat_ignore_warnings*
-* *g:latex_errorformat_show_warnings*
-* *g:latex_latexmk_autojump*
-* *g:latex_latexmk_quickfix*
-
-The new names are, respectively:
-* |g:vimtex_quickfix_ignored_warnings|
-* |g:vimtex_quickfix_ignore_all_warnings|
-* |g:vimtex_quickfix_autojump|
-* |g:vimtex_quickfix_mode|
-
-2013-10-05: First public release~
-VimTeX was first released on github on this date. The initial version was
-named vim-latex, which conflicted with Vim LaTeX-Suite which is also known as
 DIY_again
 DIY_2  vim:filetype=help:syntax=help:
