@@ -242,26 +242,6 @@ Compiler backend
     up-to-date view of the document. The script runs on both UNIX and MS-WINDOWS
     (XP, etc)." [Copied from the latexmk page.]  (|vimtex-compiler-latexmk|)
 
-        `latexrun`: https://github.com/aclements/latexrun
-        Similar to `latexmk` in that it runs the desired LaTeX engine an
-    appropriate number of times, including `bibtex`/`biber`. However, it differs
-    in philosophy in that it only does the build part. It does not support
-    continuous builds, nor automatic starting of the viewer. However, it does
-    parse the output log in order to provide a more concise list of relevant
-    warnings and error messages (this has currently not been adapted to VimTeX,
-    as of yet). (|vimtex-compiler-latexrun|)
-
-        `tectonic`: https://tectonic-typesetting.github.io/
-        `tectonic` is a complete, self-contained TeX/LaTeX engine, powered by XeTeX
-    and TeXLive. It doesn't support continuous build like `latexmk` but it
-    presents other worth mentioning features such as automatic support file
-    downloading along with reproducible builds and full Unicode and OpenType
-    fonts support thanks to the power of XeTeX. (|vimtex-compiler-tectonic|)
-
-        `arara`: https://github.com/cereda/arara
-        `arara` is a TeX automation tool similar to the above mentioned tools,
-    but where the compilation behaviour is typically defined in the preamble
-    of the document. (|vimtex-compiler-arara|)
 
 Clientserver
 *vimtex-clientserver*
@@ -469,38 +449,40 @@ dictionaries. See also [0,1].
 ------------------------------------------------------------------------------
 PACKAGE DETECTION                                    *vimtex-package-detection*
 
-VimTeX maintains a list of latex packages that
-are required by the current project.
-This list is used by VimTeX for instance to determine which
-commands to suggest during command completion (see |vimtex-complete-commands|)
-and which  packages to look up documentation for (see |vimtex-doc-package|).
-The list can be viewed with |:VimtexInfo|.
+    VimTeX maintains a list of latex packages that
+    are required by the current project.
+    This list is used by VimTeX for instance to determine which
+    commands to suggest during command completion (see |vimtex-complete-commands|)
+    and which  packages to look up documentation for (see |vimtex-doc-package|).
+    The list can be viewed with |:VimtexInfo|.
 
-The package list is determined in two ways:
+    The package list is determined in two ways:
 
 
-1. If a `.fls` file exists having the name of the main file,
-        it is scanned.
-   This file is created by `latex` (or `pdflatex`, `xelatex`, ...)
-        if it is  run with the `-recorder` option
-        (which is set by default when using  latexmk,
-        unless overridden in an initialization file).
+    1. If a `.fls` file exists having the name of the main file,
+            it is scanned.
+    This file is created by `latex` (or `pdflatex`, `xelatex`, ...)
+            if it is  run with the `-recorder` option
+            (which is set by default when using  latexmk,
+            unless overridden in an initialization file).
 
-    Parsing the `.fls`  file is done both at VimTeX initialization and
-    after each ¿successful¿  compilation,  if possible.
+        Parsing the `.fls`  file is done both at VimTeX initialization and
+        after each ¿successful¿  compilation,  if possible.
 
-    Parsing after successful compilations requires that one uses
-        a) continuous compilation with callbacks
-            (see the `callback` option  for |g:vimtex_compiler_latexmk|), or
-        b) single-shot compilation.
+        Parsing after successful compilations
+        requires that one uses
+            a) single-shot compilation.
+        or
+            b) continuous compilation with callbacks
+                (see the `callback` option  for |g:vimtex_compiler_latexmk|),
 
-2. Otherwise, the preamble is parsed for `\usepackage` statements.
-    This is  slower and less accurate than `.fls` file parsing.
-    Therefore, it is only  done during VimTeX initialization.
-    If desired, one may manually reload  VimTeX to parse the preamble again
-    during an editing session.
+    2. Otherwise, the preamble is parsed for `\usepackage` statements.
+        This is  slower and less accurate than `.fls` file parsing.
+        Therefore, it is only  done during VimTeX initialization.
+        If desired, one may manually reload  VimTeX to parse the preamble again
+        during an editing session.
 
-    See  |:VimtexReload| and |<plug>(vimtex-reload)| (by default mapped to  `<localleader>lx`).
+        See  |:VimtexReload| and |<plug>(vimtex-reload)| (by default mapped to  `<localleader>lx`).
 
 ------------------------------------------------------------------------------
 INTEGRATION WITH OTHER PLUGINS                             *vimtex-and-friends*
@@ -2336,156 +2318,6 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: 1
 
-    *g:vimtex_view_enabled*
-        Use this option to disable/enable the VimTeX viewer interface.
-
-        Default value: 1
-
-    *g:vimtex_view_automatic*
-        If enabled, the viewer should open automatically when compilation has
-        started in `continuous` mode and if `callback` is enabled, or if
-        `continuous` mode is disabled. This should work for the following compilers:
-        * |vimtex-compiler-latexmk|
-        * |vimtex-compiler-latexrun|
-        * |vimtex-compiler-arara|
-        * |vimtex-compiler-tectonic|
-
-        Default value: 1
-
-    *g:vimtex_view_use_temp_files*
-        If nonzero, this will copy output files to a corresponding set of files
-        with `_vimtex` prepended to the name. If one combines this with the callback
-        feature, this may provide a very convenient way to avoid that the pdf
-        becomes unavailable during compilation, as it will only update the viewer
-        output file after a successful compilation.
-
-        The behaviour depends on the value:
-
-            1: Copy output files after successful compilations and then update.
-            2: Copy output files after all compilations and then update.
-
-        This is only relevant for the `latexmk` compiler backend. `latexrun`
-                    already ensures that the output file is updated only after the
-                    compilation is completed.
-
-        This will disable the viewer from the `latexmk` end. That is, if this
-                    option is enabled, opening and updating the pdf viewer will have to be
-                    done by the user or by VimTeX, even if `latexmk` is chosen as the
-                    compiler.
-
-        This works best with the 'mupdf' and 'zathura' viewers. In particular,
-                    these viewers should update automatically after the pdf is updated.
-                    For general viewers, one has to create a callback function and connect
-                    it through the |VimtexEventCompileSuccess| event to update the viewer.
-
-        Default value: 0
-
-    *g:vimtex_view_forward_search_on_start*
-        If disabled, the first invocation of the viewer will not perform a forward
-        search to the current cursor position.
-
-        This option is only relevant when |g:vimtex_view_method| is set to
-                    either `mupdf` or `zathura`. See also the specific viewer sections for
-                    more info: |vimtex-view-mupdf|, |vimtex-view-zathura|.
-
-        Default value: 1
-
-    *g:vimtex_view_reverse_search_edit_cmd*
-        When working in a multi-file project, initiating inverse search (see
-        |vimtex-synctex-inverse-search|) may require opening a file that is not
-        currently open in a window. This option controls the command that is used to
-        open files as a result of an inverse search.
-
-        Examples:
-            * `edit`     open buffer in current window
-            * `tabedit`  open buffer in new tab page
-            * `split`    split current window to open buffer
-
-        Default value: `edit`
-
-    *g:vimtex_view_method*
-        Set the viewer method. By default, a generic viewer is used through the
-        general view method (e.g. `xdg-open` on Linux).
-
-        Possible values:
-            * `'general'`
-            * `'mupdf'`      |vimtex-view-mupdf|
-            * `'skim'`       |vimtex-view-skim|
-            * `'zathura'`    |vimtex-view-zathura|
-
-        See |vimtex-view-configuration| for more information on various popular
-        viewers and on how to configure them.
-
-        Default: `general`
-
-    *g:vimtex_view_general_options*
-        Set options for the specified general viewer, see |vimtex-view-general|.
-        The options are parsed to substitute the following keywords:
-
-            `@pdf`    Path to pdf file
-            `@tex`    Path to tex file
-            `@line`   Current line number
-            `@col`    Current column number
-
-        Default value: '@pdf'
-
-    *g:vimtex_view_mupdf_options*
-    *g:vimtex_view_zathura_options*
-        Set options for mupdf (|vimtex-view-mupdf|) and Zathura
-        (|vimtex-view-zathura|), respectively.
-
-        Default value: ''
-
-    *g:vimtex_view_general_viewer*
-        Use generic viewer application, see |vimtex-view-general|.
-
-        Default value:
-            Linux:   `xdg-open`
-            macOS:   `open`
-            Windows: `SumatraPDF` or `mupdf` if available, else `start ""`
-
-    *g:vimtex_view_mupdf_send_keys*
-        A string of keys that will be sent to MuPDF just after the PDF file has been
-        opened.
-
-        Default value: ''
-
-    *g:vimtex_view_sioyek_exe*
-        The name or path of the Sioyek executable. The default should usually work,
-        but in some cases it can be useful or necessary to specify the executable
-        directly. E.g., if one downloads a release version, it may be named
-        something like `'Sioyek-x86_64.AppImage'`. Unless the executable location is
-        available in `PATH` one must use an absolute path here.
-
-        Default value: `'sioyek'`
-
-    *g:vimtex_view_skim_activate*
-        Set this option to 1 to make Skim have focus after command |:VimtexView| in
-        addition to being moved to the foreground.
-
-        Default value: 0
-
-    *g:vimtex_view_skim_sync*
-        Set this option to 1 to make Skim perform a forward search after successful
-        compilation.
-
-        Default value: 0
-
-    *g:vimtex_view_skim_reading_bar*
-        Set this option to 1 to highlight current line in PDF after command
-        |:VimtexView| or compiler callback.
-
-        Default value: 0
-
-    *g:vimtex_view_zathura_check_libsynctex*
-        Check on startup if Zathura is compiled with libsynctex. This is done by
-        default because Zathura on some systems is compiled without libsynctex
-        support, in which case forward and inverse search will not work. When this
-        is the case, the startup check will provide a notification to the user.
-
-        If this option is set to 0 or |v:false|, then the check is skipped.
-
-        Default value: 1
 
     *g:vimtex_callback_progpath*
         The path to the Vim/neovim executable. This is currently passed to Zathura
@@ -3305,16 +3137,18 @@ automatically be filtered to only show equation references.
 COMPLETE COMMANDS AND ENVIRONMENTS                   *vimtex-complete-commands*
 *vimtex-complete-environments*
 
-Command completion is available after `\` and should provide completion
-candidates for relevant LaTeX commands.  The document's preamble is analysed,
-and commands will be completed for the loaded packages as well as those
-defined within the preamble using `\newcommand`, `\let` and `\def`.  Environment
-completion is also available after `\begin{` or `\end{`.  As with commands, the
-suggested environment names come from the loaded packages and `\newenvironment`
-definitions in the preamble.
+    Command completion is available after `\` and should provide completion candidates for relevant LaTeX commands.
+    The document's preamble is analysed,
+    and commands will be completed for the ¿loaded packages¿
+    as well as those defined within the preamble using `\newcommand`,  `\let` and `\def`.
 
-A lot of packages are supported, see the path `VIMTEX/autoload/vimtex/complete`
-for a relevant file listing.
+    Environment completion is also available after `\begin{` or `\end{`.
+        As with commands,
+        the suggested environment names come from the loaded packages and
+        `\newenvironment` definitions in the preamble.
+
+    A lot of packages are supported,
+        see the path `VIMTEX/autoload/vimtex/complete`  for a relevant file listing.
 
 ------------------------------------------------------------------------------
 COMPLETE FILE NAMES                                 *vimtex-complete-filenames*

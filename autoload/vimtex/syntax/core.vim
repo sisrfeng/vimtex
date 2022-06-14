@@ -211,51 +211,102 @@ fun! vimtex#syntax#core#init() abort "
             syn match texCmdSize "\\Huge\>"               conceal
 
         " \newcommand
-        syn match texCmdNewcmd "\\\%(re\)\?newcommand\>\*\?"
-                    \ nextgroup=texNewcmdArgName skipwhite skipnl
-        syn match texNewcmdArgName "\\[a-zA-Z@]\+"
-                    \ nextgroup=texNewcmdOpt,texNewcmdArgBody skipwhite skipnl
-                    \ contained
-        call vimtex#syntax#core#new_arg('texNewcmdArgName', {
-                    \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
-                    \ 'contains': ''
-                    \})
-        call vimtex#syntax#core#new_opt('texNewcmdOpt', {
+            syn match texCmdNewcmd "\v\\%(re)?newcommand>\*?"
+                        \ nextgroup=texNewcmdArgName
+                        \ skipwhite skipnl
+
+            syn match texNewcmdArgName "\\[a-zA-Z@]\+"
+                        \ nextgroup=texNewcmdOpt,texNewcmdArgBody
+                        \ skipwhite skipnl
+                        \ contained
+
+            call vimtex#syntax#core#new_arg('texNewcmdArgName',
+                  \ {
+                    \ 'next'     : 'texNewcmdOpt,texNewcmdArgBody',
+                    \ 'contains' : ''
+                   \}
+                 \ )
+
+            call vimtex#syntax#core#new_opt('texNewcmdOpt',
+                   \ {
                     \ 'next': 'texNewcmdOpt,texNewcmdArgBody',
                     \ 'opts': 'oneline',
-                    \})
-        call vimtex#syntax#core#new_arg('texNewcmdArgBody')
-        syn match texNewcmdParm contained "#\+\d" containedin=texNewcmdArgBody
+                    \}
+                 \ )
+
+            call vimtex#syntax#core#new_arg('texNewcmdArgBody')
+            syn match texNewcmdParm contained   "\v#+\d" containedin=texNewcmdArgBody
 
         " \newenvironment
-        syn match texCmdNewenv nextgroup=texNewenvArgName skipwhite skipnl "\\\%(re\)\?newenvironment\>"
-        call vimtex#syntax#core#new_arg('texNewenvArgName', {'next': 'texNewenvArgBegin,texNewenvOpt'})
-        call vimtex#syntax#core#new_opt('texNewenvOpt', {
-                    \ 'next': 'texNewenvArgBegin,texNewenvOpt',
-                    \ 'opts': 'oneline'
-                    \})
-        call vimtex#syntax#core#new_arg('texNewenvArgBegin', {'next': 'texNewenvArgEnd'})
-        call vimtex#syntax#core#new_arg('texNewenvArgEnd')
-        syn match texNewenvParm contained "#\+\d" containedin=texNewenvArgBegin,texNewenvArgEnd
+            syn match texCmdNewenv nextgroup=texNewenvArgName skipwhite skipnl "\\\%(re\)\?newenvironment\>"
+            call vimtex#syntax#core#new_arg('texNewenvArgName', {'next': 'texNewenvArgBegin,texNewenvOpt'})
+            call vimtex#syntax#core#new_opt('texNewenvOpt', {
+                        \ 'next': 'texNewenvArgBegin,texNewenvOpt',
+                        \ 'opts': 'oneline'
+                        \})
+            call vimtex#syntax#core#new_arg('texNewenvArgBegin', {'next': 'texNewenvArgEnd'})
+            call vimtex#syntax#core#new_arg('texNewenvArgEnd')
+            syn match texNewenvParm contained "#\+\d" containedin=texNewenvArgBegin,texNewenvArgEnd
 
         " Definitions/Commands
         " E.g. \def \foo #1#2 {foo #1 bar #2 baz}
-        syn match texCmdDef "\\def\>" nextgroup=texDefArgName skipwhite skipnl
-        syn match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[a-zA-Z@]\+"
-        syn match texDefArgName contained nextgroup=texDefParmPre,texDefArgBody skipwhite skipnl "\\[^a-zA-Z@]"
-        syn match texDefParmPre contained nextgroup=texDefArgBody skipwhite skipnl "#[^{]*"
-        syn match texDefParm contained "#\+\d" containedin=texDefParmPre,texDefArgBody
-        call vimtex#syntax#core#new_arg('texDefArgBody')
+            syn match texCmdDef     "\v\\def>"
+                    \ nextgroup=texDefArgName
+                    \ skipwhite skipnl
+
+            syn match texDefArgName "\v\\[a-zA-Z@]+"
+                    \ nextgroup=texDefParmPre,texDefArgBody
+                    \ skipwhite skipnl
+                    \ contained
+
+            syn match texDefArgName "\\[^a-zA-Z@]"
+                    \ nextgroup=texDefParmPre,texDefArgBody
+                    \ skipwhite skipnl
+                    \ contained
+            syn match texDefParmPre "#[^{]*"
+                    \ nextgroup=texDefArgBody
+                    \ skipwhite skipnl
+                    \ contained
+
+            syn match texDefParm    "\v#+\d"
+                    \ contained
+                    \ containedin=texDefParmPre,texDefArgBody
+
+            call vimtex#syntax#core#new_arg('texDefArgBody')
 
         " \let
-        syn match texCmdLet "\\let\>" nextgroup=texLetArgName skipwhite skipnl
-        syn match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[a-zA-Z@]\+"
-        syn match texLetArgName  contained nextgroup=texLetArgBody,texLetArgEqual skipwhite skipnl "\\[^a-zA-Z@]"
-        " Note: define texLetArgEqual after texLetArgBody; order matters
-        " E.g. in '\let\eq==' we want: 1st = is texLetArgEqual, 2nd = is texLetArgBody
-        " Reversing lines results in:  1st = is texLetArgBody,  2nd = is unmatched
-        syn match texLetArgBody  contained "\\[a-zA-Z@]\+\|\\[^a-zA-Z@]\|\S" contains=TOP,@Nospell
-        syn match texLetArgEqual contained nextgroup=texLetArgBody skipwhite skipnl "="
+            syn match texCmdLet      "\\let\>"
+                            \ nextgroup=texLetArgName
+                            \ skipwhite skipnl
+
+            syn match texLetArgName  "\v\\[a-zA-Z@]+"
+                            \ nextgroup=texLetArgBody,texLetArgEqual
+                            \ skipwhite skipnl
+                            \ contained
+
+            syn match texLetArgName  "\\[^a-zA-Z@]"
+                            \ contained
+                            \ nextgroup=texLetArgBody,texLetArgEqual
+                            \ skipwhite skipnl
+
+            " Note: define texLetArgEqual after texLetArgBody
+            " Order matters:
+            " E.g. in
+                " '\let\eq=='
+                " we want:
+                " 1st = is texLetArgEqual,
+                " 2nd = is texLetArgBody
+            " Reversing lines results in:
+                " 1st = is texLetArgBody,
+                " 2nd = is unmatched
+                syn match texLetArgBody  "\v\\[a-zA-Z@]+|\\[^a-zA-Z@]|\S"
+                        \ contained
+                        \ contains=TOP,@Nospell
+
+                syn match texLetArgEqual "="
+                        \ contained
+                        \ nextgroup=texLetArgBody
+                        \ skipwhite skipnl
 
         " Reference and cite commands
             syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\nocite>"
@@ -698,8 +749,8 @@ fun! vimtex#syntax#core#init() abort "
 
 
     " 自定义syntax conceal等
-        for l:item in g:vimtex_syntax_custom_cmds
-            call vimtex#syntax#core#new_cmd(l:item)
+        for l:a_custom in g:vimtex_syntax_custom_cmds
+            call vimtex#syntax#core#new_cmd(l:a_custom)
         endfor
 
     let b:current_syntax = 'tex'
@@ -817,29 +868,29 @@ endf
 "\ new系列函数
     fun! vimtex#syntax#core#new_arg(grp, ...) abort
         let l:cfg = extend(
-                    \ {
-                    \ 'matchgroup' : 'matchgroup=texDelim'                ,
-                    \ 'matcher'    : 'start="{" skip="\\\\\|\\}" end="}"' ,
-                    \ 'opts'       : 'contained'                          ,
-                    \ 'contains'   : 'TOP,@NoSpell'                       ,
-                    \ 'next'       : ''                                   ,
-                    \ 'skipwhite'  : v:true                               ,
-                    \},
-                    \ a:0 > 0   ?   a:1    : {}
+                     \ {
+                       \ 'matchgroup' : 'matchgroup=texDelim'                ,
+                       \ 'matcher'    : 'start="{" skip="\\\\\|\\}" end="}"' ,
+                       \ 'opts'       : 'contained'                          ,
+                       \ 'contains'   : 'TOP,@NoSpell'                       ,
+                       \ 'next'       : ''                                   ,
+                       \ 'skipwhite'  : v:true                               ,
+                      \},
+                     \ a:0 > 0   ?   a:1    : {}
                     \ )
 
-        exe     'syntax region' a:grp
-                    \ l:cfg.matchgroup
-                    \ l:cfg.matcher
-                    \ l:cfg.opts
-                    \ ( empty(l:cfg.contains)
+        exe   'syntax region' a:grp
+                  \ l:cfg.matchgroup
+                  \ l:cfg.matcher
+                  \ l:cfg.opts
+                  \ ( empty(l:cfg.contains)
                     \ ?   ''
                     \ :   'contains=' . l:cfg.contains
-                    \ )
-                    \ ( empty(l:cfg.next)
-                        \ ? ''
-                    \   : 'nextgroup=' . l:cfg.next . (l:cfg.skipwhite ? ' skipwhite skipnl' : '')
-                    \ )
+                  \ )
+                  \ ( empty(l:cfg.next)
+                    \ ? ''
+                  \   : 'nextgroup=' . l:cfg.next . (l:cfg.skipwhite ? ' skipwhite skipnl' : '')
+                  \ )
     endf
 
     fun! vimtex#syntax#core#new_opt(grp, ...) abort
@@ -857,8 +908,8 @@ endf
                     \ (empty(l:cfg.next) ? '' : 'nextgroup=' . l:cfg.next . ' skipwhite skipnl')
     endf
 
-    fun! vimtex#syntax#core#new_cmd(cfg) abort "
-        if empty(get(a:cfg, 'name')) | return | endif
+    fun! vimtex#syntax#core#new_cmd(your_cfg) abort "
+        if empty(get(a:your_cfg, 'name')) | return | endif
 
         " Parse options/config
         let l:cfg = extend({
@@ -867,13 +918,16 @@ endf
                         \ 'concealchar' : ''      ,
                         \ 'opt'         : v:true  ,
                         \ 'arg'         : v:true  ,
+                        \ 'hide_arg'    : v:false  ,
                         \ 'argstyle'    : ''      ,
                         \ 'argspell'    : v:true  ,
                         \ 'arggreedy'   : v:false ,
                         \ 'nextgroup'   : ''      ,
                         \ 'hlgroup'     : ''      ,
-                    \},
-                    \ a:cfg)
+                     \},
+                    \ a:your_cfg)
+                      "\ a:your_cfg可以扩展或覆盖前面的dict
+
 
         " Intuitive handling of concealchar
         if !empty(l:cfg.concealchar)
@@ -891,7 +945,7 @@ endf
 
         " Define group names
             let l:name = 'C' . toupper(l:cfg.name[0]) . l:cfg.name[1:]
-                    " C: 表示Custom
+                    " C: 表示Custom 貌似可以随意改, 稳妥起见, 不改
             let l:pre = l:cfg.mathmode ? 'texMath' : 'tex'
             let l:group_cmd = l:pre . 'Cmd' . l:name
             let l:group_opt = l:pre . l:name . 'Opt'
@@ -902,7 +956,7 @@ endf
                 let l:nextgroups = 'skipwhite nextgroup=' . l:cfg.nextgroup
             el
 
-            " Add syntax rules for the optional group
+            " Add syntax rules for the optional group [xxxxx]
             let l:nextgroups = []
             if l:cfg.opt
                 let l:nextgroups += [l:group_opt]
@@ -916,23 +970,29 @@ endf
                 exe     'highlight def link' l:group_opt 'texOpt'
             en
 
-            " Add syntax rules for the argument group
+            " Add syntax rules for the argument group {xxxxx}
             if l:cfg.arg
                 let l:nextgroups += [l:group_arg]
 
-                let l:arg_cfg = {'opts': 'contained'}
-                if l:cfg.conceal && empty(l:cfg.concealchar)
-                    let l:arg_cfg.opts .= ' concealends'
-                en
+                "\ arg.opts:
+                let l:set_arg = {'opts': 'contained'}
+                    if l:cfg.conceal && empty(l:cfg.concealchar)
+                        let l:set_arg.opts .= ' concealends'
+                    en
+                    "\ 我加的
+                    if l:cfg.hide_arg
+                        let l:set_arg.opts .= ' conceal'
+                    en
+
                 if l:cfg.mathmode
-                    let l:arg_cfg.contains = '@texClusterMath'
+                    let l:set_arg.contains = '@texClusterMath'
                 elseif !l:cfg.argspell
-                    let l:arg_cfg.contains = 'TOP,@Spell'
+                    let l:set_arg.contains = 'TOP,@Spell'
                 en
                 if l:cfg.arggreedy
-                    let l:arg_cfg.next = l:group_arg
+                    let l:set_arg.next = l:group_arg
                 en
-                call vimtex#syntax#core#new_arg(l:group_arg, l:arg_cfg)
+                call vimtex#syntax#core#new_arg(l:group_arg, l:set_arg)
 
                 let l:style = get({
                             \ 'bold'          : 'texStyleBold'          ,
@@ -1360,11 +1420,6 @@ endf
         syn match texMathSymbol '\\|'                   contained conceal cchar=‖
         syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
         syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
-
-        " 在vimtex_syntax_custom_cmds 里用mathmode即可:
-            " syn match texMathSymbol '\\times'                contained conceal cchar=x
-            " syn match texMathSymbol '\\emph'                contained conceal
-            " $命令名$
 
         for [l:cmd, l:symbol] in s:cmd_symbols
             exe     'syntax match texMathSymbol'

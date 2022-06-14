@@ -554,292 +554,433 @@ TODO: More documentation here. Examples of configuration.
 ==============================================================================
 VIEW                                                              *vimtex-view*
 
-VimTeX provides the command |:VimtexView| to open the output PDF in a desired
-viewer specified by |g:vimtex_view_method|. The command is mapped to
-`<localleader>lv` by default. The supported viewers are described in
-|vimtex-view-configuration|, which also explains how to configure them.
+    VimTeX provides the command |:VimtexView| to open the output PDF in a desired
+    viewer specified by |g:vimtex_view_method|. The command is mapped to
+    `<localleader>lv` by default. The supported viewers are described in
+    |vimtex-view-configuration|, which also explains how to configure them.
 
-Many viewers support synctex for navigating between the PDF and the source tex
-file. If possible, |:VimtexView| will perform forward search when the viewer
-is opened. See |vimtex-synctex| for more details.
+    Many viewers support synctex for navigating between the PDF and the source tex
+    file. If possible, |:VimtexView| will perform forward search when the viewer
+    is opened. See |vimtex-synctex| for more details.
 
-Associated settings:
-* |g:vimtex_view_enabled|
-* |g:vimtex_view_automatic|
-* |g:vimtex_view_forward_search_on_start|
-* |g:vimtex_view_use_temp_files|
-* |g:vimtex_view_method|
-* |g:vimtex_view_general_options|
-* |g:vimtex_view_general_viewer|
+    Associated settings:
+    * |g:vimtex_view_enabled|
+    * |g:vimtex_view_automatic|
+    * |g:vimtex_view_forward_search_on_start|
+    * |g:vimtex_view_use_temp_files|
+    * |g:vimtex_view_method|
+    * |g:vimtex_view_general_options|
+    * |g:vimtex_view_general_viewer|
 
-Associated events:
-* |VimtexEventView|
-* |VimtexEventViewReverse|
+    Associated events:
+    * |VimtexEventView|
+    * |VimtexEventViewReverse|
 
 ------------------------------------------------------------------------------
 VIEWER CONFIGURATION                                *vimtex-view-configuration*
 
-|g:vimtex_view_method| is the main configuration variable. It allows to choose
-between a set of predefined viewers, including a generic customizable
-interface. For the predefined viewers, forward search with synctex should
-usually work without any further configuration. With the general viewer, one
-may often specify options to enable forward search. Inverse search requires
-configuration on the viewer side in most cases.
+    For the predefined viewers,
+    forward search with synctex should
+        usually work without any further configuration.
 
-The generic interface is flexible. It relies on three options:
-* |g:vimtex_view_general_viewer|
-    Specify the viewer executable.
-* |g:vimtex_view_general_options|
-    Specify the viewer options (e.g. to specify forward search configuration).
-
-The following is a list of popular PDF viewers, in alphabetic order, and how
-they can be configured to work with VimTeX.
-
-*vimtex-view-evince*
-Evince~
-https://wiki.gnome.org/Apps/Evince
-Evince is a document viewer for viewing multiple document formats, including
-PDFs. It comes by default with Gnome.
-
-Configuration:
-
-  let g:vimtex_view_general_viewer = 'evince'
+    Inverse search requires configuration on the viewer side in most cases.
 
 
-Evince only supports synctex through DBus, which is not supported by
-      VimTeX. Thus VimTeX does not support forward and inverse search with
-      Evince. However, the Vim plugin `SVED` by Peter Jorgensen is reported to
-      work well in combination with VimTeX. See the plugin page [0] for more
-      information.
+    *g:vimtex_view_method*
+        Default: `general`
 
-      [0]: https://github.com/peterbjorgensen/sved
-
-*vimtex-view-mupdf*
-MuPDF~
-https://www.mupdf.com/
-MuPDF is a very minimalistic and quick PDF viewer. It does not support synctex
-itself, but VimTeX provides both forward and inverse search by abusing
-`xdotool`. Inverse search must be used from within VimTeX with the mapping
-|<plug>(vimtex-reverse-search)| (default mapping: `'<localleader>lr'`).
-
-One can also use |g:vimtex_view_mupdf_send_keys| to specify a set of keys that
-is sent to MuPDF on startup.
-
-Configuration:
-
-  let g:vimtex_view_method = 'mupdf'
-
-Associated settings:
-* |g:vimtex_view_mupdf_options|
-* |g:vimtex_view_mupdf_send_keys|
-
-Both forward and inverse search requires `xdotool` to work. Forward
-      search will only take you to the correct page. Inverse search will take
-      you to the line in Vim that corresponds to the first line of the current
-      page in MuPDF.
-
-Viewer handling uses window title matching. If there exists another pdf
-      viewer with the same name as the current project pdf file, then there
-      might be conflicts, and so MuPDF might not work as expected.
-
-*vimtex-view-okular*
-Okular~
-https://okular.kde.org/
-Okular is a very feature rich PDF viewer that supports both forward and
-inverse search.
-
-Configuration:
-
-  let g:vimtex_view_general_viewer = 'okular'
-  let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
-
-Inverse search can be set up within Okular in the settings pane under
-"Settings > Editor > Custom Text Editor" [0]. Use the viewer configuration as
-explained in |vimtex-synctex-inverse-search|.
-
-To perform an inverse search in Okular, do `shift + click` while browse mode
-is enabled.
-
-[0]: https://docs.kde.org/stable5/en/okular/okular/inverse_search.html
-
-*vimtex-view-qpdfview*
-qpdfview~
-https://launchpad.net/qpdfview
-qpdfview is a tabbed document viewer. It supports both forward and inverse
-search. The latter must be set up from within the viewer. Use the viewer
-configuration as explained in |vimtex-synctex-inverse-search|, but note that
-the interpolation variables should be `%1` for the filename and `%2` for the
-line number.
-
-Configuration:
-
-  let g:vimtex_view_general_viewer = 'qpdfview'
-  let g:vimtex_view_general_options
-    \ = '--unique @pdf\#src:@tex:@line:@col'
-
-*vimtex-view-sioyek*
-Sioyek~
-https://sioyek.info/
-Sioyek is a PDF viewer designed for reading research papers and technical
-books.
-
-Configuration:
-
-  let g:vimtex_view_method = 'sioyek'
-
-Inverse search should be automatically configured and work out of the box.
-VimTeX will try to pass options to Sioyek to automatically configure inverse
-search. This means that, in most cases, inverse search should work as expected
-without any further configuration. One may still be interested in learning how
-inverse-search configuration works, in which case one should read
-|vimtex-synctex-inverse-search|. The interpolation variables for Sioyek
-configuration are `%2` and `%1`, not `%l` and `%f`.
-
-Associated settings:
-* |g:vimtex_view_sioyek_exe|
+        Possible values:
+            * `'general'`
+                    A generic viewer is used  (e.g.  `xdg-open` on Linux)
+                    It is An ¿customizable¿ interface.
+                    one may often specify options to enable forward search.
+            * `'mupdf'`
+            * `'zathura'`    |vimtex-view-zathura|
 
 
-*vimtex-view-sumatrapdf*
-SumatraPDF~
-https://www.sumatrapdfreader.org/free-pdf-reader.html
-SumatraPDF is a PDF viewer for windows that is powerful, small, portable and
-starts up very fast. It supports both forward and inverse search.
+    各种选项
+        *g:vimtex_view_enabled*
+            Use this option to disable/enable the VimTeX viewer interface.
+            Default value: 1
 
-Configuration:
+        *g:vimtex_view_automatic*
+            源码:
+                function! s:viewer.compiler_callback(outfile) dict abort " {{{1
+                    if !g:vimtex_view_automatic
+                    \ || has_key(self, 'started_through_callback')
+                        return
+                    el
+                        call self._start(a:outfile)
+                        let self.started_through_callback = 1
+                    endif
 
-  let g:vimtex_view_general_viewer = 'SumatraPDF'
-  let g:vimtex_view_general_options
-      \ = '-reuse-instance -forward-search @tex @line @pdf'
+                endfunction
 
-For convenience, the above configuration is used by default on Windows if
-`SumatraPDF` is detected as executable.
+            If enabled:
+                if compilation `continuous` mode is disabled.
+                ||  `continuous` mode and `callback` is enabled,
 
-Inverse search must be configured under `Settings --> Options` from within
-SumatraPDF. Find the section `Set inverse search command-line` in the bottom
-and use the viewer configuration as explained in
-|vimtex-synctex-inverse-search|.
+                the viewer should open automatically
+                Work for the following compilers: latexmk
 
-Inverse search is activated with a double click in the PDF file.
+            Default value: 1
 
-There is a known issue with VimTeX + SumatraPDF when you use `xelatex`,
-      where the pdf file in SumatraPDF is not refreshed after compilation.
-      A workaround was found and posted by @Whitebeard0 here:
-      https://github.com/lervag/vimtex/issues/1410#issuecomment-506143020
+        *g:vimtex_view_use_temp_files*
+            For the `latexmk` compiler backend.
+            Default value: 0  (disable)
 
-*vimtex-view-zathura*
-Zathura~
-https://pwmt.org/projects/zathura/
-Zathura is, like MuPDF, a very fast and minimalistic viewer. Compared to
-MuPDF, it allows more user configuration. Zathura has full support for both
-forward and inverse search. Zathura should be straightforward to install and
-use on Linux with Xorg. It should also work on macOS, but users may want to
-read |vimtex-faq-zathura-macos|.
+            if  1或2
+                opening and updating the pdf viewer
+                will have to be  done by
+                    the user or  VimTeX.
+                Not by latexmk
 
-Configuration:
+            After f'{status}' compilations,
+                Copy output files
+                    to a corresponding set of files
+                    with  `_vimtex` prepended to the name.
+                and then update.
 
-  let g:vimtex_view_method = 'zathura'
+            1:  status = successful
+            2:  status = all
 
-VimTeX will try to start Zathura with the `-x` argument to specify the inverse
-search options automatically. This means that, in most cases, inverse search
-should work as expected without any further configuration. One may still be
-interested in learning how inverse-search configuration works, in which case
-one should read |vimtex-synctex-inverse-search|. The interpolation variables
-for Zathura configuration are `%{line}` and `%{input}`, not `%l` and `%f`.
 
-Associated settings:
-* |g:vimtex_view_zathura_check_libsynctex|
-* |g:vimtex_view_zathura_options|
+            If one combines this with the callback feature,
+                this may provide a very convenient way to avoid
+                that the pdf becomes unavailable during compilation,
+                as it will only update the viewer output file
+                after a successful compilation.
 
-Forward search requires `xdotool` to work properly. That is, `xdotool`
-      is used to avoid duplicate Zathura instances when the
-      |:VimtexView| command is issued. This is a more severe restriction
-      if the |g:vimtex_view_forward_search_on_start| option is disabled.
+            This works best with the 'mupdf' and 'zathura' viewers.
+            These viewers should update automatically
+                after the pdf is updated.
+            For general viewers,
+                one has to create a callback function and
+                connect it through
+                the |VimtexEventCompileSuccess| event to update the viewer.
 
-Recent versions of Zathura no longer ensures synctex support. This has
-      resulted in synctex support being dropped on some platforms, e.g. on
-      OpenSUSE, cf. https://github.com/lervag/vimtex/issues/384. A workaround
-      is to build Zathura from source manually.
 
-Viewer handling uses window title matching. If there exists another pdf
-      viewer with the same name as the current project pdf file, then there
-      might be conflicts. In particular, this might affect forward/inverse
-      searching for Zathura.
+        *g:vimtex_view_forward_search_on_start*
+            This option is only relevant when |g:vimtex_view_method|
+            is set to  `mupdf` or `zathura`.
+                |vimtex-view-mupdf|,
+                |vimtex-view-zathura|.
+
+            Default value: 1
+
+            If disabled,
+                the ¿first invocation¿ of the viewer will not
+                perform a forward search to the current cursor position.
+
+        *g:vimtex_view_reverse_search_edit_cmd*
+
+            When working in a multi-file project,
+            initiating inverse search (see |vimtex-synctex-inverse-search|)
+            may require opening a file that is
+            not currently open in a window.
+
+            This option controls the command that is
+            used to
+            open files as a result of an inverse search.
+
+            Examples:
+                * `edit`
+                * `tabedit`
+                * `split`
+
+            Default value: `edit`
+
+        *g:vimtex_view_general_options*
+            Set options for the specified general viewer,
+            see |vimtex-view-general|.
+            The options are parsed to substitute the following keywords:
+
+                `@pdf`    Path to pdf file
+                `@tex`    Path to tex file
+                `@line`   Current line number
+                `@col`    Current column number
+
+            Default value: '@pdf'
+
+        *g:vimtex_view_mupdf_options*
+        *g:vimtex_view_zathura_options*
+            Set options for mupdf (|vimtex-view-mupdf|) and Zathura
+            (|vimtex-view-zathura|),
+            respectively.
+
+            Default value: ''
+
+        *g:vimtex_view_general_viewer*
+            Use generic viewer application, see |vimtex-view-general|.
+
+            Default value:
+                Linux:   `xdg-open`
+                macOS:   `open`
+                Windows: `SumatraPDF` or `mupdf` if available, else `start ""`
+
+        *g:vimtex_view_zathura_check_libsynctex*
+            Default value: 1
+
+            Check on startup if Zathura is compiled with libsynctex.
+            This is done by  default because Zathura on some systems
+            is compiled without libsynctex
+            support, in which case forward and inverse search will not work. When this
+            is the case, the startup check will provide a notification to the user.
+
+            If this option is set to 0 or |v:false|, then the check is skipped.
+
+
+
+
+    The following is a list of popular PDF viewers, in alphabetic order, and how
+    they can be configured to work with VimTeX.
+
+    Evince~
+                *vimtex-view-evince*
+        https://wiki.gnome.org/Apps/Evince
+        Evince is a document viewer for viewing multiple document formats, including
+        PDFs. It comes by default with Gnome.
+
+        Configuration:
+
+        let g:vimtex_view_general_viewer = 'evince'
+
+
+        Evince only supports synctex through DBus, which is not supported by
+            VimTeX. Thus VimTeX does not support forward and inverse search with
+            Evince. However, the Vim plugin `SVED` by Peter Jorgensen is reported to
+            work well in combination with VimTeX. See the plugin page [0] for more
+            information.
+
+            [0]: https://github.com/peterbjorgensen/sved
+
+    MuPDF~
+             https://www.mupdf.com/
+             *vimtex-view-mupdf*
+        MuPDF is a very minimalistic and quick PDF viewer. It does not support synctex
+        itself, but VimTeX provides both forward and inverse search by abusing
+        `xdotool`. Inverse search must be used from within VimTeX with the mapping
+        |<plug>(vimtex-reverse-search)| (default mapping: `'<localleader>lr'`).
+
+        One can also use |g:vimtex_view_mupdf_send_keys| to specify a set of keys that
+        is sent to MuPDF on startup.
+
+        Configuration:
+
+        let g:vimtex_view_method = 'mupdf'
+
+        Associated settings:
+        * |g:vimtex_view_mupdf_options|
+        * |g:vimtex_view_mupdf_send_keys|
+
+        Both forward and inverse search requires `xdotool` to work. Forward
+            search will only take you to the correct page. Inverse search will take
+            you to the line in Vim that corresponds to the first line of the current
+            page in MuPDF.
+
+        Viewer handling uses window title matching. If there exists another pdf
+            viewer with the same name as the current project pdf file, then there
+            might be conflicts, and so MuPDF might not work as expected.
+
+    Okular~
+        https://okular.kde.org/
+        Okular is a very feature rich PDF viewer that supports both forward and
+        inverse search.  *vimtex-view-okular*
+
+        Configuration:
+
+        let g:vimtex_view_general_viewer = 'okular'
+        let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+
+        Inverse search can be set up within Okular in the settings pane under
+        "Settings > Editor > Custom Text Editor" [0]. Use the viewer configuration as
+        explained in |vimtex-synctex-inverse-search|.
+
+        To perform an inverse search in Okular, do `shift + click` while browse mode
+        is enabled.
+
+        [0]: https://docs.kde.org/stable5/en/okular/okular/inverse_search.html
+
+
+    qpdfview~
+        https://launchpad.net/qpdfview
+        qpdfview is a tabbed document viewer. It supports both forward and inverse
+        search. The latter must be set up from within the viewer. Use the viewer
+        configuration as explained in |vimtex-synctex-inverse-search|, but note that
+        the interpolation variables should be `%1` for the filename and `%2` for the
+        line number.  *vimtex-view-qpdfview*
+
+        Configuration:
+
+        let g:vimtex_view_general_viewer = 'qpdfview'
+        let g:vimtex_view_general_options
+            \ = '--unique @pdf\#src:@tex:@line:@col'
+
+    Sioyek~
+        https://sioyek.info/
+        Sioyek is a PDF viewer designed for reading research papers and technical
+        books.  *vimtex-view-sioyek*
+
+        Configuration:
+
+        let g:vimtex_view_method = 'sioyek'
+
+        Inverse search should be automatically configured and work out of the box.
+        VimTeX will try to pass options to Sioyek to automatically configure inverse
+        search. This means that, in most cases, inverse search should work as expected
+        without any further configuration. One may still be interested in learning how
+        inverse-search configuration works, in which case one should read
+        |vimtex-synctex-inverse-search|. The interpolation variables for Sioyek
+        configuration are `%2` and `%1`, not `%l` and `%f`.
+
+        Associated settings:
+        * |g:vimtex_view_sioyek_exe|
+
+
+    *vimtex-view-sumatrapdf*
+    SumatraPDF~
+    https://www.sumatrapdfreader.org/free-pdf-reader.html
+    SumatraPDF is a PDF viewer for windows that is powerful, small, portable and
+    starts up very fast. It supports both forward and inverse search.
+
+    Configuration:
+
+    let g:vimtex_view_general_viewer = 'SumatraPDF'
+    let g:vimtex_view_general_options
+        \ = '-reuse-instance -forward-search @tex @line @pdf'
+
+    For convenience, the above configuration is used by default on Windows if
+    `SumatraPDF` is detected as executable.
+
+    Inverse search must be configured under `Settings --> Options` from within
+    SumatraPDF. Find the section `Set inverse search command-line` in the bottom
+    and use the viewer configuration as explained in
+    |vimtex-synctex-inverse-search|.
+
+    Inverse search is activated with a double click in the PDF file.
+
+    There is a known issue with VimTeX + SumatraPDF when you use `xelatex`,
+        where the pdf file in SumatraPDF is not refreshed after compilation.
+        A workaround was found and posted by @Whitebeard0 here:
+        https://github.com/lervag/vimtex/issues/1410#issuecomment-506143020
+
+    *vimtex-view-zathura*
+    Zathura~
+    https://pwmt.org/projects/zathura/
+    Zathura is, like MuPDF, a very fast and minimalistic viewer. Compared to
+    MuPDF, it allows more user configuration. Zathura has full support for both
+    forward and inverse search. Zathura should be straightforward to install and
+    use on Linux with Xorg. It should also work on macOS, but users may want to
+    read |vimtex-faq-zathura-macos|.
+
+    Configuration:
+
+    let g:vimtex_view_method = 'zathura'
+
+    VimTeX will try to start Zathura with the `-x` argument to specify the inverse
+    search options automatically. This means that, in most cases, inverse search
+    should work as expected without any further configuration. One may still be
+    interested in learning how inverse-search configuration works, in which case
+    one should read |vimtex-synctex-inverse-search|. The interpolation variables
+    for Zathura configuration are `%{line}` and `%{input}`, not `%l` and `%f`.
+
+    Associated settings:
+    * |g:vimtex_view_zathura_check_libsynctex|
+    * |g:vimtex_view_zathura_options|
+
+    Forward search requires `xdotool` to work properly. That is, `xdotool`
+        is used to avoid duplicate Zathura instances when the
+        |:VimtexView| command is issued. This is a more severe restriction
+        if the |g:vimtex_view_forward_search_on_start| option is disabled.
+
+    Recent versions of Zathura no longer ensures synctex support. This has
+        resulted in synctex support being dropped on some platforms, e.g. on
+        OpenSUSE, cf. https://github.com/lervag/vimtex/issues/384. A workaround
+        is to build Zathura from source manually.
+
+    Viewer handling uses window title matching. If there exists another pdf
+        viewer with the same name as the current project pdf file, then there
+        might be conflicts. In particular, this might affect forward/inverse
+        searching for Zathura.
+
+
 
 ------------------------------------------------------------------------------
 SYNCTEX SUPPORT                                                *vimtex-synctex*
 
-Synctex is a tool that enables synchronization of the text editor position and
-the pdf viewer position. The tool may be used to add mappings in vim to go to
-the current position in the compiled pdf document (forward search), and also
-to go from a specific position in the pdf file to the corresponding position
-in vim (inverse search).
-
-To make synctex work, it must be enabled. VimTeX enables this by default by
-passing `-synctex=1` on the command line, unless the user overrides the
-option (see the `option` key for |g:vimtex_compiler_latexmk| or
-|g:vimtex_compiler_latexrun|).
-
-Alternatively, for |vimtex-compiler-latexmk|, one can put this in ones
-`~/.latexmkrc` file:
+    Synctex is a tool that enables synchronization of the text editor position and
+    the pdf viewer position.
+    The tool may be used to
+    add mappings in vim to go to the current position in the compiled pdf document (forward search),
+    and also to go from a specific position in the pdf file to the corresponding position in vim (inverse search).
 
 
-  $pdflatex = 'pdflatex -synctex=1 %O %S';
+    To make synctex work, it must be enabled. VimTeX enables this by default by
+    passing `-synctex=1` on the command line, unless the user overrides the
+    option (see the `option` key for |g:vimtex_compiler_latexmk| or
+    |g:vimtex_compiler_latexrun|).
 
-Forward search~
-*vimtex-synctex-forward-search*
-For supported viewers, |:VimtexView| (<localleader>lv) will issue a forward
-search if the viewer is already opened. The forward search will take you to
-the page or position in the viewer that corresponds to the current line in
-your vim session. See |g:vimtex_view_method| for a list of supported viewers.
-
-Inverse search~
-*vimtex-synctex-inverse-search*
-*vimtex-synctex-backward-search*
-*:VimtexInverseSearch*
-
-In supported viewers, one may set up inverse search, which allows one to go
-directly from a selected line in the viewer (typically by double clicking with
-the mouse or something similar) to the corresponding line inside the Vim
-instance. This is sometimes also called backward search or reverse search.
-
-Inverse search relies on communicating with Vim/neovim from the viewer by use
-of shell commands executed by the viewer. It is usually configured within the
-specific viewer through an option named something like "inverse search
-command-line". The option specifies the necessary shell command to perform the
-inverse search. The target line and file are provided as interpolation
-variables. In the following, we use `%l` and `%f`, but the interpolation
-variables may be named different in some viewers (e.g. |vimtex-view-skim|).
-A typical shell command looks like this:
+    Alternatively, for |vimtex-compiler-latexmk|, one can put this in ones
+    `~/.latexmkrc` file:
 
 
-  vim --remote-silent +%l %f
+    $pdflatex = 'pdflatex -synctex=1 %O %S';
 
-Luckily, VimTeX provides a convenience function to simplify the viewer
-configuration. The command `VimtexInverseSearch` will execute
-|vimtex#view#inverse_search| with the target line and file as arguments inside
-the desired Vim or neovim instance. The latter function is the one that really
-performs the inverse search. The combined effect is a more robust experience
-that will seamlessly handle multiple Vim or neovim instances and multiple
-VimTeX instances. The user doesn't need to worry about passing the correct
-servernames.
+    Forward search~
+    *vimtex-synctex-forward-search*
+    For supported viewers, |:VimtexView| (<localleader>lv) will issue a forward
+    search if the viewer is already opened. The forward search will take you to
+    the page or position in the viewer that corresponds to the current line in
+    your vim session. See |g:vimtex_view_method| for a list of supported viewers.
 
-To configure with `VimtexInverseSearch`, use:
+    Inverse search~
+    *vimtex-synctex-inverse-search*
+    *vimtex-synctex-backward-search*
+    *:VimtexInverseSearch*
+
+    In supported viewers, one may set up inverse search, which allows one to go
+    directly from a selected line in the viewer (typically by double clicking with
+    the mouse or something similar) to the corresponding line inside the Vim
+    instance. This is sometimes also called backward search or reverse search.
+
+    Inverse search relies on communicating with Vim/neovim from the viewer by use
+    of shell commands executed by the viewer. It is usually configured within the
+    specific viewer through an option named something like "inverse search
+    command-line". The option specifies the necessary shell command to perform the
+    inverse search. The target line and file are provided as interpolation
+    variables. In the following, we use `%l` and `%f`, but the interpolation
+    variables may be named different in some viewers (e.g. |vimtex-view-skim|).
+    A typical shell command looks like this:
 
 
-  vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
+    vim --remote-silent +%l %f
 
-  nvim --headless -c "VimtexInverseSearch %l '%f'"
+    Luckily, VimTeX provides a convenience function to simplify the viewer
+    configuration. The command `VimtexInverseSearch` will execute
+    |vimtex#view#inverse_search| with the target line and file as arguments inside
+    the desired Vim or neovim instance. The latter function is the one that really
+    performs the inverse search. The combined effect is a more robust experience
+    that will seamlessly handle multiple Vim or neovim instances and multiple
+    VimTeX instances. The user doesn't need to worry about passing the correct
+    servernames.
 
-On Windows, the above commands may lead to an annoying command window "popup".
-This may be avoided, or at least reduced, with the following variants:
+    To configure with `VimtexInverseSearch`, use:
 
 
-  cmd /c start /min "" vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
+    vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
 
-  cmd /c start /min "" nvim --headless -c "VimtexInverseSearch %l '%f'"
+    nvim --headless -c "VimtexInverseSearch %l '%f'"
 
-Vim users should be aware that one may need to ensure that the server is
-      really running, see |vimtex-clientserver|.
+    On Windows, the above commands may lead to an annoying command window "popup".
+    This may be avoided, or at least reduced, with the following variants:
+
+
+    cmd /c start /min "" vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
+
+    cmd /c start /min "" nvim --headless -c "VimtexInverseSearch %l '%f'"
+
+    Vim users should be aware that one may need to ensure that the server is
+        really running, see |vimtex-clientserver|.
 
 ==============================================================================
 LATEX DOCUMENTATION                                           *vimtex-latexdoc*
