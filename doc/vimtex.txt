@@ -3140,7 +3140,8 @@ COMPLETE COMMANDS AND ENVIRONMENTS                   *vimtex-complete-commands*
     Command completion is available after `\` and should provide completion candidates for relevant LaTeX commands.
     The document's preamble is analysed,
     and commands will be completed for the ¿loaded packages¿
-    as well as those defined within the preamble using `\newcommand`,  `\let` and `\def`.
+    as well as those defined within the preamble using
+        `\newcommand`,  `\let` and `\def`.
 
     Environment completion is also available after `\begin{` or `\end{`.
         As with commands,

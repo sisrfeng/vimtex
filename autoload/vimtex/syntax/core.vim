@@ -569,13 +569,20 @@ fun! vimtex#syntax#core#init() abort "
 
         " Define math environment boundaries
         "
-            " syn match texCmdMathEnv "\v\\%(begin|end)>" contained conceal   nextgroup=texMathEnvArgName
-                                          " %():  Just like (), but without counting it as a sub-expression.
-            syn match texCmdMathEnv "\v\\begin>" contained conceal cchar=      nextgroup=texMathEnvArgName
-            syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=      nextgroup=texMathEnvArgName
-            " syn match texCmdMathEnv "\v\\end>"   contained conceal cchar=⇐     nextgroup=texMathEnvArgName
+
+            syn match texCmdMathEnv "\v\\begin>"
+                        \ contained
+                        \ conceal
+                        \ cchar=      nextgroup=texMathEnvArgName
+
+            syn match texCmdMathEnv "\v\\end>"
+                        \ contained
+                        \ conceal
+                        \ cchar=      nextgroup=texMathEnvArgName
+
             call vimtex#syntax#core#new_arg('texMathEnvArgName',
-                        \ {'contains': 'texComment,@NoSpell'})
+                  \ {'contains': 'texComment,@NoSpell'}
+                 \ )
 
         " Environments inside math zones
             " * This is used to restrict the whitespace between environment name and
@@ -584,12 +591,14 @@ fun! vimtex#syntax#core#init() abort "
             " syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
             syn match texCmdEnvM "\v\\begin>" contained conceal cchar=      nextgroup=texEnvMArgName
             syn match texCmdEnvM "\v\\end>"   contained conceal cchar=      nextgroup=texEnvMArgName
-            " syn match texCmdEnvM "\v\\end>"   contained conceal cchar=⇐     nextgroup=texEnvMArgName
-            call vimtex#syntax#core#new_arg('texEnvMArgName', {
+
+            call vimtex#syntax#core#new_arg('texEnvMArgName',
+                        \ {
                         \ 'contains': 'texComment,@NoSpell',
                         \ 'next': 'texEnvOpt',
                         \ 'skipwhite': v:false
-                        \})
+                        \}
+                \ )
 
         " Math regions: environments
             call vimtex#syntax#core#new_region_math('displaymath')
@@ -597,6 +606,7 @@ fun! vimtex#syntax#core#init() abort "
                         "\ \[...\]
                         "\ \begin{displaymath}...\end{displaymath}
                         "\ \begin{equation}...\end{equation}
+
             call vimtex#syntax#core#new_region_math('eqnarray')
             call vimtex#syntax#core#new_region_math('equation')
             call vimtex#syntax#core#new_region_math('math')
@@ -647,16 +657,20 @@ fun! vimtex#syntax#core#init() abort "
         syn match texMathTextAfter "\w\+" contained contains=@NoSpell
 
         " Math regions: \ensuremath{...}
-        syn match texCmdMath "\\ensuremath\>" nextgroup=texMathZoneEnsured
-        call vimtex#syntax#core#new_arg('texMathZoneEnsured', {'contains': '@texClusterMath'})
+            syn match texCmdMath
+                        \ "\\ensuremath\>"
+                        \ nextgroup=texMathZoneEnsured
+
+            call vimtex#syntax#core#new_arg('texMathZoneEnsured', {'contains': '@texClusterMath'})
 
         " Bad/Mismatched math
-        syn match texMathError "\\[\])]"
-        syn match texMathError "\\end\s*{\s*\(array\|[bBpvV]matrix\|split\|smallmatrix\)\s*}"
+            syn match texMathError "\\[\])]"
+            syn match texMathError
+                        \ "\\end\s*{\s*\(array\|[bBpvV]matrix\|split\|smallmatrix\)\s*}"
 
         " Operators and similar
-        syn match texMathOper     "[/=+-]" contained
-        syn match texMathSuperSub "[_^]" contained
+            syn match texMathOper     "[/=+-]" contained
+            syn match texMathSuperSub "[_^]" contained
 
         " Text Inside Math regions
         for l:re_cmd in [
@@ -687,10 +701,17 @@ fun! vimtex#syntax#core#init() abort "
         call s:match_bold_italic_math()
 
         " Support for array environment
-        syn match texMathCmdEnv contained contains=texCmdMathEnv "\\begin{array}"
-                    \ nextgroup=texMathArrayArg skipwhite skipnl
+        syn match texMathCmdEnv
+                    \ "\\begin{array}"
+                    \ contained
+                    \ contains=texCmdMathEnv
+                    \ nextgroup=texMathArrayArg
+                    \ skipwhite skipnl
 
-        syn match texMathCmdEnv contained contains=texCmdMathEnv "\\end{array}"
+        syn match texMathCmdEnv
+                    \ "\\end{array}"
+                    \ contained
+                    \ contains=texCmdMathEnv
 
         call vimtex#syntax#core#new_arg('texMathArrayArg',
               \ { 'contains': '@texClusterTabular'  }
@@ -1273,159 +1294,174 @@ endf
             return
         en
 
-        exe     'syntax match texMathSuperSub'
-                    \ '"\^\%(' . s:re_super . '\)"'
+        "\ super
+            exe     'syntax match texMathSuperSub'
+                    \ '"\v\^%(' . s:re_super . ')"'
                     \ 'conceal contained contains=texMathSuper'
-        exe     'syntax match texMathSuperSub'
-                    \ '"\^{\%(' . s:re_super . '\|\s\)\+}"'
-                    \ 'conceal contained contains=texMathSuper'
-        for [l:from, l:to] in s:map_super
-            exe     'syntax match texMathSuper'
-                        \ '"' . l:from . '"'
-                        \ 'contained conceal cchar=' . l:to
-        endfor
 
-        exe     'syntax match texMathSuperSub'
-                    \ '"_\%(' . s:re_sub . '\)"'
-                    \ 'conceal contained contains=texMathSub'
-        exe     'syntax match texMathSuperSub'
-                    \ '"_{\%(' . s:re_sub . '\|\s\)\+}"'
-                    \ 'conceal contained contains=texMathSub'
-        for [l:from, l:to] in copy(s:map_sub)
-            exe     'syntax match texMathSub'
-                        \ '"' . l:from . '"'
-                        \ 'contained conceal cchar=' . l:to
-        endfor
+            exe     'syntax match texMathSuperSub'
+                    \ '"\v\^\{%(' . s:re_super . '|\s)+}"'
+                    \ 'conceal contained contains=texMathSuper'
+
+            for [l:from, l:to] in s:map_super
+                exe   'syntax match texMathSuper'
+                          \ '"' . l:from . '"'
+                          \ 'contained conceal
+                          \ cchar=' . l:to
+            endfor
+
+        "\ subscript
+            exe   'syntax match texMathSuperSub'
+                      \ '"\v_%(' . s:re_sub . ')"'
+                      \ 'conceal contained contains=texMathSub'
+
+            exe   'syntax match texMathSuperSub'
+                      \ '"\v_\{%(' . s:re_sub . '|\s)+}"'
+                      \ 'conceal contained contains=texMathSub'
+
+            for [l:from, l:to] in copy(s:map_sub)
+                exe  'syntax match texMathSub'
+                         \ '"' . l:from . '"'
+                         \ 'contained conceal cchar=' . l:to
+            endfor
     endf
 
-    let s:re_sub =
-                \ '[-+=()0-9aehijklmnoprstuvx]\|\\\%('
-                \ . join([
-                \     'beta', 'delta', 'phi', 'gamma', 'chi'
-                \ ], '\|') . '\)\>'
-    let s:re_super = '[-+=()<>:;0-9a-pr-zABDEG-PRTUVW]'
+        "\ let s:re_sub =   '\v' .  '[-+=()0-9aehijklmnoprstuvx]' . '|'
+        let s:re_sub =    '[-+=()0-9aehijklmnoprstuvx]' . '|'
+                \ . '\\%('
+                    \ . join(['beta', 'delta', 'phi', 'gamma', 'chi' ], '|')
+                   \ . ')>'
 
-    let s:map_sub = [
-                \ ['\\beta\>',  'ᵦ'],
-                \ ['\\rho\>', 'ᵨ'],
-                \ ['\\phi\>',   'ᵩ'],
-                \ ['\\gamma\>', 'ᵧ'],
-                \ ['\\chi\>',   'ᵪ'],
-                \ ['(',         '₍'],
-                \ [')',         '₎'],
-                \ ['+',         '₊'],
-                \ ['-',         '₋'],
-                \ ['=',         '₌'],
-                \ ['0',         '₀'],
-                \ ['1',         '₁'],
-                \ ['2',         '₂'],
-                \ ['3',         '₃'],
-                \ ['4',         '₄'],
-                \ ['5',         '₅'],
-                \ ['6',         '₆'],
-                \ ['7',         '₇'],
-                \ ['8',         '₈'],
-                \ ['9',         '₉'],
-                \ ['a',         'ₐ'],
-                \ ['e',         'ₑ'],
-                \ ['h',         'ₕ'],
-                \ ['i',         'ᵢ'],
-                \ ['j',         'ⱼ'],
-                \ ['k',         'ₖ'],
-                \ ['l',         'ₗ'],
-                \ ['m',         'ₘ'],
-                \ ['n',         'ₙ'],
-                \ ['o',         'ₒ'],
-                \ ['p',         'ₚ'],
-                \ ['r',         'ᵣ'],
-                \ ['s',         'ₛ'],
-                \ ['t',         'ₜ'],
-                \ ['u',         'ᵤ'],
-                \ ['v',         'ᵥ'],
-                \ ['x',         'ₓ'],
-                \]
+        let s:re_super = '[-+=()<>:;0-9a-pr-zABDEG-PRTUVW*]'
+        "\ let s:re_super = '[-+=()<>:;0-9a-pr-zABDEG-PRTUVW]'
+                "\ 被刨掉:            q      F H I J K L M N O Q S X Y  Z
 
-    let s:map_super = [
-                \ ['(',  '⁽'],
-                \ [')',  '⁾'],
-                \ ['+',  '⁺'],
-                \ ['-',  '⁻'],
-                \ ['=',  '⁼'],
-                \ [':',  '︓'],
-                \ [';',  '︔'],
-                \ ['<',  '˂'],
-                \ ['>',  '˃'],
-                \ ['0',  '⁰'],
-                \ ['1',  '¹'],
-                \ ['2',  '²'],
-                \ ['3',  '³'],
-                \ ['4',  '⁴'],
-                \ ['5',  '⁵'],
-                \ ['6',  '⁶'],
-                \ ['7',  '⁷'],
-                \ ['8',  '⁸'],
-                \ ['9',  '⁹'],
-                \ ['a',  'ᵃ'],
-                \ ['b',  'ᵇ'],
-                \ ['c',  'ᶜ'],
-                \ ['d',  'ᵈ'],
-                \ ['e',  'ᵉ'],
-                \ ['f',  'ᶠ'],
-                \ ['g',  'ᵍ'],
-                \ ['h',  'ʰ'],
-                \ ['i',  'ⁱ'],
-                \ ['j',  'ʲ'],
-                \ ['k',  'ᵏ'],
-                \ ['l',  'ˡ'],
-                \ ['m',  'ᵐ'],
-                \ ['n',  'ⁿ'],
-                \ ['o',  'ᵒ'],
-                \ ['p',  'ᵖ'],
-                \ ['r',  'ʳ'],
-                \ ['s',  'ˢ'],
-                \ ['t',  'ᵗ'],
-                \ ['u',  'ᵘ'],
-                \ ['v',  'ᵛ'],
-                \ ['w',  'ʷ'],
-                \ ['x',  'ˣ'],
-                \ ['y',  'ʸ'],
-                \ ['z',  'ᶻ'],
-                \ ['A',  'ᴬ'],
-                \ ['B',  'ᴮ'],
-                \ ['D',  'ᴰ'],
-                \ ['E',  'ᴱ'],
-                \ ['G',  'ᴳ'],
-                \ ['H',  'ᴴ'],
-                \ ['I',  'ᴵ'],
-                \ ['J',  'ᴶ'],
-                \ ['K',  'ᴷ'],
-                \ ['L',  'ᴸ'],
-                \ ['M',  'ᴹ'],
-                \ ['N',  'ᴺ'],
-                \ ['O',  'ᴼ'],
-                \ ['P',  'ᴾ'],
-                \ ['R',  'ᴿ'],
-                \ ['T',  'ᵀ'],
-                \ ['U',  'ᵁ'],
-                \ ['V',  'ⱽ'],
-                \ ['W',  'ᵂ'],
-                \]
+        let s:map_sub = [
+                    \ ['\\beta\>',  'ᵦ'],
+                    \ ['\\rho\>', 'ᵨ'],
+                    \ ['\\phi\>',   'ᵩ'],
+                    \ ['\\gamma\>', 'ᵧ'],
+                    \ ['\\chi\>',   'ᵪ'],
+                    \ ['(',         '₍'],
+                    \ [')',         '₎'],
+                    \ ['+',         '₊'],
+                    \ ['-',         '₋'],
+                    \ ['=',         '₌'],
+                    \ ['0',         '₀'],
+                    \ ['1',         '₁'],
+                    \ ['2',         '₂'],
+                    \ ['3',         '₃'],
+                    \ ['4',         '₄'],
+                    \ ['5',         '₅'],
+                    \ ['6',         '₆'],
+                    \ ['7',         '₇'],
+                    \ ['8',         '₈'],
+                    \ ['9',         '₉'],
+                    \ ['a',         'ₐ'],
+                    \ ['e',         'ₑ'],
+                    \ ['h',         'ₕ'],
+                    \ ['i',         'ᵢ'],
+                    \ ['j',         'ⱼ'],
+                    \ ['k',         'ₖ'],
+                    \ ['l',         'ₗ'],
+                    \ ['m',         'ₘ'],
+                    \ ['n',         'ₙ'],
+                    \ ['o',         'ₒ'],
+                    \ ['p',         'ₚ'],
+                    \ ['r',         'ᵣ'],
+                    \ ['s',         'ₛ'],
+                    \ ['t',         'ₜ'],
+                    \ ['u',         'ᵤ'],
+                    \ ['v',         'ᵥ'],
+                    \ ['x',         'ₓ'],
+                    \]
+
+        let s:map_super = [
+                    \ ['(',  '⁽'],
+                    \ [')',  '⁾'],
+                    \ ['+',  '⁺'],
+                    \ ['-',  '⁻'],
+                    \ ['=',  '⁼'],
+                    \ [':',  '︓'],
+                    \ [';',  '︔'],
+                    \ ['<',  '˂'],
+                    \ ['>',  '˃'],
+                    \ ['0',  '⁰'],
+                    \ ['1',  '¹'],
+                    \ ['2',  '²'],
+                    \ ['3',  '³'],
+                    \ ['4',  '⁴'],
+                    \ ['5',  '⁵'],
+                    \ ['6',  '⁶'],
+                    \ ['7',  '⁷'],
+                    \ ['8',  '⁸'],
+                    \ ['9',  '⁹'],
+                    \ ['a',  'ᵃ'],
+                    \ ['b',  'ᵇ'],
+                    \ ['c',  'ᶜ'],
+                    \ ['d',  'ᵈ'],
+                    \ ['e',  'ᵉ'],
+                    \ ['f',  'ᶠ'],
+                    \ ['g',  'ᵍ'],
+                    \ ['h',  'ʰ'],
+                    \ ['i',  'ⁱ'],
+                    \ ['j',  'ʲ'],
+                    \ ['k',  'ᵏ'],
+                    \ ['l',  'ˡ'],
+                    \ ['m',  'ᵐ'],
+                    \ ['n',  'ⁿ'],
+                    \ ['o',  'ᵒ'],
+                    \ ['p',  'ᵖ'],
+                    \ ['r',  'ʳ'],
+                    \ ['s',  'ˢ'],
+                    \ ['t',  'ᵗ'],
+                    \ ['u',  'ᵘ'],
+                    \ ['v',  'ᵛ'],
+                    \ ['w',  'ʷ'],
+                    \ ['x',  'ˣ'],
+                    \ ['y',  'ʸ'],
+                    \ ['z',  'ᶻ'],
+                    \ ['A',  'ᴬ'],
+                    \ ['B',  'ᴮ'],
+                    \ ['D',  'ᴰ'],
+                    \ ['E',  'ᴱ'],
+                    \ ['G',  'ᴳ'],
+                    \ ['H',  'ᴴ'],
+                    \ ['I',  'ᴵ'],
+                    \ ['J',  'ᴶ'],
+                    \ ['K',  'ᴷ'],
+                    \ ['L',  'ᴸ'],
+                    \ ['M',  'ᴹ'],
+                    \ ['N',  'ᴺ'],
+                    \ ['O',  'ᴼ'],
+                    \ ['P',  'ᴾ'],
+                    \ ['R',  'ᴿ'],
+                    \ ['T',  'ᵀ'],
+                    \ ['U',  'ᵁ'],
+                    \ ['V',  'ⱽ'],
+                    \ ['W',  'ᵂ'],
+                    \ ['*',  '˟'],
+                    \]
 
 
     fun! s:match_math_symbols() abort
         " Many of these symbols were contributed by Björn Winckler
         if !g:vimtex_syntax_conceal.math_symbols | return | endif
 
-        syn match texMathSymbol '\\[,:;!]'              contained conceal
-        syn match texMathSymbol '\\|'                   contained conceal cchar=‖
-        syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
-        syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
+        "\ 这几个无法放进cmd_symbols?
+            syn match texMathSymbol '\\[,:;!]'              contained conceal
+            syn match texMathSymbol '\\|'                   contained conceal cchar=‖
+            syn match texMathSymbol '\\sqrt\[3]'            contained conceal cchar=∛
+            syn match texMathSymbol '\\sqrt\[4]'            contained conceal cchar=∜
 
         for [l:cmd, l:symbol] in s:cmd_symbols
-            exe     'syntax match texMathSymbol'
-                        \ '"\v\\' . l:cmd . '\ze%([_^]|>)"'
-                        \ 'contained conceal cchar=' . l:symbol
+            exe  'syntax match texMathSymbol'
+                     \ '"\v\\' . l:cmd . '\ze%(>|[_^])"'
+                     \ 'contained conceal'
+                     \ 'cchar=' . l:symbol
+                     \ 'containedin=ALL'
         endfor
+
 
         for [l:cmd, l:pairs] in items(s:cmd_pairs_dict)
             call vimtex#syntax#core#conceal_math_cmd(l:cmd, l:pairs)
@@ -1808,7 +1844,7 @@ endf
                 \   ['Y', '𝔜'],
                 \   ['Z', 'ℨ'],
                 \ ],
-                \ 'math\%(scr\|cal\)': [
+            \ 'math\%(scr\|cal\)': [
                 \   ['A', '𝓐'],
                 \   ['B', '𝓑'],
                 \   ['C', '𝓒'],
