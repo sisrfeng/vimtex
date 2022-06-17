@@ -1,6 +1,5 @@
 *g:vimtex_quickfix_enabled*
     Use this option to disable/enable the quickfix integration.
-
     Default value: 1
 
 *g:vimtex_quickfix_method*
@@ -10,19 +9,24 @@
         This is the standard method which parses the normal LaTeX output.
 
     pplatex
-        Uses `pplatex` (https://github.com/stefanhepp/pplatex) to parse the LaTeX
-        output file. `pplatex` is a command line utility used to prettify the
+        Uses `pplatex` (https://github.com/stefanhepp/pplatex) to parse the LaTeX  output file.
+        `pplatex` is a command line utility used to prettify the
         output of the LaTeX compiler.
 
     pulp
-        Uses `pulp` (https://github.com/dmwit/pulp) to parse the LaTeX output
-        file, similar to `pplatex`.
+        Uses `pulp` (https://github.com/dmwit/pulp) to parse the LaTeX output  file,
+        similar to `pplatex`.
 
-    `pplatex` and `pulp` require that `-file-line-error` is NOT passed to the LaTeX
-    compiler. |g:vimtex_compiler_latexmk| will be updated automatically if one
-    uses `latexmk` through VimTeX. However, if one uses other compiler
-    methods, either through VimTeX (see |g:vimtex_compiler_method|) or
-    externally, this requirement must be ensured by the user.
+    `pplatex` and `pulp` require that `-file-line-error` is NOT passed to
+    the LaTeX  compiler.
+    if one uses `latexmk` through  VimTeX.
+        |g:vimtex_compiler_latexmk| will be updated automatically
+
+    if one uses other compiler methods,
+        either through  VimTeX (see |g:vimtex_compiler_method|)
+        or externally,
+        this requirement must be ensured by
+        the user.
 
     Default value: 'latexlog'
 

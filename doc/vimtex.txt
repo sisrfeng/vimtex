@@ -46,11 +46,11 @@ Contents                                                      *vimtex-contents*
     见文件2:
     Folding                                       |vimtex-folding|
     Indentation                                   |vimtex-indent|
-    Syntax highlighting                           |vimtex-syntax|
-        Syntax core specification                   |vimtex-syntax-core|
-        Syntax package specification                |vimtex-syntax-packages|
-        Syntax conceal                              |vimtex-syntax-conceal|
-        Syntax group reference                      |vimtex-syntax-reference|
+    syn  highlighting                           |vimtex-syntax|
+        syn  core specification                   |vimtex-syntax-core|
+        syn  package specification                |vimtex-syntax-packages|
+        syn  conceal                              |vimtex-syntax-conceal|
+        syn  group reference                      |vimtex-syntax-reference|
     Navigation                                    |vimtex-navigation|
         Include expression (gf command)             |vimtex-includeexpr|
         Table of contents                           |vimtex-toc|
@@ -63,7 +63,7 @@ Contents                                                      *vimtex-contents*
         Tectonic                                    |vimtex-compiler-tectonic|
         Arara                                       |vimtex-compiler-arara|
         Generic                                     |vimtex-compiler-generic|
-    Syntax Checking (Linting)                     |vimtex-lint|
+    syn  Checking (Linting)                     |vimtex-lint|
     Grammar Checking                              |vimtex-grammar|
         textidote                                   |vimtex-grammar-textidote|
         vlty                                        |vimtex-grammar-vlty|
@@ -123,92 +123,12 @@ COMMENT ON INTERNAL TEX PLUGIN                        *vimtex-comment-internal*
                 The user may prevent this overriding by specifying the |g:tex_flavor| option something different than `'latex'`.
 
 -----------------------------------------------------------------------------
-FEATURE OVERVIEW                                              *vimtex-features*
-
-- Document compilation with `latexmk`, `latexrun`, `tectonic` or `arara`
-- LaTeX log parsing for quickfix entries using
-    - internal method
-    - `pplatex`
-- Compilation of selected part of document
-- Support for several PDF viewers with forward search
-    - `MuPDF`
-    - `Zathura`
-    - `Okular`
-    - `qpdfview`
-    - `SumatraPDF`
-    - Other viewers are supported through a general interface
-- Completion of
-    - citations
-    - labels
-    - commands
-    - file names for figures, input/include, includepdf, includestandalone
-    - glossary entries
-    - package and documentclass names based on available `.sty` and `.cls` files
-
-- Document navigation through
-    - table of content
-    - proper settings for |'include'|, |'includeexpr'|, |'suffixesadd'| and
-        |'define'|, which among other things
-        - allow |include-search| and |definition-search|
-        - give enhanced |gf| command
-- Easy access to (online) documentation of packages
-- Word count (through `texcount`)
-- Motions                                                      *vimtex-motions*
-    - Move between section boundaries with `[[`, `[]`, `][`, and `]]`
-    - Move between environment boundaries with `[m`, `[M`, `]m`, and `]M`
-    - Move between math environment boundaries with `[n`, `[N`, `]n`, and `]N`
-    - Move between frame environment boundaries with `[r`, `[R`, `]r`, and `]R`
-    - Move between comment boundaries with `[*` and `]*`
-    - Move between matching delimiters with `%`
-- Text objects
-    - `ic` `ac` Commands
-    - `id` `ad` Delimiters
-    - `ie` `ae` LaTeX environments
-    - `i$` `a$` Math environments
-    - `iP` `aP` Sections
-    - `im` `am` Items
-- Other mappings
-    - Delete the surrounding command, environment or delimiter with
-        `dsc`/`dse`/`ds$`/`dsd`
-    - Change the surrounding command, environment or delimiter with
-        `csc`/`cse`/`cs$`/`csd`
-    - Toggle starred command or environment with `tsc`/`tse`
-    - Toggle inline and displaymath with `ts$`
-    - Toggle between e.g. `()` and `\left(\right)` with `tsd`/`tsD`
-    - Toggle (inline) fractions with `tsf`
-    - Close the current environment/delimiter in insert mode with `]]`
-    - Add `\left ... \right)` modifiers to surrounding delimiters with `<F8>`
-    - Insert new command with `<F7>`
-    - Convenient insert mode mappings for faster typing of e.g. maths
-    - Context menu on citations (e.g. `\cite{...}`) mapped to `<cr>`
-- Folding
-- Indentation
-- Syntax highlighting
-    - A consistent core syntax specification
-    - General syntax highlighting for several popular LaTeX packages
-    - Nested syntax highlighting for several popular LaTeX packages
-    - Highlight matching delimiters
-- Support for multi-file project packages
-    - `import`
-    - `subfiles`
-
-------------------------------------------------------------------------------
 REQUIREMENTS                                              *vimtex-requirements*
 
 The following is a list of specific requirements for running VimTeX and some
 of its key features. Windows users should also read |vimtex-faq-windows|, and
 neovim users should read |vimtex-faq-neovim|.
 
-Vim version
-*vimtex_version_check*
-    VimTeX requires Vim version 8.0.1453 or neovim version 0.4.3.  It will not
-    load for older versions, unless one adds
-
-
-        let g:vimtex_version_check = 0
-
-    to one's `vimrc` file.  This might work, but issues due to older versions
-    than the mentioned here will be ignored.
 
 Vim configuration
 
@@ -235,8 +155,8 @@ Compiler backend
 
         `latexmk`: http://users.phys.psu.edu/~collins/software/latexmk-jcc
         "a perl script for running LaTeX the correct number of times to resolve
-    cross references, etc; it also runs auxiliary programs (bibtex, makeindex if
-    necessary, and dvips and/or a previewer as requested).  It has a number of
+    cross references, etc; it also runs auxiliary programs
+    (bibtex, makeindex if  necessary, and dvips and/or a previewer as requested).  It has a number of
     other useful capabilities, for example to start a previewer and then run
     latex whenever the source files are updated, so that the previewer gives an
     up-to-date view of the document. The script runs on both UNIX and MS-WINDOWS
@@ -260,7 +180,7 @@ Clientserver
 
         if empty(v:servername) && exists('*remote_startserver')
             call remote_startserver('VIM')
-        endif
+        en
 
     Alternatively, Vim can be started with the command line option
     `--servername`, e.g. `vim --servername VIM` . The simplest way to ensure
@@ -307,11 +227,11 @@ Buffer variable
     ones |vimrc|. An example is warranted:
 
 
-        augroup VimTeX
-            autocmd!
-            autocmd BufReadPre /path/to/project/*.tex
+        aug  VimTeX
+            au!
+            au BufReadPre /path/to/project/*.tex
                         \ let b:vimtex_main = '/path/to/project/main.tex'
-        augroup END
+        aug  END
 
     When writing such rules, one should be aware that the `*` is not the
                 same as regular globbing because it also includes directory
@@ -734,8 +654,9 @@ INTEGRATION WITH OTHER PLUGINS                             *vimtex-and-friends*
     Filetype plugin for bib files
     *vimtex-af-ftplugin-bib*
         VimTeX is not a full filetype plugin for bibliography (`.bib`) files. However,
-        it does alter the 'comments' and 'commentstring' options and provide basic
-        indentation and folding; see |g:vimtex_indent_bib_enabled| and
+        it does alter the 'comments' and 'commentstring' options
+        and provide basic  indentation and
+        folding; see |g:vimtex_indent_bib_enabled| and
         |g:vimtex_fold_bib_enabled|, respectively.
 
         Here are a couple of other related Vim plugins and external tools that might
@@ -745,9 +666,11 @@ INTEGRATION WITH OTHER PLUGINS                             *vimtex-and-friends*
             An external tool for formatting, sorting, filtering, merging, and more of
             `.bib` files.
             http://www.gerd-neugebauer.de/software/TeX/BibTool/
+
         - `GooseBib`
             Some simple command-line tools to clean-up / modify BibTeX files.
             https://github.com/tdegeus/GooseBib
+
         - `tbibtools`
             A set of ruby-based bibtex-related utilities for sorting, reformatting,
             listing contents, and so on. Has optional Vim integration.
@@ -1085,17 +1008,21 @@ OPTIONS                                                        *vimtex-options*
         This option sets the desired default backend for parsing bibliographies.
         This is used e.g. for gathering completion candidates. Possible values:
 
-            `bibtex`:   The fastest, but most hacky solution. Should work well in most
-                                cases.
+            `bibtex`:   The fastest,
+                        but most hacky solution.
+                        Should work well in most  cases.
 
             `bibparse`: Also fast, but might be more robust.
 
-                                Bibparse is an executable provided by the Perl package
-                                            Text-BibTeX [0]. It should not be confused with the
-                                            similarly named Python project [1]. The latter is
-                                            deprecated in favor of GooseBib [2]. The Python projects
-                                            bibparse and GooseBib are both based on the Python library
-                                            `bibtexparser`.
+                        Bibparse is an executable provided by
+                        the Perl package  Text-BibTeX [0].
+
+                        It should not be confused with the similarly named Python project [1].
+                            The latter is deprecated in favor of GooseBib [2].
+                        The Python projects bibparse and
+                        GooseBib are both based on
+                        the Python library `bibtexparser`.
+
 
                                             [0]: https://metacpan.org/dist/Text-BibTeX
                                             [1]: https://github.com/tdegeus/bibparse
@@ -1110,8 +1037,8 @@ OPTIONS                                                        *vimtex-options*
                                             (see |if_pyth| and |py3|) and that the `bibtexparser`
                                             Python module is installed and available.
 
-            `vim`:      The slowest but perhaps most robust solution, as it does not
-                                require any external utilities.
+            `vim`:      The slowest but perhaps most robust solution,
+                        as it does not  require any external utilities.
 
         Default value: `bibtex`
 
@@ -1408,13 +1335,13 @@ OPTIONS                                                        *vimtex-options*
 
             let g:vimtex_doc_handlers = ['MyHandler']
 
-            function! MyHandler(context)
+            fun! MyHandler(context)
                 call vimtex#doc#make_selection(a:context)
                 if empty(a:context.selected) | return 0 | endif
 
-                execute '!myhandler' a:context.selected '&'
+                exe  '!myhandler' a:context.selected '&'
                 return 1
-            endfunction
+            endf
 
         Default value: []
 
@@ -1739,11 +1666,11 @@ OPTIONS                                                        *vimtex-options*
                             \}
 
     *g:vimtex_grammar_vlty*
-        This option is used to configure the `vlty` grammar checker. This checker
-        relies on the Python package `YaLafi` in combination with the proofreading
-        software `LanguageTool` (see |vimtex-grammar-vlty| for more details). The
-        option is a dictionary with the following keys :
-
+        This option is used to
+        configure the `vlty` grammar checker.
+        This checker relies on the Python package `YaLafi` in combination
+        with the proofreading software `LanguageTool` (see |vimtex-grammar-vlty| for more details).
+        The option is a dictionary with the following keys :
             lt_directory
                 Path to the `LanguageTool` software, if installed manually.
 
@@ -1777,8 +1704,9 @@ OPTIONS                                                        *vimtex-options*
                 https://github.com/matze-dd/YaLafi
 
             show_suggestions
-                If set to 1, then `LanguageTool's` replacement suggestions are included
-                in the |quickfix| or |location-list| messages.
+                If set to 1,
+                    `LanguageTool's` replacement suggestions are included
+                    in the |quickfix| or |location-list| messages.
 
             encoding
                 Encoding of the (La)TeX source file. For default value `auto`, the
@@ -2011,11 +1939,13 @@ OPTIONS                                                        *vimtex-options*
         be turned off e.g. for debugging or testing purposes.
 
         Default: 1
-    quick fix / quickfix
+
     *g:vimtex_subfile_start_local*
-        This option allows to specify that one should start with the local file for
-        subfile'd documents instead of the main project file. See |vimtex-subfiles|
-        for further info.
+        if 1
+            for  subfile'd documents,
+                one should start with the local file
+                instead of the main project file. See |vimtex-subfiles|
+            for further info.
 
         Default value: 0.
 
@@ -2058,265 +1988,281 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: `'auto'`
 
-    *g:vimtex_toc_enabled*
-        Use this option to disable/enable table of contents (ToC).
-
-        Default value: 1
-
-    *g:vimtex_toc_config*
-        This is a dictionary that can be used to configure the ToC. Each key
-        specifies a configuration option that can be changed. For configuration of
-        specific matchers, see |g:vimtex_toc_config_matchers|.
-
-        In the following, the possible configuration keys are explained briefly and
-        the default values are indicated.
-
-            `name` : `Table of contents (VimTeX)`
-                The name of the ToC buffer.
-
-            `mode` : 1
-                The ToC display mode, one of:
-                    1: Separate window.
-                    2: Separate window and location list.
-                    3: Location list (and don't open it).
-                    4: Location list (and open it).
-
-            `fold_enable` : 0
-                Whether to enable folding in the ToC window.
-
-            `fold_level_start` : -1
-                The starting fold level. The value -1 indicates that the start level is
-                the same as the `tocdepth` value.
-
-            `hide_line_numbers` : 1
-                If enabled, then line numbers will be hidden in the ToC window by
-                setting |nonumber| and |norelativenumber| locally.
-
-            `hotkeys_enabled` : 0
-                Set to 1 to enable individual hotkeys for ToC entries.
-
-            `hotkeys` : `abcdegijklmnopuvxyz`
-                A string of keys that are used to create individual hotkeys.
-
-            `hotkeys_leader` : `;`
-                The hotkey leader. Set to empty string to disable the leader.
-
-            `indent_levels` : 0
-                Set to 1 to indent the section levels in the ToC window.
-
-            `layers` : Undefined
-            `layer_status` : Dictionary
-
-                    { 'content': 1,
-                        'label': 1,
-                        'todo': 1,
-                        'include': 1 }
-                The initial state of the layers (1 for active, 0 for inactive). The
-                `layers` key may be used as a shorthand: it accepts a list of layers
-                that should be active.
-
-            `layer_keys` : Dictionary
-
-                    { 'content': 'C',
-                        'label': 'L',
-                        'todo': 'T',
-                        'include': 'I'}
-                Specify hotkeys for enabling/disabling the different layers.
-
-            `resize` : 0
-                Whether or not to automatically resize vim when index windows are
-                opened.
-
-                This option makes sense if the index window is vertically split.
-
-            `refresh_always` : 1
-                Set to 0 to manually refresh ToC entries. This may be useful for very
-                large projects where generating the ToC entries becomes slow.
-
-                It may be useful to combine manually refreshing with a |BufWritePost|
-                autocommand, e.g.:
+    toc / table of content
+        *g:vimtex_toc_config*
+            This is a dictionary that can be used to
+            configure the ToC.
+            Each key specifies a configuration option that can be changed.
+            For configuration of specific matchers,
+            see |g:vimtex_toc_config_matchers|.
 
 
-                    augroup VimTeX
-                        autocmd!
-                        autocmd BufWritePost *.tex call vimtex#toc#refresh()
-                    augroup END
-
-                Or, if preferred, one may use a mapping such as:
+            the possible configuration keys are explained briefly and
+            the default values are indicated.
 
 
-                    nnoremap <silent> <localleader>lf :call vimtex#toc#refresh()
+                `name` : `Table of contents (VimTeX)`
+                    The name of the ToC buffer.
 
-            `show_help` : 1
-                Whether to display the index help text.
+                `mode` : 1
+                    The ToC display mode, one of:
+                    ¿note:   call self.create() 生成separate window¿
 
-            `show_numbers` : 1
-                Set whether or not to show section numbers in ToC.
+                        1: Separate window.
 
-            `split_pos` : `vert leftabove`
-                Define where index windows should be opened. This is a string that
-                contains either the word 'full' to open in the current window, or
-                a position command. Use |:vert| if a vertical split is desired, and one
-                of |:leftabove|, |:rightbelow|, |:topleft|, and |:botright| to specify
-                the desired split position.
+                        2: Separate window and location list.
 
-            `split_width` : 30
-                For vertically split windows: Set width of index window.
+                        3: Location list (and don't open it).
+                        4: Location list (and open it).
 
-            `tocdepth` : 3
-                Define the depth of section levels to display. This attempts to mimic
-                the corresponding latex variable `tocdepth`. For more info, see:
-                https://en.wikibooks.org/w/index.php?title=LaTeX/Document_Structure
+                `fold_enable` : 0
+                    Whether to enable folding in the ToC window.
 
-                This will also change the width of the number column according to
-                            the space needed to show the section numbers.
+                `fold_level_start` : -1
+                    The starting fold level. The value -1 indicates that the start level is
+                    the same as the `tocdepth` value.
 
-            `todo_sorted` : 1
-                Whether or not to sort the TODOs at the top of the ToC window.
+                `hide_line_numbers` : 1
+                    If enabled, then line numbers will be hidden in the ToC window by
+                    setting |nonumber| and |norelativenumber| locally.
 
-    *g:vimtex_toc_config_matchers*
-        This is a dictionary that can be used to configure the built-in ToC
-        matchers. See below for a specification of the ToC matcher "objects" and the
-        various keys that can be defined/changed (|toc_matcher_specification|).
+                `hotkeys_enabled` : 0
+                    Set to 1 to enable individual hotkeys for ToC entries.
 
-        To configure/alter a built-in matcher, one can do this:
+                `hotkeys` : `abcdegijklmnopuvxyz`
+                    A string of keys that are used to create individual hotkeys.
 
+                `hotkeys_leader` : `;`
+                    The hotkey leader. Set to empty string to disable the leader.
 
-            let g:vimtex_toc_config_matchers = {
-                        \ 'MATCHER1': {OPTIONS},
-                        \ 'MATCHER2': {OPTIONS},
-                        \}
+                `indent_levels` : 0
+                    Set to 1 to indent the section levels in the ToC window.
 
-        The available options are described in |toc_matcher_specification|. Please
-        The built-in matchers should generally just work well for most
-        people. However, this option allows at least two useful things: to disable
-        a built-in matcher and to change the priority of a built-in matcher. The
-        following is a full example that shows how this could be used:
+                `layer_status` : Dictionary
 
+                        { 'content': 1,
+                            'label': 1,
+                            'todo': 1,
+                            'include': 1 }
+                    The initial state of the layers (1 for active, 0 for inactive).
 
-            let g:vimtex_toc_config_matchers = {
-                        \ 'beamer_frame': {'disable': 1},
-                        \ 'todo_fixme': {'priority': -1},
-                        \ 'index': {'title': 'MyFancy Index Title'},
-                        \}
+                `layers` :
+                    As a shorthand:
+                    it accepts a list of layers  that should be active.
 
-        The available built-in matchers are defined in separate files under
-                    `autoload/vimtex/parser/toc/*.vim`.
+                `layer_keys` : Dictionary
 
-        Default value: {}
+                        { 'content': 'C',
+                            'label': 'L',
+                            'todo': 'T',
+                            'include': 'I'}
+                    Specify hotkeys for enabling/disabling the different layers.
 
-    *toc_matcher_specification*
-        A ToC matcher is defined as a |Dictionary| where the possible keys are
-        specified below. In order to write a matcher, one should also be aware of
-        the `context` argument that is passed to the matcher functions, as well as
-        the specification of the `toc entry` return value. However, since this kind
-        of customization is advanced I refer users to the source file for further
-        specification of these objects. In particular, see the function
-        `s:toc.parse(...)` in `autoload/vimtex/toc.vim`.
+                `resize` : 0
+                    automatically resize vim when index windows are  opened.
+                    This option makes sense if the index window is vertically split.
 
-            re
-                Type: |String|
-                Required: `yes`
-                This specifies a regular expression that should match the current line
-                for the desired ToC entry.
+                `refresh_always` : 1
+                    Set to 0 to manually refresh ToC entries.
+                    This may be useful for very  large projects where generating the ToC entries becomes slow.
 
-            prefilter_re
-                Type: |String|
-                Required: `maybe` (this or `prefilter_cmds` should be specified)
-                This specifies a regular expression that must match the current line for
-                the desired ToC entry. This is used as a prefilter to make things
-                faster, and it does not need to be a perfect match. The `re` key may
-                often be a complex and therefore slow regular expression. This key
-                should represent a simple and fast regular expression that may match
-                more than the desired entry.
-
-            prefilter_cmds
-                Type: List of |String|
-                Required: `maybe` (this or `prefilter_re` should be specified)
-                This is similar to `prefilter_re`, except it specifies a list of command
-                names (regular expressions). For instance, it should contain `todo` for
-                a ToC matcher for `\todo` commands.
-
-            priority
-                Type: |expr-number| (default: 0)
-                Required: `no`
-                Priority is used for sorting the ToC matchers. High priority matchers
-                will be tried first, and only one matcher will match a given line. Note
-                that the built-in matchers have priority values between 0 and 2.
-
-            in_preamble
-                Type: 0 or 1 (default: 0)
-                Required: `no`
-                If the entry may appear in the preamble.
-
-            in_content
-                Type: 0 or 1 (default: 1)
-                Required: `no`
-                If the entry may appear in the main content.
-
-            title
-                Type: |String|
-                Required: `no`
-                If the matcher does not have a `get_entry` key, then it will use
-                a simple, general matcher function to generate the entry. In this case,
-                the `title` key should be specified to give the title of the ToC entry.
-
-            get_entry
-                Type: |Dictionary-function|
-                Arguments: `context`
-                Returns: `toc entry`
-                Required: `no`
-                This is the general way to define ToC entries. It allows to define the
-                ToC entry based on the context. See `autoload/vimtex/parser/toc.vim` for
-                examples on how to use this.
-
-            continue
-                Type: |Dictionary-function|
-                Arguments: `context`
-                Returns: `toc entry`
-                Required: `no`
-                Some entries may be specified over several lines, in which case this key
-                becomes necessary in combination with the `get_entry` key. See the built
-                in `s:matcher_section` matcher for an example on how to use this.
-
-            name
-                Type: |String|
-                Required: `no`
-                Mostly for making it easier to debug a specific matcher. Without a name,
-                the matcher will be registered with a semi random numbered name like
-                `custom1`.
-
-            disable
-                Type: |Boolean| (default: |v:false|)
-                Required: `no`
-                If true, then the matcher will be disabled.
-
-    *g:vimtex_toc_custom_matchers*
-        This option is a list of custom ToC matchers, see |toc_matcher_specification|.
-
-        As an example, one can use this option to add ToC entries for a custom
-        environment. Say you have defined an environment `mycustomenv`, then
-        instances of this environment could be added to the ToC with the following
-        configuration:
+                    It may be useful to combine manually refreshing with a |BufWritePost|
+                    autocommand, e.g.:
 
 
-            let g:vimtex_toc_custom_matchers = [
-                            \ { 'title' : 'My Custom Environment',
-                            \   're' : '\v^\s*\\begin\{mycustomenv\}' }
-                            \]
+                        aug  VimTeX
+                            au!
+                            au BufWritePost *.tex call vimtex#toc#refresh()
+                        aug  END
 
-        Default value: []
+                    Or, if preferred, one may use a mapping such as:
 
-    *g:vimtex_toc_todo_labels*
-        Dictionary of keywords that should be recognized in comments for the todo
-        layer. The values represent the labels used in the ToC.
+                        nno  <silent> <localleader>lf :call vimtex#toc#refresh()
 
-        Default value: `{'TODO': 'TODO: ', 'FIXME': 'FIXME: '}`
+                `show_help` : 1
+                    Whether to display the index help text.
 
-    *g:vimtex_toc_show_preamble*
-        Whether to include the preamble in the ToC.
+                `show_numbers` : 1
+                    Set whether or not to show section numbers in ToC.
 
-        Default value: 1
+                `split_pos` : `vert leftabove`
+                    Define where index windows should be opened. This is a string that
+                    contains either the word 'full' to open in the current window, or
+                    a position command. Use |:vert| if a vertical split is desired, and one
+                    of |:leftabove|, |:rightbelow|, |:topleft|, and |:botright| to specify
+                    the desired split position.
+
+                `split_width` : 30
+                    For vertically split windows: Set width of index window.
+
+                `tocdepth` : 3
+                    Define the depth of section levels to display. This attempts to mimic
+                    the corresponding latex variable `tocdepth`. For more info, see:
+                    https://en.wikibooks.org/w/index.php?title=LaTeX/Document_Structure
+
+                    This will also change the width of the number column according to
+                                the space needed to show the section numbers.
+
+                `todo_sorted` : 1
+                    Whether or not to sort the TODOs at the top of the ToC window.
+
+        *g:vimtex_toc_config_matchers*
+
+            This is a dictionary that can be used to
+            configure the built-in ToC matchers.
+            See below for a specification of the ToC matcher "objects"
+            and the various keys that can be defined/changed (|toc_matcher_specification|).
+
+
+            To configure/alter a built-in matcher, one can do this:
+
+
+                let g:vimtex_toc_config_matchers = {
+                            \ 'MATCHER1': {OPTIONS},
+                            \ 'MATCHER2': {OPTIONS},
+                            \}
+
+
+            The available options are described in |toc_matcher_specification|.
+            The built-in matchers should generally just work well for most people.
+            However,
+            this option allows at least two useful things:
+            to disable a built-in matcher and
+            to change the priority of a built-in matcher.
+            The following is a full example
+
+                let g:vimtex_toc_config_matchers = {
+                            \ 'beamer_frame' : {'disable': 1},
+                            \ 'todo_fixme'   : {'priority': -1},
+                            \ 'index'        : {'title': 'MyFancy Index Title'},
+                            \}
+
+            The available built-in matchers are defined in separate files under
+                        `autoload/vimtex/parser/toc/*.vim`.
+
+            Default value: {}
+
+        *toc_matcher_specification*
+            A ToC matcher is defined as a |Dictionary| where the possible keys
+            are specified below.
+            In order to write a matcher,
+                one should also be aware of the `context` argument that is
+                passed to the matcher functions,
+                as well as the specification of the `toc entry` return value.
+            However,
+                since this kind of customization is advanced I refer users to the source file for further specification of these objects.
+            In particular,
+            see the function `s:toc.parse(...)` in `autoload/vimtex/toc.vim`.
+
+
+                re
+                    Type: |String|
+                    Required: `yes`
+                    This specifies a regular expression that should match the current line
+                    for the desired ToC entry.
+
+                prefilter  2选1
+                    prefilter_re
+                        Type: |String|
+
+                        This specifies a regular expression that must match the current line for the desired ToC entry.
+                        This is used as a prefilter to make things faster,
+                        and it does not need to be a perfect match.
+                        The `re` key may often be a complex and
+                        therefore slow regular expression.
+                        This key should represent a simple and
+                        fast regular expression that may match more than
+                        the desired entry.
+
+                    prefilter_cmds
+                        Type: List of |String|
+                        This is similar to `prefilter_re`, except it specifies a list of command
+                        names (regular expressions). For instance, it should contain `todo` for
+                        a ToC matcher for `\todo` commands.
+
+                priority
+                    Type: |expr-number| (default: 0)
+                    Required: `no`
+                    Priority is used for sorting the ToC matchers.
+                    High priority matchers will be tried first,
+                    and only one matcher will match a given line.
+                    Built-in matchers have priority values between
+                    0 and  2.
+
+
+                in_preamble
+                    Type: 0 or 1 (default: 0)
+                    Required: `no`
+                    If the entry may appear in the preamble.
+
+                in_content
+                    Type: 0 or 1 (default: 1)
+                    Required: `no`
+                    If the entry may appear in the main content.
+
+                title
+                    Type: |String|
+                    Required: `no`
+                    If the matcher does not have a `get_entry` key, then it will use
+                    a simple, general matcher function to generate the entry. In this case,
+                    the `title` key should be specified to give the title of the ToC entry.
+
+                get_entry
+                    Type: |Dictionary-function|
+                    Arguments: `context`
+                    Returns: `toc entry`
+                    Required: `no`
+                    This is the general way to define ToC entries. It allows to define the
+                    ToC entry based on the context. See `autoload/vimtex/parser/toc.vim` for
+                    examples on how to use this.
+
+                continue
+                    Type: |Dictionary-function|
+                    Arguments: `context`
+                    Returns: `toc entry`
+                    Required: `no`
+                    Some entries may be specified over several lines, in which case this key
+                    becomes necessary in combination with the `get_entry` key. See the built
+                    in `s:matcher_section` matcher for an example on how to use this.
+
+                name
+                    Type: |String|
+                    Required: `no`
+                    Mostly for making it easier to debug a specific matcher. Without a name,
+                    the matcher will be registered with a semi random numbered name like
+                    `custom1`.
+
+                disable
+                    Type: |Boolean| (default: |v:false|)
+                    Required: `no`
+                    If true, then the matcher will be disabled.
+
+        *g:vimtex_toc_custom_matchers*
+            This option is a list of custom ToC matchers,
+
+            As an example, one can use this option to add ToC entries for a custom
+            environment. Say you have defined an environment `mycustomenv`, then
+            instances of this environment could be added to the ToC with the following
+            configuration:
+
+
+                let g:vimtex_toc_custom_matchers = [
+                                \ { 'title' : 'My Custom Environment',
+                                \   're' : '\v^\s*\\begin\{mycustomenv\}' }
+                                \]
+
+            Default value: []
+
+
+        *g:vimtex_toc_todo_labels*
+            Dictionary of keywords that should be recognized in comments for the todo
+            layer. The values represent the labels used in the ToC.
+
+            Default value: `{'TODO': 'TODO: ', 'FIXME': 'FIXME: '}`
+
+        *g:vimtex_toc_show_preamble*
+
+            Default value: 1
 
 
     *g:vimtex_callback_progpath*
@@ -2406,9 +2352,8 @@ COMMANDS                                                      *vimtex-commands*
 
 
         Compiles the selected text by
-        copying it to a temporary file with the same preamble as the current file.
-        It will be compiled similarly to a single shot compile,
-        see |:VimtexCompileSS|.
+            copying it to a temporary file with the same preamble as the current file.
+        It will be compiled similarly to  |:VimtexCompileSS|.
         ¿If there are errors¿,
             they will be shown in the quickfix list.
 
@@ -2860,136 +2805,152 @@ INSERT MODE MAPPINGS                                             *vimtex-imaps*
 
     *vimtex-neosnippet*
     *vimtex-UltiSnips*
-    That this feature is not the same as the snippet feature of |UltiSnips|
-    or |neosnippet|. The imaps feature of VimTeX previously supported `automatic`
-    snippets, but these have been removed after careful considerations and input
-    from VimTeX users, please see VimTeX issue #295:
-    https://github.com/lervag/vimtex/issues/295#issuecomment-164262446
-    It has been decided that the best approach is to only provide basic mappings,
-    and to let users manually create automatic snippets through the anonymous
-    snippet functions in |UltiSnips| and |neosnippet|, please see |UltiSnips#Anon|
-    and |neosnippet#anonymous|, respectively. Here are a couple of examples that
-    show how to create such mappings:
 
+    His feature is not
+    the same as the snippet feature of |UltiSnips| or |neosnippet|.
+    The ¿imaps¿ feature of VimTeX previously
+        supported `automatic` snippets,
+        but these have been removed after careful considerations and
+        input from VimTeX users,
+        please see VimTeX issue #295:
+        https://github.com/lervag/vimtex/issues/295#issuecomment-164262446
+        It has been decided that the best approach
+        is to only provide basic ¿mappings¿,
+        and to let users manually create automatic snippets through
+        the anonymous snippet functions in |UltiSnips| and |neosnippet|,
+        please see |UltiSnips#Anon| and |neosnippet#anonymous|,  respectively.
+        Here are a couple of examples that show how to create such mappings:
 
             " Using neosnippet#anonymous
-            inoremap <silent><expr> __ neosnippet#anonymous('_${1}${0}')
-            inoremap <silent><expr> ^^ neosnippet#anonymous('^${1}${0}')
+            ino  <silent><expr> __ neosnippet#anonymous('_${1}${0}')
+            ino  <silent><expr> ^^ neosnippet#anonymous('^${1}${0}')
 
             " Using UltiSnips#Anon
-            inoremap <silent> __ __<c-r>=UltiSnips#Anon('_{$1}$0', '__', '', 'i')<cr>
-            inoremap <silent> ^^ ^^<c-r>=UltiSnips#Anon('^{$1}$0', '^^', '', 'i')<cr>
+            ino  <silent> __ __<c-r>=UltiSnips#Anon('_{$1}$0', '__', '', 'i')<cr>
+            ino  <silent> ^^ ^^<c-r>=UltiSnips#Anon('^{$1}$0', '^^', '', 'i')<cr>
 
-    A drawback with the anonymous UltiSnips snippets is that they do not nest.
-    That is, if you did `__` twice in a row, only the second one could be escaped.
-    In recent versions of |UltiSnips|, one may set normal snippets to trigger
-    automatically, see |UltiSnips-autotrigger|. This allows nesting, and is
-    therefore a better approach than using the anonymous snippet function.
+
+    A drawback with the anonymous UltiSnips snippets
+    is that they do not nest.
+    That is,
+        if you did `__` twice in a row,
+        only the second one could be escaped.
+    This allows nesting:
+        In recent versions of |UltiSnips|,
+            one may set normal snippets to trigger automatically,
+            see |UltiSnips-autotrigger|.
+        and is therefore a better approach than
+        using the anonymous snippet function.
+
 
 ------------------------------------------------------------------------------
 EVENTS                                                          *vimtex-events*
 
-VimTeX defines some events using the |User| autocmd that may be used for
-further customization.
+    VimTeX defines some events using the |User| autocmd that may be used for
+    further customization.
 
-    *VimtexEventQuit*
-        This event is triggered when the last buffer for a particular LaTeX project
-        is wiped (for example, using `:bwipeout`) and when Vim is quit.  The event
-        may be used, for instance, to cleanup up auxiliary build files or close
-        open viewers (see Examples below).  With Vim defaults, this event is not
-        triggered when using `:quit` or `:bdelete` since these commands merely hide
-        the buffer.  In multi-file projects, the event may be triggered multiple
-        times.  The 'b:vimtex' variable contains context data for the quitting
-        file or project.  For example, 'b:vimtex.tex' identifies the tex file being
-        wiped, or the main tex file of a multi-file project.
+        *VimtexEventQuit*
+            This event is triggered when the last buffer for a particular LaTeX project
+            is wiped (for example, using `:bwipeout`) and when Vim is quit.  The event
+            may be used, for instance, to cleanup up auxiliary build files or close
+            open viewers (see Examples below).  With Vim defaults, this event is not
+            triggered when using `:quit` or `:bdelete` since these commands merely hide
+            the buffer.  In multi-file projects, the event may be triggered multiple
+            times.  The 'b:vimtex' variable contains context data for the quitting
+            file or project.  For example, 'b:vimtex.tex' identifies the tex file being
+            wiped, or the main tex file of a multi-file project.
 
-        Commands such as |:VimtexClean| cannot be used in this autocommand
-        because when quitting vim the current buffer does not necessarily have
-        filetype 'tex'.
+            Commands such as |:VimtexClean| cannot be used in this autocommand
+            because when quitting vim the current buffer does not necessarily have
+            filetype 'tex'.
 
-    *VimtexEventInitPre*
-    *VimtexEventInitPost*
-        This event is triggered at the start/end of VimTeX initialization.  The
-        post event may e.g. be used to automatically start compiling a document.
+        *VimtexEventInitPre*
+        *VimtexEventInitPost*
+            This event is triggered at the start/end of VimTeX initialization.  The
+            post event may e.g. be used to automatically start compiling a document.
 
-    *VimtexEventCompileStarted*
-        This event is triggered after compilation is started.
+        *VimtexEventCompileStarted*
+            This event is triggered after compilation is started.
 
-    *VimtexEventCompileStopped*
-        This event is triggered after compilation is stopped.
+        *VimtexEventCompileStopped*
+            This event is triggered after compilation is stopped.
 
-    *VimtexEventCompiling*
-        This event is triggered when the compiler backend triggers a new
-        compilation. This is only supported by |vimtex-compiler-latexmk|.
+        *VimtexEventCompiling*
+            This event is triggered when the compiler backend triggers a new
+            compilation. This is only supported by |vimtex-compiler-latexmk|.
 
-    *VimtexEventCompileSuccess*
-    *VimtexEventCompileFailed*
-        These events are triggered after successful/failed compilation and
-        allows users to add custom callback functionality.
+        *VimtexEventCompileSuccess*
+        *VimtexEventCompileFailed*
+            These events are triggered after successful/failed compilation and
+            allows users to add custom callback functionality.
 
-    *VimtexEventTocCreated*
-        This event is triggered after a ToC window is created.
+        *VimtexEventTocCreated*
+            This event is triggered after a ToC window is created.
 
-    *VimtexEventTocActivated*
-        This event is triggered when a ToC entry has been activated. This allows
-        to add custom behaviour after opening an entry, e.g. positioning the
-        buffer window with the |zt| or |zz| mappings.
+        *VimtexEventTocActivated*
+            This event is triggered when a ToC entry has been activated. This allows
+            to add custom behaviour after opening an entry, e.g. positioning the
+            buffer window with the |zt| or |zz| mappings.
 
-    *VimtexEventView*
-        This event is triggered after the viewer has opened/forward search has
-        been performed by the command |:VimtexView| or the related mapping.
+        *VimtexEventView*
+            This event is triggered after the viewer has opened/forward search has
+            been performed by the command |:VimtexView| or the related mapping.
 
-    *VimtexEventViewReverse*
-        This event is triggered at the end of the |vimtex#view#inverse_search|
-        function, which can be used as the callback function for reverse goto from
-        a PDF viewer.
+        *VimtexEventViewReverse*
+            This event is triggered at the end of the |vimtex#view#inverse_search|
+            function, which can be used as the callback function for reverse goto from
+            a PDF viewer.
 
-Examples:
+    Examples:
 
 
-    " Compile on initialization, cleanup on quit
-    augroup vimtex_event_1
-        au!
-        au User VimtexEventQuit     VimtexClean
-        au User VimtexEventInitPost VimtexCompile
-    augroup END
+        " Compile on initialization,
+        " cleanup on quit
 
-    " Close viewers when VimTeX buffers are closed
-    function! CloseViewers()
-        if executable('xdotool')
-                    \ && exists('b:vimtex.viewer.xwin_id')
-                    \ && b:vimtex.viewer.xwin_id > 0
-            call system('xdotool windowclose '. b:vimtex.viewer.xwin_id)
-        endif
-    endfunction
+            aug  vimtex_event_1
+                au!
+                au User VimtexEventInitPost   VimtexCompile
+                au User VimtexEventQuit       VimtexClean
+            aug  END
 
-    augroup vimtex_event_2
-        au!
-        au User VimtexEventQuit call CloseViewers()
-    augroup END
+        " Close viewers when VimTeX buffers are closed
 
-    " Add custom mappings in ToC buffer
-    function! TocMappings()
-        " You probably don't want to do this, though...
-        nnoremap <silent><buffer><nowait> q :quitall!
-    endfunction
+            aug  vimtex_event_2
+                au!
+                au User VimtexEventQuit call CloseViewers()
+            aug  END
 
-    augroup vimtex_event_3
-        au!
-        au User VimtexEventTocCreated call TocMappings()
-    augroup END
+            fun! CloseViewers()
+                if executable('xdotool')
+                            \ && exists('b:vimtex.viewer.xwin_id')
+                            \ && b:vimtex.viewer.xwin_id > 0
+                    call system('xdotool windowclose '. b:vimtex.viewer.xwin_id)
+                en
+            endf
 
-    " Specify window position when opening ToC entries
-    augroup vimtex_event_4
-        au!
-        au User VimtexEventTocActivated normal! zt
-    augroup END
 
-    " Specify extra behaviour after reverse goto
-    augroup vimtex_event_4
-        au!
-        au User VimtexEventViewReverse normal! zMzvzz
-    augroup END
+        " Add custom mappings in ToC buffer
+            fun! TocMappings()
+                " You probably don't want to do this, though...
+                nno  <silent><buffer><nowait> q :quitall!
+            endf
+
+            aug  vimtex_event_3
+                au!
+                au User VimtexEventTocCreated call TocMappings()
+            aug  END
+
+        " Specify window position when opening ToC entries
+            aug  vimtex_event_4
+                au!
+                au User VimtexEventTocActivated normal! zt
+            aug  END
+
+        " Specify extra behaviour after reverse goto
+            aug  vimtex_event_4
+                au!
+                au User VimtexEventViewReverse normal! zMzvzz
+            aug  END
 
 ------------------------------------------------------------------------------
 TEXT OBJECTS                                              *vimtex-text-objects*
@@ -3258,16 +3219,16 @@ following:
 * Use a custom function in your |vimrc| file, something like this:
 
 
-        nnoremap <silent> K :call <sid>show_documentation()<cr>
-        function! s:show_documentation()
+        nno  <silent> K :call <sid>show_documentation()<cr>
+        fun! s:show_documentation()
             if index(['vim', 'help'], &filetype) >= 0
-                execute 'help ' . expand('<cword>')
+                exe  'help ' . expand('<cword>')
             elseif &filetype ==# 'tex'
                 VimtexDocPackage
-            else
+            el
                 call CocAction('doHover')
-            endif
-        endfunction
+            en
+        endf
 
 deoplete
 *vimtex-complete-deoplete*
@@ -3286,7 +3247,7 @@ To configure for VimTeX, one may use:
     " This is old style (deprecated)
     if !exists('g:deoplete#omni#input_patterns')
             let g:deoplete#omni#input_patterns = {}
-    endif
+    en
     let g:deoplete#omni#input_patterns.tex = g:vimtex#re#deoplete
 
 neocomplete
@@ -3302,7 +3263,7 @@ documents with |neocomplete| and VimTeX's omni completion function:
 
     if !exists('g:neocomplete#sources#omni#input_patterns')
         let g:neocomplete#sources#omni#input_patterns = {}
-    endif
+    en
     let g:neocomplete#sources#omni#input_patterns.tex =
                 \ g:vimtex#re#neocomplete
 
@@ -3321,10 +3282,10 @@ The following simple configuration should work well with VimTeX:
 
     set completeopt=noinsert,menuone,noselect
 
-    augroup my_cm_setup
-        autocmd!
-        autocmd BufEnter * call ncm2#enable_for_buffer()
-        autocmd Filetype tex call ncm2#register_source({
+    aug  my_cm_setup
+        au!
+        au BufEnter * call ncm2#enable_for_buffer()
+        au Filetype tex call ncm2#register_source({
                         \ 'name': 'vimtex',
                         \ 'priority': 8,
                         \ 'scope': ['tex'],
@@ -3333,16 +3294,16 @@ The following simple configuration should work well with VimTeX:
                         \ 'complete_pattern': g:vimtex#re#ncm2,
                         \ 'on_complete': ['ncm2#on_complete#omni', 'vimtex#complete#omnifunc'],
                         \ })
-    augroup END
+    aug  END
 
 For more lenient, omni-complete-like, filtering of completion candidates,
 use the following setup (in your init.vim or a personal ftplugin) instead:
 
 
-    augroup my_cm_setup
-        autocmd!
-        autocmd BufEnter * call ncm2#enable_for_buffer()
-        autocmd Filetype tex call ncm2#register_source({
+    aug  my_cm_setup
+        au!
+        au BufEnter * call ncm2#enable_for_buffer()
+        au Filetype tex call ncm2#register_source({
                         \ 'name' : 'vimtex-cmds',
                         \ 'priority': 8,
                         \ 'complete_length': -1,
@@ -3352,7 +3313,7 @@ use the following setup (in your init.vim or a personal ftplugin) instead:
                         \ 'complete_pattern': g:vimtex#re#ncm2#cmds,
                         \ 'on_complete': ['ncm2#on_complete#omni', 'vimtex#complete#omnifunc'],
                         \ })
-        autocmd Filetype tex call ncm2#register_source({
+        au Filetype tex call ncm2#register_source({
                         \ 'name' : 'vimtex-labels',
                         \ 'priority': 8,
                         \ 'complete_length': -1,
@@ -3366,7 +3327,7 @@ use the following setup (in your init.vim or a personal ftplugin) instead:
                         \ 'complete_pattern': g:vimtex#re#ncm2#labels,
                         \ 'on_complete': ['ncm2#on_complete#omni', 'vimtex#complete#omnifunc'],
                         \ })
-        autocmd Filetype tex call ncm2#register_source({
+        au Filetype tex call ncm2#register_source({
                         \ 'name' : 'vimtex-files',
                         \ 'priority': 8,
                         \ 'complete_length': -1,
@@ -3380,7 +3341,7 @@ use the following setup (in your init.vim or a personal ftplugin) instead:
                         \ 'complete_pattern': g:vimtex#re#ncm2#files,
                         \ 'on_complete': ['ncm2#on_complete#omni', 'vimtex#complete#omnifunc'],
                         \ })
-        autocmd Filetype tex call ncm2#register_source({
+        au Filetype tex call ncm2#register_source({
                         \ 'name' : 'bibtex',
                         \ 'priority': 8,
                         \ 'complete_length': -1,
@@ -3395,7 +3356,7 @@ use the following setup (in your init.vim or a personal ftplugin) instead:
                         \ 'complete_pattern': g:vimtex#re#ncm2#bibtex,
                         \ 'on_complete': ['ncm2#on_complete#omni', 'vimtex#complete#omnifunc'],
                         \ })
-    augroup END
+    aug  END
 
 nvim-completion-manager
 *vimtex-complete-ncm*
@@ -3410,9 +3371,9 @@ https://github.com/roxma/nvim-completion-manager
 To configure for VimTeX, one can use the following code:
 
 
-    augroup my_cm_setup
-        autocmd!
-        autocmd User CmSetup call cm#register_source({
+    aug  my_cm_setup
+        au!
+        au User CmSetup call cm#register_source({
                     \ 'name': 'vimtex',
                     \ 'priority': 8,
                     \ 'scoping': 1,
@@ -3421,7 +3382,7 @@ To configure for VimTeX, one can use the following code:
                     \ 'cm_refresh_patterns': g:vimtex#re#ncm,
                     \ 'cm_refresh': {'omnifunc': 'vimtex#complete#omnifunc'},
                     \ })
-    augroup END
+    aug  END
 
 YouCompleteMe
 *vimtex-complete-youcompleteme*
@@ -3443,7 +3404,7 @@ To enable automatic completion with |youcompleteme|, use the following options:
 
     if !exists('g:ycm_semantic_triggers')
         let g:ycm_semantic_triggers = {}
-    endif
+    en
     au VimEnter * let g:ycm_semantic_triggers.tex=g:vimtex#re#youcompleteme
 
 VimCompletesMe
@@ -3456,11 +3417,11 @@ The following options may be used to enable completion with the <tab> trigger
 for LaTeX documents with |VimCompletesMe| and VimTeX's omni completion function:
 
 
-    augroup VimCompletesMeTex
-        autocmd!
-        autocmd FileType tex
+    aug  VimCompletesMeTex
+        au!
+        au FileType tex
                 \ let b:vcm_omni_pattern = g:vimtex#re#neocomplete
-    augroup END
+    aug  END
 
 nvim-cmp
 *vimtex-complete-nvim-cmp*

@@ -98,79 +98,79 @@ documentclass and `.sty` files for packages).
 ------------------------------------------------------------------------------
 TABLE OF CONTENTS                                                  *vimtex-toc*
 
-|vimtex-toc| displays a table of contents (ToC) for the current LaTeX document.
-The ToC entries may be activated/jumped to with <cr> or <space>. There are
-currently four different "layers" of entries:
-
-* content  This is the main part and the "real" ToC
-* todo     This shows TODOs from comments and `\todo{...}` commands
-* label    This shows `\label{...}` commands
-* include  This shows included files
-
-The ToC is configured with |g:vimtex_toc_config|. One may change things from
-where the ToC window is positioned to which layers to show and more. Please
-read the option help for details.
-
-The ToC parser uses a list of matchers to parse the LaTeX project for the ToC
-entries. One may add custom matchers through the |g:vimtex_toc_custom_matchers|
-option. The syntax of a custom matcher is specified here:
-|toc_matcher_specification|.
-
-By setting the `mode` configuration key to > 2, the separate ToC window
-is not opened and most of the features mentioned here will be irrelevant.
-
-One may force file input entries of the "include" type into the ToC through
-comments with the following syntax:
 
 
-  % vimtex-include: /path/to/file
-
-The path may be absolute or relative. In the latter case, it will be relative
-to the current root (as printed by |:VimtexInfo|). This will add an entry in
-the ToC which makes it easy to open any file. Any file opened through the ToC
-that was included in this manner will be linked to the current VimTeX project,
-and thus the ToC and similar commands will be available, even if the file is
-not a LaTeX file.
-
-*vimtex-toc-custom-maps*
-Some people may want to have separate mappings for different ToC contents,
-e.g. one mapping to open a table of labels and todos and a different mapping
-to open a table of include files. This may be easily added with custom
-mappings:
+    The ToC entries may be activated/jumped to with <cr> or <space>.
+    There are currently four different "layers" of entries:
 
 
-  augroup vimtex_customization
-    autocmd!
-    autocmd FileType tex call CreateTocs()
-  augroup END
+    * content  This is the main part and the "real" ToC
+    * todo                TODOs from comments and `\todo{...}` commands
+    * label               `\label{...}` commands
+    * include             included files
 
-  function CreateTocs()
-    let g:custom_toc1 = vimtex#toc#new({
-        \ 'layers' : ['label', 'todo'],
-        \ 'todo_sorted' : 0,
-        \ 'show_help' : 0,
-        \ 'show_numbers' : 0,
-        \ 'mode' : 4,
-        \})
-    nnoremap <silent> \ly :call g:custom_toc1.open()<cr>
 
-    let g:custom_toc2 = vimtex#toc#new({
-        \ 'layers' : ['include'],
-        \ 'show_help' : 0,
-        \})
-    nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
-  endfunction
+    The ToC is configured with |g:vimtex_toc_config|.
 
-The `vimtex#toc#new` function takes a dictionary argument that may be used to
-override the one main configuration (i.e. the combination of the default
-values and |g:vimtex_toc_config|).
 
-Associated settings:
-* |g:vimtex_toc_enabled|
-* |g:vimtex_toc_custom_matchers|
-* |g:vimtex_toc_todo_labels|
-* |g:vimtex_toc_show_preamble|
-* |g:vimtex_toc_config|
+
+    The ToC parser uses a list of matchers to parse the LaTeX project for the ToC entries.
+
+
+    One may force file input entries of the "include" type into the ToC through
+    comments with the following syntax:
+
+            % vimtex-include: /path/to/file
+
+
+    The path may be absolute or  relative.
+        In the latter case,
+            it will be relative to the current root (as printed by  |:VimtexInfo|).
+    This will add an entry in the ToC which
+        makes it easy to open any file.
+    Any file opened through
+        the ToC that was included in this manner will be linked to the current VimTeX project,
+    and thus the ToC and
+    similar commands will be available,
+    even if the file is not a LaTeX file.
+
+
+    *vimtex-toc-custom-maps*
+    Some people may want to have separate mappings for different ToC contents,
+    e.g. one mapping to open a table of labels and todos and a different mapping
+    to open a table of include files. This may be easily added with custom
+    mappings:
+
+    augroup vimtex_customization
+        autocmd!
+        autocmd FileType tex call CreateTocs()
+    augroup END
+
+    function CreateTocs()
+        let g:custom_toc1 = vimtex#toc#new({
+            \ 'layers' : ['label', 'todo'],
+            \ 'todo_sorted' : 0,
+            \ 'show_help' : 0,
+            \ 'show_numbers' : 0,
+            \ 'mode' : 4,
+            \})
+        nnoremap <silent> \ly :call g:custom_toc1.open()<cr>
+
+        let g:custom_toc2 = vimtex#toc#new({
+            \ 'layers' : ['include'],
+            \ 'show_help' : 0,
+            \})
+        nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
+    endfunction
+
+    The `vimtex#toc#new` function takes a dictionary argument that may be used to
+    override the combination of the default  values and |g:vimtex_toc_config|
+
+    * |g:vimtex_toc_enabled|
+    * |g:vimtex_toc_custom_matchers|
+    * |g:vimtex_toc_todo_labels|
+    * |g:vimtex_toc_show_preamble|
+    * |g:vimtex_toc_config|
 
 ------------------------------------------------------------------------------
 DENITE AND UNITE SOURCES                                        *vimtex-denite*
@@ -632,10 +632,11 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
             if  1或2
                 opening and updating the pdf viewer
                 will have to be  done by
-                    the user or  VimTeX.
+                    the user
+                    or  VimTeX.
                 Not by latexmk
 
-            After f'{status}' compilations,
+            After `f'{status}'`(我写的) compilations,
                 Copy output files
                     to a corresponding set of files
                     with  `_vimtex` prepended to the name.
@@ -647,13 +648,14 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
 
             If one combines this with the callback feature,
                 this may provide a very convenient way to avoid
-                that the pdf becomes unavailable during compilation,
+                that ¿the pdf becomes unavailable during compilation¿,
                 as it will only update the viewer output file
                 after a successful compilation.
 
             This works best with the 'mupdf' and 'zathura' viewers.
             These viewers should update automatically
                 after the pdf is updated.
+
             For general viewers,
                 one has to create a callback function and
                 connect it through
@@ -985,23 +987,29 @@ SYNCTEX SUPPORT                                                *vimtex-synctex*
 ==============================================================================
 LATEX DOCUMENTATION                                           *vimtex-latexdoc*
 
-VimTeX provides the command |:VimtexDocPackage| to open documentation for
-packages and documentclasses. The command is mapped to `K` by default.
-
-For simplicity, the standard method provided by VimTeX is to look up
-documentation online through http://texdoc.net/. However, this can be
-customized with the option |g:vimtex_doc_handlers|. The option allows much
-flexibility for advanced users. For users that want to use a local `texdoc`
-installation as the main method, they may use the following config:
+VimTeX provides the command |:VimtexDocPackage| to open documentation for packages and
+documentclasses.
+The command is mapped to `K`
 
 
-  let g:vimtex_doc_handlers = ['vimtex#doc#handlers#texdoc']
+For simplicity,
+the standard method provided by
+VimTeX is to look up documentation online through
+http://texdoc.net/.
+However,
+this can be customized with the option |g:vimtex_doc_handlers|.
+The option allows much flexibility for advanced users.
+For users that want to use a local `texdoc` installation as the main method:
+    let g:vimtex_doc_handlers = ['vimtex#doc#handlers#texdoc']
 
 See https://www.tug.org/texdoc/doc/texdoc.pdf for more info about `texdoc`.
 
-In the following, I list some relevant online and offline alternatives for
-accessing LaTeX documentation. Please These methods are not
-integrated into VimTeX and are listed purely for the readers convenience.
+In the following,
+I list some relevant online and
+offline alternatives for accessing LaTeX documentation.
+These methods are not integrated into VimTeX and
+are listed purely for the readers convenience.
+
 
 ------------------------------------------------------------------------------
 ONLINE                                                 *vimtex-latexdoc-online*
@@ -1019,17 +1027,28 @@ found online at [2].
 ------------------------------------------------------------------------------
 OFFLINE                                               *vimtex-latexdoc-offline*
 
-One may use a more dedicated offline documentation system. On macOS, Dash [0]
-is a non-free but high-quality system. On Linux, one may use Zeal [1] or dasht
-[2], both of which access the Dash documentation sets. Zeal should also work
-well on Windows.
+One may use a more dedicated offline documentation system.
+On macOS,
+    Dash [0] is a non-free but high-quality system.
+On Linux,
+    one may use Zeal [1] or dasht [2],
+    both of which
+        access the Dash documentation sets.
+        Zeal should also work well on Windows.
 
-The above systems may be accessed from vim through dash.vim [3], zeavim.vim
-[4] or vim-dasht [5], respectively. Other alternative vim plugins include
-investigate.vim [6].
 
-The unofficial LaTeX(2e) reference manual (latexref) should also be mentioned,
+The above systems may be accessed from vim through
+dash.vim [3],
+zeavim.vim [4] or vim-dasht [5],
+respectively.
+Other alternative vim plugins include investigate.vim [6].
+
+
+The unofficial LaTeX(2e)
+reference manual (latexref)
+should also be mentioned,
 since it may be easily downloaded in various formats from [7].
+
 
 [0]: https://kapeli.com/dash
 [1]: https://zealdocs.org/

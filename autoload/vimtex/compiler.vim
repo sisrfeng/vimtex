@@ -62,7 +62,7 @@ fun! vimtex#compiler#callback(status) abort " {{{1
 
     if a:status == 2
         if !g:vimtex_compiler_silent
-            call vimtex#log#info('Compilation completed')
+            call vimtex#log#info('编好了')
         en
 
         if exists('b:vimtex')
@@ -75,7 +75,7 @@ fun! vimtex#compiler#callback(status) abort " {{{1
         en
     elseif a:status == 3
         if !g:vimtex_compiler_silent
-            call vimtex#log#warning('Compilation failed!')
+            call vimtex#log#warning('编不了')
         en
 
         if exists('#User#VimtexEventCompileFailed')

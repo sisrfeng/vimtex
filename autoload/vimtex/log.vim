@@ -61,9 +61,9 @@ let s:logger = {
       \ 'name': 'VimtexMessageLog',
       \ 'entries': [],
       \ 'type_to_highlight': {
-      \   'info': 'VimtexInfo',
-      \   'warning': 'VimtexWarning',
-      \   'error': 'VimtexError',
+      \   'info'    : 'Tex_Info'  ,
+      \   'warning' : 'Tex_Warn'  ,
+      \   'error'   : 'Tex_Error' ,
       \ },
       \ 'type_to_level': {
       \   'info': 1,
@@ -109,9 +109,10 @@ function! s:logger.notify(msg_list, type) abort dict " {{{1
   endfor
 
   call vimtex#echo#formatted([
-        \ [self.type_to_highlight[a:type], 'VimTeX:'],
-        \ ' ' . a:msg_list[0]
-        \])
+                       \ [self.type_to_highlight[a:type],  'TeX:'],
+                       \ ' ' . a:msg_list[0]
+                       \]
+                     \ )
 
   if len(a:msg_list) > 1
     call vimtex#echo#echo(

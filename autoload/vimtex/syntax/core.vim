@@ -157,10 +157,10 @@ fun! vimtex#syntax#core#init() abort "
         syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\usepackage\>"
         syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\RequirePackage\>"
         syn match texCmdPackage nextgroup=texFilesOpt,texFilesArg skipwhite skipnl "\\ProvidesPackage\>"
-        call vimtex#syntax#core#new_arg('texFileArg', {'contains': '@NoSpell,texCmd,texComment'})
-        call vimtex#syntax#core#new_arg('texFilesArg', {'contains': '@NoSpell,texCmd,texComment,texOptSep'})
-        call vimtex#syntax#core#new_opt('texFileOpt', {'next': 'texFileArg'})
-        call vimtex#syntax#core#new_opt('texFilesOpt', {'next': 'texFilesArg'})
+        call vimtex#syntax#core#new_arg('texFileArg'  , {'contains': '@NoSpell,texCmd,texComment'})
+        call vimtex#syntax#core#new_arg('texFilesArg' , {'contains': '@NoSpell,texCmd,texComment,texOptSep'})
+        call vimtex#syntax#core#new_opt('texFileOpt'  , {'next': 'texFileArg'})
+        call vimtex#syntax#core#new_opt('texFilesOpt' , {'next': 'texFilesArg'})
 
         " LaTeX 2.09 type styles
             syn match texCmdStyle "\\rm\>"        conceal
@@ -220,6 +220,7 @@ fun! vimtex#syntax#core#init() abort "
                         \ skipwhite skipnl
                         \ contained
 
+            "\ 用到syn region
             call vimtex#syntax#core#new_arg('texNewcmdArgName',
                   \ {
                     \ 'next'     : 'texNewcmdOpt,texNewcmdArgBody',
@@ -235,7 +236,8 @@ fun! vimtex#syntax#core#init() abort "
                  \ )
 
             call vimtex#syntax#core#new_arg('texNewcmdArgBody')
-            syn match texNewcmdParm contained   "\v#+\d" containedin=texNewcmdArgBody
+
+            syn match  texNewcmdParm   contained   "\v#+\d" containedin=texNewcmdArgBody
 
         " \newenvironment
             syn match texCmdNewenv nextgroup=texNewenvArgName skipwhite skipnl "\\\%(re\)\?newenvironment\>"
@@ -462,10 +464,11 @@ fun! vimtex#syntax#core#init() abort "
              "  For more info on dtx files, see  https://ctan.uib.no/info/dtxtut/dtxtut.pdf
             syn match texComment "\^\^A.*$"
             syn match texComment "^%\+"
+
         elseif g:vimtex_syntax_nospell_comments
             syn match texComment "%.*$" contains=@NoSpell,@In_fancY
         el
-            syn match texComment "%.*$" contains=@Spell,@In_fancY
+            syn match texComment "%.*$"   contains=@Spell,@In_fancY
         en
 
         " Don't spell check magic comments/directives
@@ -774,6 +777,8 @@ fun! vimtex#syntax#core#init() abort "
             call vimtex#syntax#core#new_cmd(l:a_custom)
         endfor
 
+
+
     let b:current_syntax = 'tex'
 endf
 
@@ -863,6 +868,7 @@ fun! vimtex#syntax#core#init_highlights() abort
         hi def link texCmdRef             texCmd
         hi def link texCmdRefConcealed    texCmdRef
         hi def link texCmdStyleItal       texCmd
+        hi link texComment Comment
         hi def link texCommentAcronym     texComment
         hi def link texCommentFalse       texComment
         hi def link texCommentURL         texComment
@@ -937,6 +943,7 @@ endf
                         \ 'mathmode'    : v:false ,
                         \ 'conceal'     : v:false ,
                         \ 'concealchar' : ''      ,
+                        \ 'containedin' : 'texMathCmdEnv'      ,
                         \ 'opt'         : v:true  ,
                         \ 'arg'         : v:true  ,
                         \ 'hide_arg'    : v:false  ,
@@ -1007,9 +1014,11 @@ endf
 
                 if l:cfg.mathmode
                     let l:set_arg.contains = '@texClusterMath'
+                    let l:set_arg.containedin = 'texMathZoneEnv'
                 elseif !l:cfg.argspell
                     let l:set_arg.contains = 'TOP,@Spell'
                 en
+
                 if l:cfg.arggreedy
                     let l:set_arg.next = l:group_arg
                 en
@@ -1118,26 +1127,29 @@ endf
 
     fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
         let l:cfg = extend({
-                    \ 'starred': 1,
-                    \ 'next': '',
-                    \}, a:0 > 0 ? a:1 : {})
+                        \ 'starred' : 1  ,
+                        \ 'next'    : '' ,
+                       \},
+                        a:0 > 0 ? a:1 : {}
+                     \)
 
         let l:envname = a:mathzone . (l:cfg.starred ? '\*\?' : '')
 
-        exe     'syntax match texMathError  "\\end{'..l:envname ..'}"  '
+        exe     'syntax match texMathError  "\\end{' . l:envname . '}"  '
 
-        exe     'syntax match texMathEnvBgnEnd  "\v\\%(begin|end)>\{'..l:envname..'\}"  contained'
+        exe     'syntax match texMathEnvBgnEnd  "\v\\%(begin|end)>\{' .  l:envname . '\}"  contained'
                     \ ' contains=texCmdMathEnv'
-                    \ ( empty(l:cfg.next) ?  ''   :   'nextgroup='..l:cfg.next..' skipwhite skipnl' )
+                    \ ( empty(l:cfg.next)
+                        \?  ''
+                        \:  'nextgroup=' . l:cfg.next . ' skipwhite skipnl' )
 
+        " \z(aaabbb): 用于syn-region 里的¿start=¿ ¿skip=¿, ¿end=¿的特殊的sub-expression
         exe     'syntax region texMathZoneEnv'
-                    \ 'start="\\begin{\z('..l:envname..'\)}"'
+                    \ 'start="\\begin{\z(' . l:envname . '\)}"'
                     \ 'end="\\end{\z1}"'
                     \ 'contains=texMathEnvBgnEnd,@texClusterMath'
                     \ 'keepend'
-        " \z\(aaabbb\): 用于✌start= ✌的特殊的regex
     endf
-
 
 " conceal 太长, 以后用xX代替? x像封条
 " 貌似是改了这个,导致git bisect了半天, 还是少改插件源码吧
@@ -1456,7 +1468,8 @@ endf
 
         for [l:cmd, l:symbol] in s:cmd_symbols
             exe  'syntax match texMathSymbol'
-                     \ '"\v\\' . l:cmd . '\ze%(>|[_^])"'
+                     "\ \ '"\v\\' . l:cmd . '"'  \ 删掉>的话, \left被\le 捣乱
+                     \ '"\v\\' . l:cmd . '\ze%(>|[_^]|\d)"'
                      \ 'contained conceal'
                      \ 'cchar=' . l:symbol
                      \ 'containedin=ALL'

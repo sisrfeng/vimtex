@@ -379,37 +379,39 @@ fun! vimtex#options#init() abort " {{{1
     call s:init_option('vimtex_text_obj_linewise_operators', ['d', 'y'])
 
     call s:init_option('vimtex_toc_enabled', 1)
-    call s:init_option('vimtex_toc_config', {
-                \ 'name' : 'Table of contents (VimTeX)',
-                \ 'mode' : 1,
-                \ 'fold_enable' : 0,
-                \ 'fold_level_start' : -1,
-                \ 'hide_line_numbers' : 1,
-                \ 'hotkeys_enabled' : 0,
-                \ 'hotkeys' : 'abcdeilmnopuvxyz',
-                \ 'hotkeys_leader' : ';',
-                \ 'indent_levels' : 0,
-                \ 'layer_status' : {
-                \   'content': 1,
-                \   'label': 1,
-                \   'todo': 1,
-                \   'include': 1,
-                \ },
-                \ 'layer_keys' : {
-                \   'content': 'C',
-                \   'label': 'L',
-                \   'todo': 'T',
-                \   'include': 'I',
-                \ },
-                \ 'resize' : 0,
-                \ 'refresh_always' : 1,
-                \ 'show_help' : 1,
-                \ 'show_numbers' : 1,
-                \ 'split_pos' : 'vert leftabove',
-                \ 'split_width' : 50,
-                \ 'tocdepth' : 3,
-                \ 'todo_sorted' : 1,
-                \})
+    call s:init_option( 'vimtex_toc_config',
+                   \{
+                    \ 'name'              : 'tex TOC',
+                    \ 'mode'              : 1,
+                    \ 'fold_enable'       : 0,
+                    \ 'fold_level_start'  : -1,
+                    \ 'hide_line_numbers' : 1,
+                    \ 'hotkeys_enabled'   : 0,
+                    \ 'hotkeys'           : 'abcdeilmnopuvxyz',
+                    \ 'hotkeys_leader'    : ';',
+                    \ 'indent_levels'     : 0,
+                    \ 'layer_status'      : {
+                                            \   'content' : 1,
+                                            \   'label'   : 1,
+                                            \   'todo'    : 1,
+                                            \   'include' : 1,
+                                            \ },
+                    \ 'layer_keys'        : {
+                                            \   'content'  : 'C',
+                                            \   'label'    : 'L',
+                                            \   'todo'     : 'T',
+                                            \   'include'  : 'I',
+                                            \ },
+                    \ 'resize'         : 0                ,
+                    \ 'refresh_always' : 1                ,
+                    \ 'show_help'      : 1                ,
+                    \ 'show_numbers'   : 1                ,
+                    \ 'split_width'    : 50               ,
+                    \ 'tocdepth'       : 3                ,
+                    \ 'todo_sorted'    : 1                ,
+                    \ 'split_pos'      : 'vert leftabove' ,
+                    \}
+                \ )
     call s:init_option('vimtex_toc_config_matchers', {})
     call s:init_option('vimtex_toc_custom_matchers', [])
     call s:init_option('vimtex_toc_show_preamble', 1)
@@ -594,7 +596,7 @@ endf
 fun! s:init_option(opt, default) abort " {{{1
     let l:global_opt = 'g:' . a:opt
                     "\ 虽然l:global_opt是函数的var, 但'g:'让它能改变全局变量
-                    "\ 这个函数不需要return
+                    "\ 另外,这个函数不需要return
     if !exists(l:global_opt)
         let {l:global_opt} = a:default
 
