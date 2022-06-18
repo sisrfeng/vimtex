@@ -575,118 +575,118 @@ Note:
 
 Table 1: A list of groups that are only primitive link targets.~
 
-  GROUP                DEFAULT
-  ----------------------------------------------------------------------------
-  texCmdType           Type
-  texError             Error
-  texParm              Special
-  texZone              PreCondit
-  texSymbol            SpecialChar
+    GROUP                DEFAULT
+    ----------------------------------------------------------------------------
+    texCmdType           Type
+    texError             Error
+    texParm              Special
+    texZone              PreCondit
+    texSymbol            SpecialChar
 
 Table 2: A list of the most common normal LaTeX groups.~
 
-  GROUP                DEFAULT      EXAMPLE
-  ----------------------------------------------------------------------------
-  texComment           Comment      % COMMENT
-  texCommentTodo       Todo         % TODO
-  texDelim             Delimiter    {, }, [, and ]
-  texCmd               Statement    \CMD
-  texOpt               Identifier   \cmd[OPT]
-  texOptSep            NormalNC     [a, b] (commas)
-  texOptEqual          texSymbol    [a=b]
-  texArg               Include      \cmd[...]{ARG}
-  texSpecialChar       SpecialChar  \S, \P, \$, \;, ...
-  texCmdInput          texCmd       \INPUT
-                                    \INCLUDE
-                                    \INCLUDEONLY
-                                    \INCLUDEGRAPHICS
-  texCmdBib            texCmd       \BIBLIOGRAPHY
-                                    \BIBLIOGRAPHYSTYLE
-  texCmdClass          texCmd       \DOCUMENTCLASS
-  texCmdPackage        texCmd       \USEPACKAGE
-                                    \REQUIREPACKAGE
-  texFileOpt           texOpt       \includegraphics[PACKAGE OPTIONS]
-                                    \documentclass[CLASS OPTIONS]
-  texFileArg           texArg       \input{FILE}
-                                    \include{FILE}
-                                    \includegraphics[...]{FILE}
-                                    \bibliographystyle{FILE}
-                                    \documentclass[...]{CLASS}
-  texFilesOpt          texFileOpt   \usepackage[PACKAGE OPTIONS]
-                                    \RequirePackage[PACKAGE OPTIONS]
-  texFilesArg          texFileArg   \includeonly{FILE1, FILE2}
-                                    \bibliography{FILE1, FILE2}
-                                    \usepackage[...]{PACKAGE1, PACKAGE2}
-                                    \RequirePackage[...]{PACKAGE1, PACKAGE2}
-  texCmdTitle          texCmd       \TITLE
-  texTitleArg          Underlined   \title{MAIN TITLE}
-  texCmdAuthor         texCmd       \AUTHOR
-  texAuthorOpt         texOpt       \author[OPT]
-  texAuthorArg         NONE         \author[...]{AUTHOR LIST}
-  texCmdPart           texCmd       \(SUB*)SECTION
-  texPartArgTitle      String       \(sub*)section{TITLE}
-  texCmdEnv            texCmd       \BEGIN; \END
-  texEnvArgName        PreCondit    \begin{ENVNAME}
-  texCmdRef            texCmd       \CITE; \LABEL
-  texRefArg            Special      \cite{REFERENCE}; \label{REF}
-  texE3Variable        texCmd       \G_MYFILE_NAME_STR
-  texE3Constant        texE3Variable
-                                    \C_MYFILE_NAME_STR
-  texE3Function        texCmdType   \STR_NEW:n
-  texE3Type            texParm      \str_new:N
-  texCmdParbox         texCmd       \PARBOX[p][h][i]{w}{c}
-  texBoxOptPosVal      texSymbol    \parbox[P][h][i]{w}{c}
-                                    \begin{minipage}[P][h][i]{w}
-  texBoxOptIPosVal     texBoxOptPosVal
-                                    \parbox[p][h][I]{w}{c}
-                                    \begin{minipage}[p][h][I]{w}
+    GROUP                DEFAULT      EXAMPLE
+    ----------------------------------------------------------------------------
+    texComment           Comment      % COMMENT
+    texCommentTodo       Todo         % TODO
+    texDelim             Delimiter    {, }, [, and ]
+    texCmd               Statement    \CMD
+    texOpt               Identifier   \cmd[OPT]
+    texOptSep            NormalNC     [a, b] (commas)
+    texOptEqual          texSymbol    [a=b]
+    texArg               Include      \cmd[...]{ARG}
+    texSpecialChar       SpecialChar  \S, \P, \$, \;, ...
+    texCmdInput          texCmd       \INPUT
+                                        \INCLUDE
+                                        \INCLUDEONLY
+                                        \INCLUDEGRAPHICS
+    texCmdBib            texCmd       \BIBLIOGRAPHY
+                                        \BIBLIOGRAPHYSTYLE
+    texCmdClass          texCmd       \DOCUMENTCLASS
+    texCmdPackage        texCmd       \USEPACKAGE
+                                        \REQUIREPACKAGE
+    texFileOpt           texOpt       \includegraphics[PACKAGE OPTIONS]
+                                        \documentclass[CLASS OPTIONS]
+    texFileArg           texArg       \input{FILE}
+                                        \include{FILE}
+                                        \includegraphics[...]{FILE}
+                                        \bibliographystyle{FILE}
+                                        \documentclass[...]{CLASS}
+    texFilesOpt          texFileOpt   \usepackage[PACKAGE OPTIONS]
+                                        \RequirePackage[PACKAGE OPTIONS]
+    texFilesArg          texFileArg   \includeonly{FILE1, FILE2}
+                                        \bibliography{FILE1, FILE2}
+                                        \usepackage[...]{PACKAGE1, PACKAGE2}
+                                        \RequirePackage[...]{PACKAGE1, PACKAGE2}
+    texCmdTitle          texCmd       \TITLE
+    texTitleArg          Underlined   \title{MAIN TITLE}
+    texCmdAuthor         texCmd       \AUTHOR
+    texAuthorOpt         texOpt       \author[OPT]
+    texAuthorArg         NONE         \author[...]{AUTHOR LIST}
+    texCmdPart           texCmd       \(SUB*)SECTION
+    texPartArgTitle      String       \(sub*)section{TITLE}
+    texCmdEnv            texCmd       \BEGIN; \END
+    texEnvArgName        PreCondit    \begin{ENVNAME}
+    texCmdRef            texCmd       \CITE; \LABEL
+    texRefArg            Special      \cite{REFERENCE}; \label{REF}
+    texE3Variable        texCmd       \G_MYFILE_NAME_STR
+    texE3Constant        texE3Variable
+                                        \C_MYFILE_NAME_STR
+    texE3Function        texCmdType   \STR_NEW:n
+    texE3Type            texParm      \str_new:N
+    texCmdParbox         texCmd       \PARBOX[p][h][i]{w}{c}
+    texBoxOptPosVal      texSymbol    \parbox[P][h][i]{w}{c}
+                                        \begin{minipage}[P][h][i]{w}
+    texBoxOptIPosVal     texBoxOptPosVal
+                                        \parbox[p][h][I]{w}{c}
+                                        \begin{minipage}[p][h][I]{w}
 
 Table 3: A list of math mode groups.~
 
-  GROUP                    DEFAULT        EXAMPLE
-  ----------------------------------------------------------------------------
-  texMathZone              Special        \( HERE \); \[ HERE \]
+    GROUP                    DEFAULT        EXAMPLE
+    ----------------------------------------------------------------------------
+    texMathZone              Special        \( HERE \); \[ HERE \]
 
-  texMathZoneEnv           texMathZone    \begin{menv}  HERE \end{menv}
-  texMathZoneEnvStarred    texMathZone    \begin{menv*} HERE \end{menv¿*¿}
+    texMathZoneEnv           texMathZone    \begin{menv}  HERE \end{menv}
+    texMathZoneEnvStarred    texMathZone    \begin{menv*} HERE \end{menv¿*¿}
 
-  texMathZoneX             texMathZone    $ HERE $
-  texMathZoneXX            texMathZone    $$ HERE $$
+    texMathZoneX             texMathZone    $ HERE $
+    texMathZoneXX            texMathZone    $$ HERE $$
 
-  texMathZoneEnsured       texMathZone    \ensuremath{HERE}
+    texMathZoneEnsured       texMathZone    \ensuremath{HERE}
 
-  texCmdMathEnv            texCmdEnv      \BEGIN; \END (for math environments)
-  texMathEnvArgName        Delimiter      \begin{EQUATION}
-  texCmdMath               texCmd         \ENSUREMATH
-  texMathDelim             Type           \LVERT
-  texMathDelimMod          texMathDelim   \LEFT\lvert \RIGHT\rvert
+    texCmdMathEnv            texCmdEnv      \BEGIN; \END (for math environments)
+    texMathEnvArgName        Delimiter      \begin{EQUATION}
+    texCmdMath               texCmd         \ENSUREMATH
+    texMathDelim             Type           \LVERT
+    texMathDelimMod          texMathDelim   \LEFT\lvert \RIGHT\rvert
 
-  texMathOper              Operator       Basic operators: +-=/
-  texMathSuperSub          texMathOper    Sub and super operators (^, _)
+    texMathOper              Operator       Basic operators   `+-=/`
+    texMathSuperSub          texMathOper    Sub and super operators  ¿^¿ ¿_¿
 
-  texMathError             texError       Unmatched region endings
+    texMathError             texError       Unmatched region endings
 
 Table 4: A list of other important groups.~
 
-  GROUP                DEFAULT         EXAMPLE
-  ----------------------------------------------------------------------------
-  texLength            Number          Length units, e.g. "4 cm". Only when
-                                       contained e.g. in option groups.
-  texLigature          texSymbol       --; ---; ``; ''; ,,
-  texCmdAccent         texCmd          \"{a}
-  texCmdLigature       texSpecialChar  \ss; \ae
-  texCmdSpaceCodeChar  Special         Catcodes. For more info, see:
-                                       https://en.wikibooks.org/wiki/TeX/catcode
-  texCmdTodo           Todo            \TODOSOMETHING
-  texCmdVerb           texCmd          \VERB
+    GROUP                DEFAULT         EXAMPLE
+    ----------------------------------------------------------------------------
+    texLength            Number          Length units, e.g. "4 cm". Only when
+                                        contained e.g. in option groups.
+    texLigature          texSymbol       --; ---; ``; ''; ,,
+    texCmdAccent         texCmd          \"{a}
+    texCmdLigature       texSpecialChar  \ss; \ae
+    texCmdSpaceCodeChar  Special         Catcodes. For more info, see:
+                                        https://en.wikibooks.org/wiki/TeX/catcode
+    texCmdTodo           Todo            \TODOSOMETHING
+    texCmdVerb           texCmd          \VERB
 
-  texVerbZoneInline    texZone         \verb+VERB TEXT+
-  texVerbZone          texZone         \begin{verbatim} VERB TEXT \end{verbatim}
+    texVerbZoneInline    texZone         \verb+VERB TEXT+
+    texVerbZone          texZone         \begin{verbatim} VERB TEXT \end{verbatim}
 
-  texCmdDef            texCmdNew       \DEF
-  texDefArgName        texArgNew       \def\NAME
-  texDefParm           texParm         \def\name #1
-  texCmdItem           texCmd          \item
+    texCmdDef            texCmdNew       \DEF
+    texDefArgName        texArgNew       \def\NAME
+    texDefParm           texParm         \def\name #1
+    texCmdItem           texCmd          \item
 
 
 

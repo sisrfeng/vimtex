@@ -10,43 +10,43 @@ fun! vimtex#syntax#core#init() abort "
 
     " Define main syntax clusters
         syn cluster texClusterOpt contains=
-                    \texCmd,
-                    \texComment,
-                    \texGroup,
-                    \texLength,
-                    \texOpt,
-                    \texOptEqual,
-                    \texOptSep,
-                    \@NoSpell
+                                          \texCmd,
+                                          \texComment,
+                                          \texGroup,
+                                          \texLength,
+                                          \texOpt,
+                                          \texOptEqual,
+                                          \texOptSep,
+                                          \@NoSpell
 
         syn cluster texClusterMath contains=
-                    \texCmdEnvM,
-                    \texCmdFootnote,
-                    \texCmdGreek,
-                    \texCmdMinipage,
-                    \texCmdParbox,
-                    \texCmdRef,
-                    \texCmdSize,
-                    \texCmdStyle,
-                    \texCmdTodo,
-                    \texCmdVerb,
-                    \texComment,
-                    \texGroupError,
-                    \texMathCmd,
-                    \texMathCmdEnv,
-                    \texMathCmdStyle,
-                    \texMathCmdStyleBold,
-                    \texMathCmdStyleItal,
-                    \texMathCmdText,
-                    \texMathDelim,
-                    \texMathDelimMod,
-                    \texMathGroup,
-                    \texMathOper,
-                    \texMathSuperSub,
-                    \texMathSymbol,
-                    \texSpecialChar,
-                    \texTabularChar,
-                    \@NoSpell
+                                          \texCmdEnvM,
+                                          \texCmdFootnote,
+                                          \texCmdGreek,
+                                          \texCmdMinipage,
+                                          \texCmdParbox,
+                                          \texCmdRef,
+                                          \texCmdSize,
+                                          \texCmdStyle,
+                                          \texCmdTodo,
+                                          \texCmdVerb,
+                                          \texComment,
+                                          \texGroupError,
+                                          \texMathCmd,
+                                          \texMathCmdEnv,
+                                          \texMathCmdStyle,
+                                          \texMathCmdStyleBold,
+                                          \texMathCmdStyleItal,
+                                          \texMathCmdText,
+                                          \texMathDelim,
+                                          \texMathDelimMod,
+                                          \texMathGroup,
+                                          \texMathOper,
+                                          \texMathSuperSub,
+                                          \texMathSymbol,
+                                          \texSpecialChar,
+                                          \texTabularChar,
+                                          \@NoSpell
 
 
     " TeX symbols and special characters
@@ -291,16 +291,17 @@ fun! vimtex#syntax#core#init() abort "
                             \ nextgroup=texLetArgBody,texLetArgEqual
                             \ skipwhite skipnl
 
-            " Note: define texLetArgEqual after texLetArgBody
+            " Define texLetArgEqual after texLetArgBody
             " Order matters:
-            " E.g. in
-                " '\let\eq=='
-                " we want:
-                " 1st = is texLetArgEqual,
-                " 2nd = is texLetArgBody
-            " Reversing lines results in:
-                " 1st = is texLetArgBody,
-                " 2nd = is unmatched
+                " E.g. in
+                    " '\let\eq=='
+                    " we want:
+                    " 1st = is texLetArgEqual,
+                    " 2nd = is texLetArgBody
+
+                " Reversing lines results in:
+                    " 1st = is texLetArgBody,
+                    " 2nd = is unmatched
                 syn match texLetArgBody  "\v\\[a-zA-Z@]+|\\[^a-zA-Z@]|\S"
                         \ contained
                         \ contains=TOP,@Nospell
@@ -311,12 +312,12 @@ fun! vimtex#syntax#core#init() abort "
                         \ skipwhite skipnl
 
         " Reference and cite commands
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\nocite>"
-            "\ syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\label>"
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\(page|eq)ref>"
-            syn match texCmdRef nextgroup=texRefArg           skipwhite skipnl   "\v\\v?ref>"
-            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite>"
-            syn match texCmdRef nextgroup=texRefOpt,texRefArg skipwhite skipnl   "\v\\cite[tp]>\*?"
+            syn match texCmdRef nextgroup=texRefArg            #\v\\nocite>#        skipwhite skipnl
+            syn match texCmdRef nextgroup=texRefArg            #\v\\label>#         skipwhite skipnl
+            syn match texCmdRef nextgroup=texRefArg            #\v\\v?ref>#         skipwhite skipnl
+            syn match texCmdRef nextgroup=texRefArg            #\v\\(page|eq)ref>#  skipwhite skipnl
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg  #\v\\cite>#          skipwhite skipnl
+            syn match texCmdRef nextgroup=texRefOpt,texRefArg  #\v\\cite[tp]>\*?#   skipwhite skipnl
             call vimtex#syntax#core#new_opt('texRefOpt', {'next': 'texRefOpt,texRefArg'})
             call vimtex#syntax#core#new_arg('texRefArg', {'contains': 'texComment,@NoSpell'})
 
@@ -494,8 +495,8 @@ fun! vimtex#syntax#core#init() abort "
                     \ contains=texCommentConditionals,@In_fancY
 
         syn region texCommentConditionals matchgroup=texComment
-                    \ start="\\if\w\+"
-                    \ end="\\fi\>"
+                    \ start="\v\\if\w+"
+                    \ end="\v\\fi>"
                     \ contained
                     \ transparent
 
@@ -668,8 +669,9 @@ fun! vimtex#syntax#core#init() abort "
 
         " Bad/Mismatched math
             syn match texMathError "\\[\])]"
+
             syn match texMathError
-                        \ "\\end\s*{\s*\(array\|[bBpvV]matrix\|split\|smallmatrix\)\s*}"
+                        \ #\\end\s*{\s*\v(array|[bBpvV]matrix|split|smallmatrix)\s*}#
 
         " Operators and similar
             syn match texMathOper     "[/=+-]" contained
@@ -690,15 +692,19 @@ fun! vimtex#syntax#core#init() abort "
         call vimtex#syntax#core#new_arg('texMathTextArg')
 
         " Math style commands
-            syn match texMathCmdStyle contained "\\mathbb\>"
-            syn match texMathCmdStyle contained "\\mathbf\>"
-            syn match texMathCmdStyle contained "\\mathcal\>"
-            syn match texMathCmdStyle contained "\\mathfrak\>"
-            syn match texMathCmdStyle contained "\\mathit\>"
-            syn match texMathCmdStyle contained "\\mathnormal\>"
-            syn match texMathCmdStyle contained "\\mathrm\>"
-            syn match texMathCmdStyle contained "\\mathsf\>"
-            syn match texMathCmdStyle contained "\\mathtt\>"
+        "\ 我删掉了contained
+            syn match texMathCmdStyle           "\\mathbb\>"          conceal
+            syn match texMathCmdStyle           "\\mathbf\>"          conceal
+            syn match texMathCmdStyle           "\\mathcal\>"         conceal
+            syn match texMathCmdStyle           "\\mathfrak\>"        conceal
+            syn match texMathCmdStyle           "\\mathit\>"          conceal
+            syn match texMathCmdStyle           "\\mathnormal\>"      conceal
+            syn match texMathCmdStyle           "\\mathrm\>"          conceal
+            syn match texMathCmdStyle           "\\mathsf\>"          conceal
+            syn match texMathCmdStyle           "\\mathtt\>"          conceal
+
+
+
 
         " Bold and italic commands
         call s:match_bold_italic_math()
@@ -802,9 +808,11 @@ endf
 fun! vimtex#syntax#core#init_highlights() abort
 
     " Primitive TeX highlighting groups
-        hi link texDelim Conceal
         "\ syn list texDelim为空, 它只出现在:
                 "\ matchgroup=texDelim
+
+        "\ 在这个文件 /home/wf/dotF/cfg/nvim/after/syntax/tex.vim
+        "\ 的这个函数里改:  fun! s:Tex_hi(group, fg, bg, gui)
 
         hi def link texArg                Ignore
 
@@ -814,18 +822,11 @@ fun! vimtex#syntax#core#init_highlights() abort
         hi def link texCmdType            Ignore
 
         hi def link texCommentTodo        Ignore
-
-        " hi def link texDelim              Delimiter
-        hi link texDelim              HidE
-        " hi texDelim guifg=none guibg=none gui=none
-            " 大括号的fg还受其他位置控制
-
         hi def link texEnvArgName         Ignore
 
-        hi def link texIgnore              Ignore
+        hi def link texIgnore             Ignore
         hi def link texLength             Ignore
 
-        hi def link texMathDelim          Ignore
         hi def link texMathEnvArgName     Ignore
         hi def link texMathOper           Ignore
         hi def link texMathZone           Ignore
@@ -861,22 +862,30 @@ fun! vimtex#syntax#core#init_highlights() abort
     "
     "
     " " Inherited groups
+        hi def link texMathCmdStyle       texMathCmd
         hi def link texCmdGreek           texMathCmd
-        hi def link texCmdMath            texCmd
-        hi def link texCmdLigature        texSpecialChar
+
+        hi def link texCmdMath            texCmd   "\ \ "\\ensuremath\>"
         hi def link texCmdPart            texCmd
         hi def link texCmdRef             texCmd
-        hi def link texCmdRefConcealed    texCmdRef
         hi def link texCmdStyleItal       texCmd
-        hi link texComment Comment
+
+        hi def link texCmdLigature        texSpecialChar
+        hi def link texCmdRefConcealed    texCmdRef
+
+        hi def link texComment            Comment
         hi def link texCommentAcronym     texComment
         hi def link texCommentFalse       texComment
         hi def link texCommentURL         texComment
+
         hi def link texE3Delim            texDelim
         hi def link texRefConcealedDelim  texDelim
         hi def link texMathDelimZone      texDelim
-        hi def link texGroupError         texError
-        hi def link texMathCmdStyle       texMathCmd
+
+        hi def link texGroupError         HidE
+        hi def link texMathError          HidE
+        "\ 经常误报, 等编译失败时再检查?  debug buggy !!!!!!!!
+
         hi def link texPartConcealed      texCmdPart
 endf
 
@@ -943,7 +952,6 @@ endf
                         \ 'mathmode'    : v:false ,
                         \ 'conceal'     : v:false ,
                         \ 'concealchar' : ''      ,
-                        \ 'containedin' : 'texMathCmdEnv'      ,
                         \ 'opt'         : v:true  ,
                         \ 'arg'         : v:true  ,
                         \ 'hide_arg'    : v:false  ,
@@ -972,10 +980,13 @@ endf
         en
 
         " Define group names
-            let l:name = 'C' . toupper(l:cfg.name[0]) . l:cfg.name[1:]
-                    " C: 表示Custom 貌似可以随意改, 稳妥起见, 不改
-            let l:pre = l:cfg.mathmode ? 'texMath' : 'tex'
-            let l:group_cmd = l:pre . 'Cmd' . l:name
+            let l:name = 'wf_' . toupper(l:cfg.name[0]) . l:cfg.name[1:]
+                    "\ C: 表示Custom 貌似可以随意改, 稳妥起见, 不改
+                   "\ 'C'
+            let l:pre = l:cfg.mathmode . 'tex'
+                        \ ? 'Math'
+                        \ : ''
+            let l:group_cmd = l:pre . l:name . 'Cmd'
             let l:group_opt = l:pre . l:name . 'Opt'
             let l:group_arg = l:pre . l:name . 'Arg'
 
@@ -1013,8 +1024,7 @@ endf
                     en
 
                 if l:cfg.mathmode
-                    let l:set_arg.contains = '@texClusterMath'
-                    let l:set_arg.containedin = 'texMathZoneEnv'
+                    let l:set_arg.contains    = '@texClusterMath'
                 elseif !l:cfg.argspell
                     let l:set_arg.contains = 'TOP,@Spell'
                 en
@@ -1092,9 +1102,9 @@ endf
 
         " Define default highlight rule
         exe     'hi def link' l:group_cmd
-                    \ !empty(l:cfg.hlgroup)  ?
-                    \ l:cfg.hlgroup
-                    \   : l:pre . 'Cmd'
+                    \ !empty(l:cfg.hlgroup)
+                      \ ?  l:cfg.hlgroup
+                    \   :  l:pre . 'Cmd'
     endf
 
 
@@ -1126,12 +1136,10 @@ endf
     endf
 
     fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
-        let l:cfg = extend({
-                        \ 'starred' : 1  ,
-                        \ 'next'    : '' ,
-                       \},
-                        a:0 > 0 ? a:1 : {}
-                     \)
+        let l:cfg = extend(
+                        \ { 'starred' : 1, 'next' : ''  },
+                        \ a:0 > 0 ? a:1 : {},
+                    \ )
 
         let l:envname = a:mathzone . (l:cfg.starred ? '\*\?' : '')
 
@@ -1140,15 +1148,19 @@ endf
         exe     'syntax match texMathEnvBgnEnd  "\v\\%(begin|end)>\{' .  l:envname . '\}"  contained'
                     \ ' contains=texCmdMathEnv'
                     \ ( empty(l:cfg.next)
-                        \?  ''
-                        \:  'nextgroup=' . l:cfg.next . ' skipwhite skipnl' )
+                        \ ?  ''
+                        \ :  'nextgroup=' . l:cfg.next . ' skipwhite skipnl' )
 
-        " \z(aaabbb): 用于syn-region 里的¿start=¿ ¿skip=¿, ¿end=¿的特殊的sub-expression
+                                      " \z(aaabbb):
+                                          "  用于syn-region 里的¿start=¿ ¿skip=¿, ¿end=¿的特殊的sub-expression
+
         exe     'syntax region texMathZoneEnv'
                     \ 'start="\\begin{\z(' . l:envname . '\)}"'
                     \ 'end="\\end{\z1}"'
-                    \ 'contains=texMathEnvBgnEnd,@texClusterMath'
+                    \ 'contains=texMathEnvBgnEnd,@texClusterMath,texCmdGreek'
                     \ 'keepend'
+
+                       "\ keepend导致@texClusterMath里的cmd不会被匹配? 应该不会
     endf
 
 " conceal 太长, 以后用xX代替? x像封条
@@ -1157,9 +1169,9 @@ endf
 fun! vimtex#syntax#core#conceal_math_cmd(cmd, pairs) abort
 
     for [l:from, l:to] in a:pairs
-        exe     'syntax match texMathSymbol'
-                    \ '"\\' . a:cmd . '\%({\s*' . l:from . '\s*}\|\s\+' . l:from . '\)"'
-                    \ 'contained conceal cchar=' . l:to
+        exe   'syntax match texMathSymbol'
+                  \ '"\\' . a:cmd . '\%({\s*' . l:from . '\s*}\|\s\+' . l:from . '\)"'
+                  \ 'contained conceal cchar=' . l:to
     endfor
 endf
 
@@ -1261,14 +1273,22 @@ endf
                         \ l:conceal
         endfor
 
-        exe     'syntax region texMathStyleBold
-                    \ matchgroup=texDelim start="{" end="}"
-                    \ contained contains=@texClusterMath' l:concealends
-        exe     'syntax region texMathStyleItal
-                    \ matchgroup=texDelim start="{" end="}"
-                    \ contained contains=@texClusterMath' l:concealends
+        exe   'syntax region texMathStyleBold'
+                  \ 'matchgroup=texDelim'
+                  \ 'start="{"   end="}" '
+                  \ 'contained'
+                  \ 'contains=@texClusterMath'
+                  \ l:concealends
+
+        exe   'syntax region texMathStyleItal'
+                  \ 'matchgroup=texDelim'
+                  \ 'start="{"    end="}"'
+                  \ 'contained'
+                  \ 'contains=@texClusterMath'
+                  \ l:concealends
 
         if g:vimtex_syntax_conceal.styles
+            syn match Tex_Math           "\v\\math>"
             syn match texMathCmdStyle    "\v\\math%(rm|tt|normal|sf)>"
                         \ contained conceal  skipwhite   nextgroup=texMathStyleConcArg
 
@@ -1910,8 +1930,10 @@ endf
 
 
     fun! s:match_math_delims() abort
-        syn match texMathDelimMod contained "\\\(left\|right\)\>"
+        "\ syn match texMathDelimMod             "\v\\%(left|right)>"
+        syn match texMathDelimMod contained   "\v\\%(left|right)>"
         syn match texMathDelimMod contained "\\[bB]igg\?[lr]\?\>"
+
         syn match texMathDelim contained "[<>()[\]|/.]\|\\[{}|]"
         syn match texMathDelim contained "\\backslash\>"
         syn match texMathDelim contained "\\downarrow\>"
@@ -2104,54 +2126,58 @@ endf
 
 
     fun! s:match_conceal_greek() abort
-        syn match texCmdGreek "\\alpha\>"      contained conceal cchar=α
-        syn match texCmdGreek "\\beta\>"       contained conceal cchar=β
-        syn match texCmdGreek "\\gamma\>"      contained conceal cchar=γ
-        syn match texCmdGreek "\\delta\>"      contained conceal cchar=δ
-        syn match texCmdGreek "\\epsilon\>"    contained conceal cchar=ϵ
-        syn match texCmdGreek "\\varepsilon\>" contained conceal cchar=ε
-        syn match texCmdGreek "\\zeta\>"       contained conceal cchar=ζ
-        syn match texCmdGreek "\\eta\>"        contained conceal cchar=η
-        syn match texCmdGreek "\\theta\>"      contained conceal cchar=θ
-        syn match texCmdGreek "\\vartheta\>"   contained conceal cchar=ϑ
-        syn match texCmdGreek "\\iota\>"       contained conceal cchar=ι
-        syn match texCmdGreek "\\kappa\>"      contained conceal cchar=κ
-        syn match texCmdGreek "\\lambda\>"     contained conceal cchar=λ
-        syn match texCmdGreek "\\mu\>"         contained conceal cchar=μ
-        syn match texCmdGreek "\\nu\>"         contained conceal cchar=ν
-        syn match texCmdGreek "\\xi\>"         contained conceal cchar=ξ
-        syn match texCmdGreek "\\pi\>"         contained conceal cchar=π
-        syn match texCmdGreek "\\varpi\>"      contained conceal cchar=ϖ
-        syn match texCmdGreek "\\rho\>"        contained conceal cchar=ρ
-        syn match texCmdGreek "\\varrho\>"     contained conceal cchar=ϱ
-        syn match texCmdGreek "\\sigma\>"      contained conceal cchar=σ
-        syn match texCmdGreek "\\varsigma\>"   contained conceal cchar=ς
-        syn match texCmdGreek "\\tau\>"        contained conceal cchar=τ
-        syn match texCmdGreek "\\upsilon\>"    contained conceal cchar=υ
-        syn match texCmdGreek "\\phi\>"        contained conceal cchar=ϕ
-        syn match texCmdGreek "\\varphi\>"     contained conceal cchar=φ
-        syn match texCmdGreek "\\chi\>"        contained conceal cchar=χ
-        syn match texCmdGreek "\\psi\>"        contained conceal cchar=ψ
-        syn match texCmdGreek "\\omega\>"      contained conceal cchar=ω
-        syn match texCmdGreek "\\Gamma\>"      contained conceal cchar=Γ
-        syn match texCmdGreek "\\Delta\>"      contained conceal cchar=Δ
-        syn match texCmdGreek "\\Theta\>"      contained conceal cchar=Θ
-        syn match texCmdGreek "\\Lambda\>"     contained conceal cchar=Λ
-        syn match texCmdGreek "\\Xi\>"         contained conceal cchar=Ξ
-        syn match texCmdGreek "\\Pi\>"         contained conceal cchar=Π
-        syn match texCmdGreek "\\Sigma\>"      contained conceal cchar=Σ
-        syn match texCmdGreek "\\Upsilon\>"    contained conceal cchar=Υ
-        syn match texCmdGreek "\\Phi\>"        contained conceal cchar=Φ
-        syn match texCmdGreek "\\Chi\>"        contained conceal cchar=Χ
-        syn match texCmdGreek "\\Psi\>"        contained conceal cchar=Ψ
-        syn match texCmdGreek "\\Omega\>"      contained conceal cchar=Ω
+                                              "\ 我把contained全删了
+        syn match texCmdGreek "\\alpha\>"      conceal cchar=α
+        syn match texCmdGreek "\\beta\>"       conceal cchar=β
+        syn match texCmdGreek "\\gamma\>"      conceal cchar=γ
+        syn match texCmdGreek "\\delta\>"      conceal cchar=δ
+        syn match texCmdGreek "\\epsilon\>"    conceal cchar=ϵ
+        syn match texCmdGreek "\\varepsilon\>" conceal cchar=ε
+        syn match texCmdGreek "\\zeta\>"       conceal cchar=ζ
+        syn match texCmdGreek "\\eta\>"        conceal cchar=η
+        syn match texCmdGreek "\\theta\>"      conceal cchar=θ
+        syn match texCmdGreek "\\vartheta\>"   conceal cchar=ϑ
+        syn match texCmdGreek "\\iota\>"       conceal cchar=ι
+        syn match texCmdGreek "\\kappa\>"      conceal cchar=κ
+        syn match texCmdGreek "\\lambda\>"     conceal cchar=λ
+        syn match texCmdGreek "\\mu\>"         conceal cchar=μ
+        syn match texCmdGreek "\\nu\>"         conceal cchar=ν
+        syn match texCmdGreek "\\xi\>"         conceal cchar=ξ
+        syn match texCmdGreek "\\pi\>"         conceal cchar=π
+        syn match texCmdGreek "\\varpi\>"      conceal cchar=ϖ
+        syn match texCmdGreek "\\rho\>"        conceal cchar=ρ
+        syn match texCmdGreek "\\varrho\>"     conceal cchar=ϱ
+        syn match texCmdGreek "\\sigma\>"      conceal cchar=σ
+        syn match texCmdGreek "\\varsigma\>"   conceal cchar=ς
+        syn match texCmdGreek "\\tau\>"        conceal cchar=τ
+        syn match texCmdGreek "\\upsilon\>"    conceal cchar=υ
+        syn match texCmdGreek "\\phi\>"        conceal cchar=ϕ
+        syn match texCmdGreek "\\varphi\>"     conceal cchar=φ
+        syn match texCmdGreek "\\chi\>"        conceal cchar=χ
+        syn match texCmdGreek "\\psi\>"        conceal cchar=ψ
+        syn match texCmdGreek "\\omega\>"      conceal cchar=ω
+        syn match texCmdGreek "\\Gamma\>"      conceal cchar=Γ
+        syn match texCmdGreek "\\Delta\>"      conceal cchar=Δ
+        syn match texCmdGreek "\\Theta\>"      conceal cchar=Θ
+        syn match texCmdGreek "\\Lambda\>"     conceal cchar=Λ
+        syn match texCmdGreek "\\Xi\>"         conceal cchar=Ξ
+        syn match texCmdGreek "\\Pi\>"         conceal cchar=Π
+        syn match texCmdGreek "\\Sigma\>"      conceal cchar=Σ
+        syn match texCmdGreek "\\Upsilon\>"    conceal cchar=Υ
+        syn match texCmdGreek "\\Phi\>"        conceal cchar=Φ
+        syn match texCmdGreek "\\Chi\>"        conceal cchar=Χ
+        syn match texCmdGreek "\\Psi\>"        conceal cchar=Ψ
+        syn match texCmdGreek "\\Omega\>"      conceal cchar=Ω
     endf
 
 
     fun! s:match_conceal_cites_brackets() abort
         syn match texCmdRefConcealed
                     \ "\\cite[tp]\?\>\*\?"
-                    \ conceal skipwhite nextgroup=texRefConcealedOpt1,texRefConcealedArg
+                    \ conceal
+                    \ skipwhite
+                    \ nextgroup=texRefConcealedOpt1,texRefConcealedArg
+
         call vimtex#syntax#core#new_opt('texRefConcealedOpt1', {
                     \ 'opts': g:vimtex_syntax_conceal_cites.verbose ? '' : 'conceal',
                     \ 'next': 'texRefConcealedOpt2,texRefConcealedArg',
@@ -2174,8 +2200,9 @@ endf
         if empty(g:vimtex_syntax_conceal_cites.icon) | return | endif
 
         exe     'syntax match texCmdRefConcealed'
-                    \ '"\\cite[tp]\?\*\?\%(\[[^]]*\]\)\{,2}{[^}]*}"'
-                    \ 'conceal cchar=' . g:vimtex_syntax_conceal_cites.icon
+                   \ '"\\cite[tp]\?\*\?\%(\[[^]]*\]\)\{,2}{[^}]*}"'
+                    \ 'conceal'
+                    \ 'cchar=' . g:vimtex_syntax_conceal_cites.icon
     endf
 
 
