@@ -5,11 +5,11 @@ fun! vimtex#compiler#init_buffer() abort " {{{1
     com!     -buffer        VimtexCompile                          call vimtex#compiler#compile()
     com!     -buffer -bang  VimtexCompileSS                        call vimtex#compiler#compile_ss()
     com!     -buffer -range VimtexCompileSelected   <line1>,<line2>call vimtex#compiler#compile_selected('command')
-    com!     -buffer        VimtexCompileOutput                    call vimtex#compiler#output()
-    com!     -buffer        VimtexStop                             call vimtex#compiler#stop()
-    com!     -buffer        VimtexStopAll                          call vimtex#compiler#stop_all()
-    com!     -buffer -bang  VimtexClean                            call vimtex#compiler#clean(<q-bang> == "!")
-    com!     -buffer -bang  VimtexStatus                           call vimtex#compiler#status(<q-bang> == "!")
+    com!     -buffer        VimtexCompileOutput        call vimtex#compiler#output()
+    com!     -buffer        VimtexStop                 call vimtex#compiler#stop()
+    com!     -buffer        VimtexStopAll              call vimtex#compiler#stop_all()
+    com!     -buffer -bang  VimtexClean                call vimtex#compiler#clean(<q-bang> == "!")
+    com!     -buffer -bang  VimtexStatus               call vimtex#compiler#status(<q-bang> == "!")
 
     " Define mappings
     nno      <buffer> <plug>(vimtex-compile)              :call vimtex#compiler#compile()<cr>
@@ -34,6 +34,7 @@ endf
 
 " }}}1
 
+"\ tells `latexmk` to run |vimtex#compiler#callback|
 fun! vimtex#compiler#callback(status) abort " {{{1
     " Status:
     " 1: Compilation cycle has started
@@ -61,11 +62,12 @@ fun! vimtex#compiler#callback(status) abort " {{{1
     en
 
     if a:status == 2
-        if !g:vimtex_compiler_silent
-            call vimtex#log#info('编好了')
-        en
+        if !g:vimtex_compiler_silent |  call vimtex#log#info('编好了') | endif
 
         if exists('b:vimtex')
+            "\ echo "b:vimtex 是: "   b:vimtex
+            "\ echom "b:vimtex 是: "   b:vimtex
+                "\ echom b:一般会报错, 因为buffer变了?
             call b:vimtex.update_packages()
             call vimtex#syntax#packages#init()
         en
@@ -73,6 +75,7 @@ fun! vimtex#compiler#callback(status) abort " {{{1
         if exists('#User#VimtexEventCompileSuccess')
             doautocmd <nomodeline> User VimtexEventCompileSuccess
         en
+
     elseif a:status == 3
         if !g:vimtex_compiler_silent
             call vimtex#log#warning('编不了')
@@ -292,7 +295,7 @@ fun! s:init_compiler(options) abort " {{{1
     try
         let l:options =
                     \ get(g:, 'vimtex_compiler_' . g:vimtex_compiler_method, {})
-        let l:options = extend(deepcopy(l:options), a:options)
+        let l:options = extend(deepcopy(l:options),   a:options)
         let l:compiler
                     \ = vimtex#compiler#{g:vimtex_compiler_method}#init(l:options)
         return l:compiler

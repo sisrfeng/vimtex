@@ -300,20 +300,9 @@ Associated events:
 LATEXMK                                               *vimtex-compiler-latexmk*
 
     http://users.phys.psu.edu/~collins/software/latexmk-jcc
-    > latexmk is a ¿perl¿ script for running LaTeX the correct number of times to
-    > resolve cross references, etc; it also runs auxiliary programs (bibtex,
-    > makeindex if necessary, and dvips and/or a previewer as requested).  It has
-    > a number of other useful capabilities, for example to start a previewer and
-    > then run latex whenever the source files are updated, so that the previewer
-    > gives an up-to-date view of the document. The script runs on both UNIX and
-    > MS-WINDOWS (XP, etc).
+    > latexmk is a ¿perl¿ script
 
 
-    `latexmk` is a compiler backend that handles recompilation of
-        LaTeX documents when source files have been changed.
-
-    VimTeX uses the continuous mode by default,
-    but `latexmk` also allows single shot compilations.
     The compiler may be configured through:
 
         *g:vimtex_compiler_latexmk*
@@ -383,7 +372,7 @@ LATEXMK                                               *vimtex-compiler-latexmk*
 
             callback
                 If enabled,
-                this option tells `latexmk` to run |vimtex#compiler#callback|
+                tells `latexmk` to run |vimtex#compiler#callback|
                 after compilation is finished.
 
             continuous
@@ -401,10 +390,13 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                 The name/path to the `latexmk` executable.
 
             hooks
-                A list of |Funcref|s. If running in continuous mode, each hook will be
-                called for each line of output from `latexmk`, with that line as argument.
-                E.g., to show information about the compilation run numbers, one could do
-                this:
+                A list of |Funcref|s.
+                If running in continuous mode,
+                each hook will be  called for each line of output from `latexmk`,
+                with that line as argument.
+                E.g.,
+                to show information about the compilation run numbers,
+                one could do  this:
 
 
                     function! Callback(msg)
@@ -476,48 +468,51 @@ LATEXMK                                               *vimtex-compiler-latexmk*
 
             Default value: 'latexmk'
 
-    If the `callback` key is enabled (it is by default and there is really no
-    reason to disable it!), then compilation errors will be parsed automatically.
-    This is done by utilizing the tricks explained below. Although `latexmk`
-    can control viewers directly, VimTeX disables this feature with `-view=none`
+    If the `callback` key is enabled
+    (it is by default and there is really no  reason to disable it!),
+        then compilation errors will be parsed automatically.
+    This is done by utilizing the tricks explained below.
+    Although `latexmk`  can control viewers directly,
+    VimTeX disables this feature with `-view=none`
     so as to get full control of the viewers.
 
-    As stated, one may customize the `latexmk` options through
-    |g:vimtex_compiler_latexmk|.  However, one may also configure `latexmk`
+    As stated,
+    one may customize the `latexmk` options through
+    |g:vimtex_compiler_latexmk|.
+    However, one may also configure `latexmk`
     explicitly through a global `~/.latexmkrc` file, or a project specific
-    `.latexmkrc` file. It is important to know that command line arguments have
-    priority, so one may want to use custom options if one wants to specify
-    particular things in a configuration file.
-
-    A particular set of options are very convenient for a good coupling between
-    `latexmk` and Vim: `$compiling_cmd`, `$success_cmd`, and `$failure_cmd`. These
-    options can be used to specify commands that are run by `latexmk` before and
-    after compilation. This is used by VimTeX to achieve callbacks after
-    compilation has finished through |vimtex#compiler#callback| with something
-    like this:
+    `.latexmkrc` file.
+    Command line arguments have  priority,
 
 
-    $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
-    $success_cmd = "vim --remote-expr 'vimtex#compiler#callback(2)'";
-    $failure_cmd = "vim --remote-expr 'vimtex#compiler#callback(3)'";
+    These options can be used to
+    specify commands that are run by
+    `latexmk` before and
+    after compilation.
+
+
+        $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
+        $success_cmd   = "vim --remote-expr 'vimtex#compiler#callback(2)'";
+        $failure_cmd   = "vim --remote-expr 'vimtex#compiler#callback(3)'";
 
     Another neat way to use this is to use `xdotool` to change the window title of
     the viewer to indicate the compilation status:
 
 
-    $compiling_cmd = "xdotool search --name \"%D\" " .
-                    "set_window --name \"%D compiling...\"";
-    $success_cmd   = "xdotool search --name \"%D\" " .
-                    "set_window --name \"%D OK\"";
-    $failure_cmd   = "xdotool search --name \"%D\" " .
-                    "set_window --name \"%D FAILURE\"";
+        $compiling_cmd = "xdotool search --name \"%D\" " .
+                        "set_window --name \"%D compiling...\"";
+        $success_cmd   = "xdotool search --name \"%D\" " .
+                        "set_window --name \"%D OK\"";
+        $failure_cmd   = "xdotool search --name \"%D\" " .
+                        "set_window --name \"%D FAILURE\"";
 
-    If you define these options similar to the above `xdotool` trick and
-        still want to enable the VimTeX callbacks, then one must include
-        a semicolon at the end of the `cmd` strings so that VimTeX may append
-        safely to the options.
+        If you define these options similar to the above `xdotool` trick and
+            still want to enable the VimTeX callbacks,
+            then one must include
+            a semicolon at the end of the `cmd` strings so that
+            VimTeX may append  safely to the options.
 
-    More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
+        More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
 
 
 ------------------------------------------------------------------------------
@@ -1111,7 +1106,7 @@ API REFERENCE                                                 *vimtex-code-api*
     This API is currently a work in progress!
 
     *vimtex#compiler#callback*
-        Utility function to be used as a compiler callback function.
+
         Takes a single argument,
         which is the compiler status:
 
@@ -1122,9 +1117,11 @@ API REFERENCE                                                 *vimtex-code-api*
 
         The function does several useful things based on  the status,
         such as running the
-        |VimtexEventCompiling|,
-        |VimtexEventCompileFailed| and |VimtexEventCompileSuccess| events.
-
+            |VimtexEventCompiling|,
+            |VimtexEventCompileFailed|
+            |VimtexEventCompileSuccess| events.
+            VimtexEventCompileSuccess等
+            要自己定义
 
     *vimtex#syntax#in_mathzone*
         if the position is inside a math zone.

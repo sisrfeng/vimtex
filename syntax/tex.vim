@@ -1,8 +1,3 @@
-" VimTeX - LaTeX plugin for Vim
-"
-" Email:      karl.yngve@gmail.com
-"
-"
 " This script is a fork of version 119 (dated 2020-06-29) of the syntax script
 " "tex.vim" created and maintained by Charles E. Campbell [0].
 "
@@ -29,18 +24,18 @@ call vimtex#syntax#nested#reset()
 " Load syntax rules that depend on VimTeX state
 " * This includes e.g. package specific syntax
 if exists('b:vimtex')
-    call vimtex#syntax#core#init_post()
-endif
+        call vimtex#syntax#core#init_post()
+en
 
 " Use autocommands to ensure
 " 1. that highlight groups are defined when colorschemes are changed or the
 "    background is toggled, and
 " 2. that the init_post function is executed when VimTeX state is loaded (if it
 "    was not already done).
-augroup vimtex_syntax
-    autocmd! * <buffer>
-    autocmd ColorScheme <buffer> call vimtex#syntax#core#init_highlights()
-    autocmd! User VimtexEventInitPost call vimtex#syntax#core#init_post()
-augroup END
+aug  vimtex_syntax
+        au! *          <buffer>
+        au ColorScheme <buffer>                  call vimtex#syntax#core#init_highlights()
+        au! User        VimtexEventInitPost      call vimtex#syntax#core#init_post()
+aug  END
 
 unlet s:is_loading

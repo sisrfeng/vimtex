@@ -42,18 +42,17 @@
     Default value: {}
 
 *g:vimtex_quickfix_autojump*
+    Thus I recommend to keep it disabled for continuous compilation,
+    and rather enable it if one prefers single shot compilations.
+
+    Default value: 0
+
     This option controls if vim should automatically jump to the first error
     whenever the |quickfix| window is opened.
-
 
     This option does not go well with continuous compilation and  callbacks,
     since the callbacks will open the quickfix window if there are errors.
 
-    Thus I recommend to keep it disabled for continuous compilation,
-    and rather enable it if one prefers single shot compilations.
-
-
-    Default value: 0
 
 *g:vimtex_quickfix_ignore_filters*
 

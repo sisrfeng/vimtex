@@ -1,9 +1,3 @@
-" VimTeX - LaTeX plugin for Vim
-"
-" Maintainer: Karl Yngve Lervåg
-" Email:      karl.yngve@gmail.com
-"
-
 fun! vimtex#qf#init_buffer() abort " {{{1
     if !g:vimtex_quickfix_enabled | return | endif
 
@@ -66,6 +60,7 @@ fun! vimtex#qf#open(force) abort " {{{1
         if a:force
             call vimtex#log#info('No errors!')
         en
+
         if g:vimtex_quickfix_mode > 0
             cclose
         en
@@ -116,35 +111,52 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
 
     try
         " Initialize the quickfix list
-        " Note: Only create new list if the current list is not a VimTeX qf list
-        if get(getqflist({'title': 1}), 'title') =~# 'VimTeX'
-            call setqflist([], 'r')
+        if get( getqflist( {'title': 1} ), 'title' ) =~# 'VimTeX'
+        "\ the current list is not a VimTeX qf list
+            call setqflist([], 'r')  "\ clear the list
         el
             call setqflist([])
         en
 
-        " Parse LaTeX errors
-        call b:vimtex.qf.addqflist(l:tex, l:log)
+        " Parse  errors
+            "\ LaTeX
+            call b:vimtex.qf.addqflist(l:tex,  l:log)
 
-        " Parse bibliography errors
-        if has_key(b:vimtex.packages, 'biblatex')
-            call vimtex#qf#biblatex#addqflist(l:blg)
-        el
-            call vimtex#qf#bibtex#addqflist(l:blg)
-        en
+            " bibliography errors
+            if has_key(b:vimtex.packages, 'biblatex')
+                call vimtex#qf#biblatex#addqflist(l:blg)
+            el
+                call vimtex#qf#bibtex#addqflist(l:blg)
+            en
 
         " Ignore entries if desired
         if !empty(g:vimtex_quickfix_ignore_filters)
             let l:qflist = getqflist()
+                      "\ Returns a |List| with all the current quickfix errors.
+
             for l:re in g:vimtex_quickfix_ignore_filters
-                call filter(l:qflist, 'v:val.text !~# l:re')
+                call filter(
+                    \ l:qflist,
+                    \ 'v:val.text  !~#   l:re',
+                   \ )
             endfor
+
             call setqflist(l:qflist, 'r')
+                                "\ 'r' The items from the current quickfix list are replaced
+                                    "\ with the items from l:qflist
         en
 
         " Set title if supported
         try
-            call setqflist([], 'r', {'title': 'VimTeX errors (' . b:vimtex.qf.name . ')'})
+            call setqflist(
+                    \ []                                                    ,
+                    \ 'r'                                                   ,
+                    \ {'title': 'VimTeX errors : ' . b:vimtex.qf.name } ,
+               \ )
+                "\ If the optional {what} dictionary argument is supplied,
+                "\     Only the items listed in {what} are set.
+                "\     The first {list} argument is ignored.
+
         catch
         endtry
 
@@ -156,7 +168,6 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
         throw 'VimTeX: No log file found'
     endtry
 endf
-
 " }}}1
 fun! vimtex#qf#inquire(file) abort " {{{1
     try
@@ -191,8 +202,13 @@ endf
 
 
 fun! s:qf_has_errors() abort " {{{1
-    return len( filter(getqflist(), 'v:val.type ==# ''E''') ) > 0
-                                                     "\ 'E', 如果只有warning, 不弹窗
+    "\ echo getqflist() 空白
+    return  0 <  len( filter(
+                            \ getqflist(),
+                           \ 'v:val.type ==# ''E''',
+                          \ )
+                  \ )
+                           "\ 'E', 如果只有warning, 不弹窗
 endf
 
 " }}}1

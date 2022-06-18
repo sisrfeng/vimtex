@@ -2861,23 +2861,35 @@ INSERT MODE MAPPINGS                                             *vimtex-imaps*
 ------------------------------------------------------------------------------
 EVENTS                                                          *vimtex-events*
 
-    VimTeX defines some events using the |User| autocmd that may be used for
-    further customization.
+    VimTeX defines  (并没有define, 只是有 if exists(#User#VimtexEvent...), 要自己定义  )
+    some events (User才是event, 作者定义是是User这个event的pattern?)
+        using the |User| autocmd
+    that may be used for  further customization.
 
         *VimtexEventQuit*
             This event is triggered when the last buffer for a particular LaTeX project
-            is wiped (for example, using `:bwipeout`) and when Vim is quit.  The event
-            may be used, for instance, to cleanup up auxiliary build files or close
-            open viewers (see Examples below).  With Vim defaults, this event is not
-            triggered when using `:quit` or `:bdelete` since these commands merely hide
-            the buffer.  In multi-file projects, the event may be triggered multiple
-            times.  The 'b:vimtex' variable contains context data for the quitting
-            file or project.  For example, 'b:vimtex.tex' identifies the tex file being
-            wiped, or the main tex file of a multi-file project.
+            is wiped
+            (for example, using `:bwipeout`) and when Vim is quit.
+            The event  may be used
+                to cleanup up auxiliary build files or
+                close  open viewers
+                (see Examples below).
+            With Vim defaults,
+            this event is not  triggered when
+            using `:quit` or `:bdelete` since these commands merely hide
+            the buffer.
+            In multi-file projects,
+            the event may be triggered multiple  times.
+            The 'b:vimtex' variable contains context data for the quitting
+            file or project.
+            For example,
+                'b:vimtex.tex' identifies the tex file being  wiped,
+                or the main tex file of a multi-file project.
 
             Commands such as |:VimtexClean| cannot be used in this autocommand
-            because when quitting vim the current buffer does not necessarily have
-            filetype 'tex'.
+            because
+            when quitting vim
+                the current buffer does not necessarily have  filetype 'tex'.
 
         *VimtexEventInitPre*
         *VimtexEventInitPost*
@@ -2888,11 +2900,12 @@ EVENTS                                                          *vimtex-events*
             This event is triggered after compilation is started.
 
         *VimtexEventCompileStopped*
-            This event is triggered after compilation is stopped.
+                                    after compilation is stopped.
 
         *VimtexEventCompiling*
             This event is triggered when the compiler backend triggers a new
-            compilation. This is only supported by |vimtex-compiler-latexmk|.
+            compilation.
+            This is only supported by |vimtex-compiler-latexmk|.
 
         *VimtexEventCompileSuccess*
         *VimtexEventCompileFailed*
@@ -2918,9 +2931,7 @@ EVENTS                                                          *vimtex-events*
 
     Examples:
 
-
-        " Compile on initialization,
-        " cleanup on quit
+        1.
 
             aug  vimtex_event_1
                 au!
@@ -2940,31 +2951,30 @@ EVENTS                                                          *vimtex-events*
                             \ && exists('b:vimtex.viewer.xwin_id')
                             \ && b:vimtex.viewer.xwin_id > 0
                     call system('xdotool windowclose '. b:vimtex.viewer.xwin_id)
-                en
+                endif
             endf
 
 
         " Add custom mappings in ToC buffer
             fun! TocMappings()
-                " You probably don't want to do this, though...
-                nno  <silent><buffer><nowait> q :quitall!
+                nno  <silent><buffer><nowait>  eee :echo 'hi'
             endf
 
             aug  vimtex_event_3
                 au!
-                au User VimtexEventTocCreated call TocMappings()
+                au User VimtexEventTocCreated   call TocMappings()
             aug  END
 
         " Specify window position when opening ToC entries
             aug  vimtex_event_4
                 au!
-                au User VimtexEventTocActivated normal! zt
+                au User VimtexEventTocActivated  normal! zt
             aug  END
 
         " Specify extra behaviour after reverse goto
             aug  vimtex_event_4
                 au!
-                au User VimtexEventViewReverse normal! zMzvzz
+                au User VimtexEventViewReverse   normal! zMzvzz
             aug  END
 
 ------------------------------------------------------------------------------
