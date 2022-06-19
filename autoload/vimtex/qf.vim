@@ -50,6 +50,7 @@ fun! vimtex#qf#open(force) abort " {{{1
         call vimtex#log#error(
                     \ 'Something went wrong when parsing log files!',
                     \ v:exception)
+
         if g:vimtex_quickfix_mode > 0
             cclose
         en
@@ -58,7 +59,7 @@ fun! vimtex#qf#open(force) abort " {{{1
 
     if empty(getqflist())
         if a:force
-            call vimtex#log#info('No errors!')
+            call vimtex#log#info('getqflist为空')
         en
 
         if g:vimtex_quickfix_mode > 0
@@ -151,7 +152,7 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
             call setqflist(
                     \ []                                                    ,
                     \ 'r'                                                   ,
-                    \ {'title': 'VimTeX errors : ' . b:vimtex.qf.name } ,
+                    \ {'title': 'VimTeX的qf : ' . b:vimtex.qf.name } ,
                \ )
                 "\ If the optional {what} dictionary argument is supplied,
                 "\     Only the items listed in {what} are set.
@@ -162,9 +163,14 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
 
         " Jump to first error if wanted
         if l:jump
-            cfirst
+            try
+                cfirst
+            catch
+                "\ echom 'aaaaaaaaaaa No errors found'
+            endtry
         en
     catch /VimTeX: No log file found/
+    "\ catch /VimTeX: No log file found/
         throw 'VimTeX: No log file found'
     endtry
 endf

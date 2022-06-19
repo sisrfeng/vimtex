@@ -338,17 +338,26 @@ fun! s:compiler_nvim.exec(cmd) abort dict " {{{1
                 \ 'output'     :  self.output                        ,
                 \}
 
-    echom "l:shell 是: "   l:shell
+   "\ "\ {
+   "\ \ 'output': '/tmp/nvimyQik0w/2',
+   "\ \ 'cwd': '/home/wf/d/tT/wf_tex',
+   "\ \ 'tex': '/home/wf/d/tT/wf_tex/PasS.tex',
+   "\ \ 'stdin': 'null',
+   "\ \ 'on_stdout': function('<SNR>224_callback_nvim_output'),
+   "\ \ 'on_stderr': function('<SNR>224_callback_nvim_output'),
+   "\ \ }
 
     if !self.continuous
-        echom "l:shell 是: "   l:shell
+
+
         let l:shell.on_exit = function('s:callback_nvim_exit')
     en
 
     let s:saveshell = [&shell, &shellcmdflag]
         set   shell& shellcmdflag&
         let self.job = jobstart(a:cmd, l:shell)
-        echom "self.job 是: "   self.job
+        "\ echom "self.job 是: "   self.job
+                                "\ 一个id, 逐步加1
     let [&shell, &shellcmdflag] = s:saveshell
 endf
 

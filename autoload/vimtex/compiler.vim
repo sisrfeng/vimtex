@@ -62,7 +62,7 @@ fun! vimtex#compiler#callback(status) abort " {{{1
     en
 
     if a:status == 2
-        if !g:vimtex_compiler_silent |  call vimtex#log#info('编好了') | endif
+        if !g:vimtex_compiler_silent |  call vimtex#log#info('callback里 status是2') | endif
 
         if exists('b:vimtex')
             "\ echo "b:vimtex 是: "   b:vimtex
@@ -109,14 +109,14 @@ endf
 fun! vimtex#compiler#compile_ss() abort " {{{1
     if b:vimtex.compiler.is_running()
         call vimtex#log#info(
-                    \ 'Compiler is already running, use :VimtexStop to stop it!')
+                    \ 'compiling. 想要 :VimtexStop ?')
         return
     en
 
     call b:vimtex.compiler.start_single()
 
     if g:vimtex_compiler_silent | return | endif
-    call vimtex#log#info('Compiler started in background!')
+    call vimtex#log#info('在compile')
 endf
 
 " }}}1
