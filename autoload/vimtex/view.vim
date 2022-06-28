@@ -1,4 +1,4 @@
-fun! vimtex#view#init_buffer() abort " {{{1
+fun! vimtex#view#init_buffer() abort
     if !g:vimtex_view_enabled | return | endif
 
     com!  -buffer -nargs=? -complete=file
@@ -12,16 +12,16 @@ fun! vimtex#view#init_buffer() abort " {{{1
     en
 endf
 
-fun! vimtex#view#view(...) abort " {{{1
+fun! vimtex#view#view(...) abort
     if exists('*b:vimtex.viewer.view')
-        call b:vimtex.viewer.view(a:0 > 0 ? a:1 : '')
+        call b:vimtex.viewer.view(a:0 > 0 ?  a:1 : '')
     else
-        echom '进入了它的else   /home/wf/.local/share/nvim/PL/TeX/autoload/vimtex/view.vim'
+        echom 'function/method不存在: b:vimtex.viewer.view'
     en
 endf
 
 
-fun! s:nvim_prune_servernames() abort " {{{1
+fun! s:nvim_prune_servernames() abort
     " Load servernames from file
     let l:servers = filereadable(s:nvim_servernames)
                 \ ? readfile(s:nvim_servernames)
@@ -44,15 +44,15 @@ endf
 
 
 
-" }}}1
-fun! vimtex#view#init_state(state) abort " {{{1
+
+fun! vimtex#view#init_state(state) abort
     if !g:vimtex_view_enabled | return | endif
     if has_key(a:state, 'viewer') | return | endif
 
     aug  vimtex_viewer
         au!
-        au User VimtexEventCompileSuccess call vimtex#view#compiler_callback()
-        au User VimtexEventCompileStopped call vimtex#view#compiler_stopped()
+        au User VimtexEventCompileSuccess    call vimtex#view#compiler_callback()
+        au User VimtexEventCompileStopped    call vimtex#view#compiler_stopped()
     aug  END
 
     try
@@ -65,10 +65,10 @@ fun! vimtex#view#init_state(state) abort " {{{1
     endtry
 endf
 
-" }}}1
 
-" }}}1
-fun! vimtex#view#compiler_callback() abort " {{{1
+
+
+fun! vimtex#view#compiler_callback() abort
     if exists('*b:vimtex.viewer.compiler_callback')
         if !b:vimtex.viewer.check() | return | endif
 
@@ -79,16 +79,16 @@ fun! vimtex#view#compiler_callback() abort " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#view#compiler_stopped() abort " {{{1
+
+fun! vimtex#view#compiler_stopped() abort
     if exists('*b:vimtex.viewer.compiler_stopped')
         call b:vimtex.viewer.compiler_stopped()
     en
 endf
 
-" }}}1
+
 "\ search
-    fun! vimtex#view#inverse_search(line, filename) abort " {{{1
+    fun! vimtex#view#inverse_search(line, filename) abort
         " Only activate in VimTeX buffers
         if !exists('b:vimtex') | return -1 | endif
 
@@ -144,8 +144,8 @@ endf
         en
     endf
 
-    " }}}1
-    fun! vimtex#view#inverse_search_cmd(line, filename) abort " {{{1
+
+    fun! vimtex#view#inverse_search_cmd(line, filename) abort
         " One may call this function manually, but the main usage is to through the
         " command "VimtexInverseSearch". See ":help vimtex-synctex-inverse-search"
         " for more info.
@@ -164,9 +164,9 @@ endf
         quitall!
     endf
 
-    " }}}1
 
-    fun! s:inverse_search_cmd_nvim(line, filename) abort " {{{1
+
+    fun! s:inverse_search_cmd_nvim(line, filename) abort
         if !filereadable(s:nvim_servernames) | return | endif
 
         for l:server in readfile(s:nvim_servernames)
@@ -183,13 +183,13 @@ endf
         endfor
     endf
 
-    fun! s:inverse_search_cmd_vim(line, filename) abort " {{{1
+    fun! s:inverse_search_cmd_vim(line, filename) abort
         for l:server in split(serverlist(), "\n")
             call remote_expr(l:server,
                         \ printf("vimtex#view#inverse_search(%d, '%s')", a:line, a:filename))
         endfor
     endf
 
-" }}}1
+
 
 let s:nvim_servernames = vimtex#cache#path('nvim_servernames.log')

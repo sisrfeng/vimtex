@@ -1,33 +1,32 @@
-function! vimtex#view#_template#new(viewer) abort " {{{1
+fun! vimtex#view#_template#new(viewer) abort
     return extend(
         \ deepcopy(s:viewer),
         \ a:viewer,
        \ )
-endfunction
+endf
 
 let s:viewer = {}
 
-function! s:viewer.init() abort dict " {{{1
+fun! s:viewer.init() abort dict
     let l:viewer = deepcopy(self)
     unlet l:viewer.init
     return l:viewer
-endfunction
+endf
 
-" }}}1
-function! s:viewer.check() abort " {{{1
+
+fun! s:viewer.check() abort
     if !has_key(self, '_check_value')
         let self._check_value = self._check()
-    endif
+    en
 
     return self._check_value
-endfunction
+endf
 
-" }}}1
-function! s:viewer.out() dict abort " {{{1
-    " Copy pdf and synctex files
-        " if we use temporary files
+
+fun! s:viewer.out() dict abort
     if g:vimtex_view_use_temp_files
-        let l:out = b:vimtex.root . '/' . b:vimtex.name . '_vimtex.pdf'
+    " Copy pdf
+        let l:out = b:vimtex.root . '/' . b:vimtex.name . '_bk.pdf'
 
         if getftime(b:vimtex.out())   >   getftime(l:out)
             call writefile(
@@ -35,110 +34,110 @@ function! s:viewer.out() dict abort " {{{1
                       \ l:out,
                       \ 'b',
                    \ )
-        endif
+        en
 
-        "\ synctex.gz
+    " Copy synctex file
             let l:old = b:vimtex.ext('synctex.gz')
             let l:new = fnamemodify(l:out, ':r') . '.synctex.gz'
             if getftime(l:old)   >    getftime(l:new)
                 call rename(l:old, l:new)
-            endif
-    else
+            en
+    el
         let l:out = b:vimtex.out(1)
-    endif
+    en
 
     return filereadable(l:out)
         \ ? l:out
         \ : ''
-endfunction
+endf
 
-" }}}1
-function! s:viewer.view(file) dict abort " {{{1
+
+fun! s:viewer.view(file) dict abort
     if !self.check() | return | endif
 
     if !empty(a:file)
+        echom "a:file 是: "   a:file
         let l:outfile = a:file
-    else
+    el
         let l:outfile = self.out()
-    endif
+    en
 
     if !filereadable(l:outfile)
         if l:outfile == ''
-            echom  'l:outfile 为空'
-        else
+            "\ let g:vimtex_view_use_temp_files = 0会导致进入这里?
+            "\ echom  'l:outfile 为空'
+        el
             call vimtex#log#warning('此PDF不满足 filereadable(): ', l:outfile)
         en
         return
-    endif
+    en
 
     if self._exists()
         call self._forward_search(l:outfile)
-    else
+    el
         call self._start(l:outfile)
-    endif
+    en
 
     if exists('#User#VimtexEventView')
         doautocmd <nomodeline> User VimtexEventView
-    endif
-endfunction
+    en
+endf
 
-" }}}1
-function! s:viewer.compiler_callback(outfile) dict abort " {{{1
+
+fun! s:viewer.compiler_callback(outfile) dict abort
     if !g:vimtex_view_automatic
     \ || has_key(self, 'started_through_callback')
         return
     el
         call self._start(a:outfile)
         let self.started_through_callback = 1
-    endif
+    en
 
-endfunction
+endf
 
-" }}}1
-function! s:viewer.compiler_stopped() dict abort " {{{1
+
+fun! s:viewer.compiler_stopped() dict abort
     if has_key(self, 'started_through_callback')
         unlet self.started_through_callback
-    endif
-endfunction
+    en
+endf
 
-" }}}1
 
-function! s:viewer._exists() dict abort " {{{1
+
+fun! s:viewer._exists() dict abort
     return v:false
-endfunction
+endf
 
-" }}}1
 
-function! s:viewer.__pprint() abort dict " {{{1
+
+fun! s:viewer.__pprint() abort dict
     let l:list = []
 
     if has_key(self, 'xwin_id')
         call add(l:list, ['xwin id', self.xwin_id])
-    endif
+    en
 
     if has_key(self, 'job')
         call add(l:list, ['job', self.job])
-    endif
+    en
 
     for l:key in filter(keys(self), 'v:val =~# ''^cmd''')
         call add(l:list, [l:key, self[l:key]])
     endfor
 
     return l:list
-endfunction
-
-" }}}1
+endf
 
 
+"\ Only relevant for those that has the "xwin_id" attribute.
+"\ (though these are made available to all viewers)
 " Methods that rely on xdotool.
-"\ These are made available to all viewers,
-"\ but they are only relevant for those that has the "xwin_id" attribute.
-    function! s:viewer.xdo_check() dict abort " {{{1
+    fun! s:viewer.xdo_check() dict abort
         return executable('xdotool') && has_key(self, 'xwin_id')
-    endfunction
+    endf
 
-    " }}}1
-    function! s:viewer.xdo_get_id() dict abort " {{{1
+
+    fun! s:viewer.xdo_get_id() dict abort
         if !self.xdo_check() | return 0 | endif
 
         if self.xwin_id <= 0
@@ -149,16 +148,16 @@ endfunction
             if len(l:xwin_ids) == 0
                 call vimtex#log#warning('Viewer cannot find ' . self.name . ' window ID!')
                 let self.xwin_id = 0
-            else
+            el
                 let self.xwin_id = l:xwin_ids[-1]
-            endif
-        endif
+            en
+        en
 
         return self.xwin_id
-    endfunction
+    endf
 
-    " }}}1
-    function! s:viewer.xdo_exists() dict abort " {{{1
+
+    fun! s:viewer.xdo_exists() dict abort
         if !self.xdo_check() | return v:false | endif
 
         " If xwin_id is already set, check if it still exists
@@ -166,8 +165,8 @@ endfunction
             let xwin_ids = vimtex#jobs#capture('xdotool search --class ' . self.name)
             if index(xwin_ids, self.xwin_id) < 0
                 let self.xwin_id = 0
-            endif
-        endif
+            en
+        en
 
         " If xwin_id is unset, check if matching viewer windows exist
         if self.xwin_id == 0
@@ -177,7 +176,7 @@ endfunction
                             \   'xdotool search --all --pid ' . l:pid
                             \ . ' --name ' . fnamemodify(self.out(), ':t'))
                 let self.xwin_id = get(xwin_ids, 0)
-            else
+            el
                 let xwin_ids = vimtex#jobs#capture(
                             \ 'xdotool search --name ' . fnamemodify(self.out(), ':t'))
                 let ids_already_used = filter(map(
@@ -188,31 +187,31 @@ endfunction
                     if index(ids_already_used, id) < 0
                         let self.xwin_id = id
                         break
-                    endif
+                    en
                 endfor
-            endif
-        endif
+            en
+        en
 
         return self.xwin_id > 0
-    endfunction
+    endf
 
-    " }}}1
-    function! s:viewer.xdo_send_keys(keys) dict abort " {{{1
+
+    fun! s:viewer.xdo_send_keys(keys) dict abort
         if !self.xdo_check() || empty(a:keys) || self.xwin_id <= 0 | return | endif
 
         call vimtex#jobs#run('xdotool key --window ' . self.xwin_id . ' ' . a:keys)
-    endfunction
+    endf
 
-    " }}}1
-    function! s:viewer.xdo_focus_viewer() dict abort " {{{1
+
+    fun! s:viewer.xdo_focus_viewer() dict abort
         if !self.xdo_check() || self.xwin_id <= 0 | return | endif
 
         call vimtex#jobs#run('xdotool windowactivate ' . self.xwin_id . ' --sync')
         call vimtex#jobs#run('xdotool windowraise ' . self.xwin_id)
-    endfunction
+    endf
 
-    " }}}1
-    function! s:viewer.xdo_focus_vim() dict abort " {{{1
+
+    fun! s:viewer.xdo_focus_vim() dict abort
         if !executable('xdotool') | return | endif
         if !executable('pstree') | return | endif
 
@@ -222,11 +221,11 @@ endfunction
         " PIDS of the corresponding pty.
         if empty($TMUX)
             let l:current_pid = getpid()
-        else
+        el
             let l:output = vimtex#jobs#capture('tmux display-message -p "#{client_tty}"')
             let l:pts = split(trim(l:output[0]), '/')[-1]
             let l:current_pid = str2nr(vimtex#jobs#capture('ps o pid t ' . l:pts)[1])
-        endif
+        en
 
         let l:output = join(vimtex#jobs#capture('pstree -s -p ' . l:current_pid))
         let l:pids = split(l:output, '\D\+')
@@ -242,7 +241,7 @@ endfunction
                 call feedkeys("\<c-l>", 'tn')
                 return l:xwinids[0]
                 break
-            endif
+            en
         endfor
-    endfunction
+    endf
 

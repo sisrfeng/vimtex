@@ -1,4 +1,4 @@
-fun! vimtex#qf#init_buffer() abort " {{{1
+fun! vimtex#qf#init_buffer() abort
     if !g:vimtex_quickfix_enabled | return | endif
 
     com!     -buffer VimtexErrors  call vimtex#qf#toggle()
@@ -6,8 +6,8 @@ fun! vimtex#qf#init_buffer() abort " {{{1
     nno      <buffer> <plug>(vimtex-errors)  :call vimtex#qf#toggle()<cr>
 endf
 
-" }}}1
-fun! vimtex#qf#init_state(state) abort " {{{1
+
+fun! vimtex#qf#init_state(state) abort
     if !g:vimtex_quickfix_enabled | return | endif
 
     try
@@ -22,9 +22,9 @@ fun! vimtex#qf#init_state(state) abort " {{{1
     endtry
 endf
 
-" }}}1
 
-fun! vimtex#qf#toggle() abort " {{{1
+
+fun! vimtex#qf#toggle() abort
     if vimtex#qf#is_open()
         cclose
     el
@@ -32,28 +32,23 @@ fun! vimtex#qf#toggle() abort " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#qf#open(force) abort " {{{1
+
+fun! vimtex#qf#open(force) abort
     if !exists('b:vimtex.qf.addqflist') | return | endif
 
     try
         call vimtex#qf#setqflist()
     catch /VimTeX: No log file found/
-        if a:force
-            call vimtex#log#warning('No log file found')
-        en
-        if g:vimtex_quickfix_mode > 0
-            cclose
-        en
+        if a:force  | call vimtex#log#warning('No log file found')  | en
+
+        if g:vimtex_quickfix_mode > 0  | cclose  | en
+
         return
     catch
-        call vimtex#log#error(
-                    \ 'Something went wrong when parsing log files!',
-                    \ v:exception)
+        echom "v:exceptiov:exceptionn 是: "   v:exception
+        call vimtex#log#error( 'parse log files 失败',  )
 
-        if g:vimtex_quickfix_mode > 0
-            cclose
-        en
+        if g:vimtex_quickfix_mode > 0  | cclose  | en
         return
     endtry
 
@@ -75,7 +70,7 @@ fun! vimtex#qf#open(force) abort " {{{1
     " normal mode mapping).  Else the behaviour is based on the settings.
     "
     let l:errors_or_warnings = s:qf_has_errors()
-                \ || g:vimtex_quickfix_open_on_warning
+                       \ || g:vimtex_quickfix_open_on_warning
 
     if a:force || (g:vimtex_quickfix_mode > 0 && l:errors_or_warnings)
         let s:previous_window = win_getid()
@@ -94,11 +89,11 @@ fun! vimtex#qf#open(force) abort " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#qf#setqflist(...) abort " {{{1
+
+fun! vimtex#qf#setqflist(...) abort
     if !exists('b:vimtex.qf.addqflist') | return | endif
 
-    if a:0 > 0 && !empty(a:1)
+    if a:0 > 0 &&  !empty(a:1)
         let l:tex = a:1
         let l:log = fnamemodify(l:tex, ':r') . '.log'
         let l:blg = fnamemodify(l:tex, ':r') . '.blg'
@@ -106,13 +101,18 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
     el
         let l:tex = b:vimtex.tex
         let l:log = b:vimtex.log()
+           "\ echom "autoload/vimtex/qf.vim   log 是: "   l:log
+              "\ /data2/wf2/tT/wf_tex/out_wf/PasS.log
+              "\ 有时候为空, 那是因为latex没跑完? (报 "编不了"时, 不代表latex跑完了?)
+
         let l:blg = b:vimtex.ext('blg')
         let l:jump = g:vimtex_quickfix_autojump
     en
 
     try
         " Initialize the quickfix list
-        if get( getqflist( {'title': 1} ), 'title' ) =~# 'VimTeX'
+        "\ echo '改了qf的tittle'
+        if get( getqflist( {'title': 1} ), 'title' ) =~# 'TeX的qf'
         "\ the current list is not a VimTeX qf list
             call setqflist([], 'r')  "\ clear the list
         el
@@ -123,7 +123,7 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
             "\ LaTeX
             call b:vimtex.qf.addqflist(l:tex,  l:log)
 
-            " bibliography errors
+            " bibliography
             if has_key(b:vimtex.packages, 'biblatex')
                 call vimtex#qf#biblatex#addqflist(l:blg)
             el
@@ -150,9 +150,9 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
         " Set title if supported
         try
             call setqflist(
-                    \ []                                                    ,
-                    \ 'r'                                                   ,
-                    \ {'title': 'VimTeX的qf : ' . b:vimtex.qf.name } ,
+                    \ []                                          ,
+                    \ 'r'                                         ,
+                    \ {'title': 'TeX的qf : ' . b:vimtex.qf.name } ,
                \ )
                 "\ If the optional {what} dictionary argument is supplied,
                 "\     Only the items listed in {what} are set.
@@ -170,23 +170,24 @@ fun! vimtex#qf#setqflist(...) abort " {{{1
             endtry
         en
     catch /VimTeX: No log file found/
-    "\ catch /VimTeX: No log file found/
         throw 'VimTeX: No log file found'
     endtry
 endf
-" }}}1
-fun! vimtex#qf#inquire(file) abort " {{{1
+
+fun! vimtex#qf#inquire(file) abort
     try
         call vimtex#qf#setqflist(a:file)
+        echom "vimtex#qf#setqflist(a:file)"
+        echom "a:file 是: "   a:file
         return s:qf_has_errors()
     catch
         return 0
     endtry
 endf
 
-" }}}1
 
-fun! vimtex#qf#is_open() abort " {{{1
+
+fun! vimtex#qf#is_open() abort
     redir => l:bufstring
     silent! ls!
     redir END
@@ -204,10 +205,10 @@ fun! vimtex#qf#is_open() abort " {{{1
     return 0
 endf
 
-" }}}1
 
 
-fun! s:qf_has_errors() abort " {{{1
+
+fun! s:qf_has_errors() abort
     "\ echo getqflist() 空白
     return  0 <  len( filter(
                             \ getqflist(),
@@ -217,8 +218,8 @@ fun! s:qf_has_errors() abort " {{{1
                            "\ 'E', 如果只有warning, 不弹窗
 endf
 
-" }}}1
-fun! s:qf_autoclose_check() abort " {{{1
+
+fun! s:qf_autoclose_check() abort
     if get(s:, 'keystroke_counter') == 0
         let s:keystroke_counter = g:vimtex_quickfix_autoclose_after_keystrokes
     en
@@ -243,4 +244,4 @@ fun! s:qf_autoclose_check() abort " {{{1
     en
 endf
 
-" }}}1
+

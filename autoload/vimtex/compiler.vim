@@ -1,4 +1,4 @@
-fun! vimtex#compiler#init_buffer() abort " {{{1
+fun! vimtex#compiler#init_buffer() abort
     if !g:vimtex_compiler_enabled | return | endif
 
     " Define commands
@@ -25,21 +25,30 @@ fun! vimtex#compiler#init_buffer() abort " {{{1
     nno      <buffer> <plug>(vimtex-status-all)           :call vimtex#compiler#status(1)<cr>
 endf
 
-" }}}1
-fun! vimtex#compiler#init_state(state) abort " {{{1
+
+fun! vimtex#compiler#init_state(state) abort
     if !g:vimtex_compiler_enabled | return | endif
 
     let a:state.compiler = s:init_compiler({'state': a:state})
 endf
 
-" }}}1
 
-"\ tells `latexmk` to run |vimtex#compiler#callback|
-fun! vimtex#compiler#callback(status) abort " {{{1
+
+"\ 给 `latexmk` 调用
+fun! vimtex#compiler#callback(status) abort
     " Status:
-    " 1: Compilation cycle has started
-    " 2: Compilation complete - Success
-    " 3: Compilation complete - Failed
+        " 1: Compilation cycle has started
+        " 2: Compilation complete - Success
+        " 3: Compilation complete - Failed
+
+    "\ 被这堆东西相关的家伙调用
+                "\ \ 'on_stdout'  :  function('s:callback_nvim_stdout') ,
+                "\ \ 'on_stderr'  :  function('s:callback_nvim_err') ,
+
+                "\ callback_nvim_err里有:
+                "\ call vimtex#compiler#callback(2 + vimtex#qf#inquire(l:target))
+
+
     if !exists('b:vimtex.compiler') | return | endif
     silent! call s:output.pause()
 
@@ -54,36 +63,27 @@ fun! vimtex#compiler#callback(status) abort " {{{1
     let b:vimtex.compiler.status = a:status
 
     if a:status == 1
-        if exists('#User#VimtexEventCompiling')
-            doautocmd <nomodeline> User VimtexEventCompiling
-        en
+        if exists('#User#VimtexEventCompiling')  | doautocmd <nomodeline> User VimtexEventCompiling  | en
         silent! call s:output.resume()
         return
     en
 
     if a:status == 2
-        if !g:vimtex_compiler_silent |  call vimtex#log#info('callback里 status是2') | endif
+        if !g:vimtex_compiler_silent |  call vimtex#log#info('在compile') | endif
 
+        "\ echo "b:vimtex 是: "   b:vimtex
+        "\ echom "b:vimtex 是: "   b:vimtex
+            "\ echom b:一般会报错, 因为buffer变了?
         if exists('b:vimtex')
-            "\ echo "b:vimtex 是: "   b:vimtex
-            "\ echom "b:vimtex 是: "   b:vimtex
-                "\ echom b:一般会报错, 因为buffer变了?
             call b:vimtex.update_packages()
             call vimtex#syntax#packages#init()
         en
 
-        if exists('#User#VimtexEventCompileSuccess')
-            doautocmd <nomodeline> User VimtexEventCompileSuccess
-        en
+        if exists('#User#VimtexEventCompileSuccess')  | doautocmd <nomodeline> User VimtexEventCompileSuccess  | en
 
     elseif a:status == 3
-        if !g:vimtex_compiler_silent
-            call vimtex#log#warning('编不了')
-        en
-
-        if exists('#User#VimtexEventCompileFailed')
-            doautocmd <nomodeline> User VimtexEventCompileFailed
-        en
+        if !g:vimtex_compiler_silent                 | call vimtex#log#warning('编不了')  | en
+        if exists('#User#VimtexEventCompileFailed')  | doautocmd <nomodeline> User VimtexEventCompileFailed  | en
     en
 
     if b:vimtex.compiler.silence_next_callback
@@ -95,9 +95,9 @@ fun! vimtex#compiler#callback(status) abort " {{{1
     silent! call s:output.resume()
 endf
 
-" }}}1
 
-fun! vimtex#compiler#compile() abort " {{{1
+
+fun! vimtex#compiler#compile() abort
     if b:vimtex.compiler.is_running()
         call vimtex#compiler#stop()
     el
@@ -105,22 +105,26 @@ fun! vimtex#compiler#compile() abort " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#compiler#compile_ss() abort " {{{1
+
+fun! vimtex#compiler#compile_ss() abort
     if b:vimtex.compiler.is_running()
         call vimtex#log#info(
-                    \ 'compiling. 想要 :VimtexStop ?')
+                    \ '想Stop?')
         return
     en
 
     call b:vimtex.compiler.start_single()
 
-    if g:vimtex_compiler_silent | return | endif
-    call vimtex#log#info('在compile')
+    if g:vimtex_compiler_silent
+        return
+    el
+        call vimtex#log#info('单次compile')
+    endif
+
 endf
 
-" }}}1
-fun! vimtex#compiler#compile_selected(type) abort range " {{{1
+
+fun! vimtex#compiler#compile_selected(type) abort range
     " Values of a:firstline  and a:lastline are not available in ¿nested¿ function  calls,
         " so we must handle them here.
     let l:opts = a:type ==# 'command'
@@ -139,9 +143,9 @@ fun! vimtex#compiler#compile_selected(type) abort range " {{{1
 
     " Create and initialize temporary compiler
     let l:compiler = s:init_compiler({
-                                \ 'state' : l:file,
-                                \ 'continuous' : 0,
-                                \ 'callback' : 0,
+                                \ 'state'       :  l:file ,
+                                \ 'continuous'  :  0      ,
+                                \ 'callback'    :  0      ,
                                 \})
 
     if empty(l:compiler) | return | endif
@@ -166,17 +170,21 @@ fun! vimtex#compiler#compile_selected(type) abort range " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#compiler#output() abort " {{{1
+
+fun! vimtex#compiler#output() abort
     if !exists('b:vimtex.compiler.output')
-                \ || !filereadable(b:vimtex.compiler.output)
+ \ || !filereadable(b:vimtex.compiler.output)
+
+        echom "b:vimtex.compiler.output 是: "   b:vimtex.compiler.output
         call vimtex#log#warning('No output exists!')
         return
     en
 
-    " If relevant output is open, then reuse it
+    " If relevant output is open,
+    " then reuse it
     if exists('s:output')
         if s:output.name ==# b:vimtex.compiler.output
+        echom "s:output.name 是: "   s:output.name
             if bufwinnr(b:vimtex.compiler.output) == s:output.winnr
                 exe     s:output.winnr . 'wincmd w'
             en
@@ -189,8 +197,8 @@ fun! vimtex#compiler#output() abort " {{{1
     call s:output_factory.create(b:vimtex.compiler.output)
 endf
 
-" }}}1
-fun! vimtex#compiler#start() abort " {{{1
+
+fun! vimtex#compiler#start() abort
     if b:vimtex.compiler.is_running()
         call vimtex#log#warning(
                     \ 'Compiler is already running for `' . b:vimtex.base . "'")
@@ -201,55 +209,62 @@ fun! vimtex#compiler#start() abort " {{{1
 
     if g:vimtex_compiler_silent | return | endif
 
-    " We add a redraw here to clear messages (e.g. file written). This is useful
-    " to avoid the "Press ENTER" prompt in some cases, see e.g.
-    " https://github.com/lervag/vimtex/issues/2149
     redraw
+        " We add a redraw here to clear messages (e.g. file written).
+        " This is useful  to avoid the "Press ENTER" prompt in some cases, see e.g.
+            " https://github.com/lervag/vimtex/issues/2149
 
     if b:vimtex.compiler.continuous
-        call vimtex#log#info('Compiler started in continuous mode')
+        call vimtex#log#info('开启连续编译')
     el
-        call vimtex#log#info('Compiler started in background!')
+        call vimtex#log#info('后台已开始编译')
     en
 endf
 
-" }}}1
-fun! vimtex#compiler#stop() abort " {{{1
+
+fun! vimtex#compiler#stop() abort
+
     if !b:vimtex.compiler.is_running()
-        call vimtex#log#warning(
-                    \ 'There is no process to stop (' . b:vimtex.base . ')')
+        call vimtex#log#warning( 'There is no process to stop (' . b:vimtex.base . ')')
         return
     en
 
     call b:vimtex.compiler.stop()
 
     if g:vimtex_compiler_silent | return | endif
-    call vimtex#log#info('Compiler stopped (' . b:vimtex.base . ')')
+    call vimtex#log#info('编译停止' )
+    "\ call vimtex#log#info('不编了 b:vimtex.base是: ' . b:vimtex.base )
+                                                      "\ tex主文件名
 endf
 
-" }}}1
-fun! vimtex#compiler#stop_all() abort " {{{1
+
+fun! vimtex#compiler#stop_all() abort
     for l:state in vimtex#state#list_all()
         if exists('l:state.compiler.is_running')
-                    \ && l:state.compiler.is_running()
+      \ && l:state.compiler.is_running()
             call l:state.compiler.stop()
             call vimtex#log#info('Compiler stopped (' . l:state.compiler.state.base . ')')
         en
     endfor
 endf
 
-" }}}1
-fun! vimtex#compiler#clean(full) abort " {{{1
+
+fun! vimtex#compiler#clean(full) abort
     let l:restart = b:vimtex.compiler.is_running()
-    if l:restart
-        call b:vimtex.compiler.stop()
-    en
+    if l:restart  | call b:vimtex.compiler.stop()  | en
 
 
     call b:vimtex.compiler.clean(a:full)
+    "\ 100m 需要调大?
     sleep 100m
     call b:vimtex.compiler.remove_build_dir()
-    call vimtex#log#info('Compiler clean finished' . (a:full ? ' (full)' : ''))
+    echom 'Compiler 清理 finished'
+    call vimtex#log#info('Compiler clean finished'
+                        \ . (a:full ?
+                            \ ' (full)' :
+                            \ ''
+                          \ )
+                  \ )
 
 
     if l:restart
@@ -258,8 +273,8 @@ fun! vimtex#compiler#clean(full) abort " {{{1
     en
 endf
 
-" }}}1
-fun! vimtex#compiler#status(detailed) abort " {{{1
+
+fun! vimtex#compiler#status(detailed) abort
     if a:detailed
         let l:running = []
         for l:data in vimtex#state#list_all()
@@ -288,17 +303,22 @@ fun! vimtex#compiler#status(detailed) abort " {{{1
     en
 endf
 
-" }}}1
 
 
-fun! s:init_compiler(options) abort " {{{1
+
+fun! s:init_compiler(options) abort
     try
-        let l:options =
-                    \ get(g:, 'vimtex_compiler_' . g:vimtex_compiler_method, {})
+        let l:options =  get(
+                        \ g:,
+                        \ 'vimtex_compiler_' . g:vimtex_compiler_method,
+                        \ {},
+                    \ )
+            "\要搜 vimtex_compiler_latexmk 就来这里
+
         let l:options = extend(deepcopy(l:options),   a:options)
-        let l:compiler
-                    \ = vimtex#compiler#{g:vimtex_compiler_method}#init(l:options)
+        let l:compiler   = vimtex#compiler#{g:vimtex_compiler_method}#init(l:options)
         return l:compiler
+
     catch /VimTeX: Requirements not met/
         call vimtex#log#error('Compiler was not initialized!')
     catch /E117/
@@ -310,11 +330,11 @@ fun! s:init_compiler(options) abort " {{{1
     return {}
 endf
 
-" }}}1
+
 
 
 let s:output_factory = {}
-fun! s:output_factory.create(file) dict abort " {{{1
+fun! s:output_factory.create(file) dict abort
     let l:vimtex = b:vimtex
     silent execute 'split' a:file
     let b:vimtex = l:vimtex
@@ -352,18 +372,18 @@ fun! s:output_factory.create(file) dict abort " {{{1
     aug  END
 endf
 
-" }}}1
-fun! s:output_factory.pause() dict abort " {{{1
+
+fun! s:output_factory.pause() dict abort
     let self.paused = v:true
 endf
 
-" }}}1
-fun! s:output_factory.resume() dict abort " {{{1
+
+fun! s:output_factory.resume() dict abort
     let self.paused = v:false
 endf
 
-" }}}1
-fun! s:output_factory.update() dict abort " {{{1
+
+fun! s:output_factory.update() dict abort
     if self.paused | return | endif
 
     let l:ftime = getftime(self.name)
@@ -394,18 +414,18 @@ fun! s:output_factory.update() dict abort " {{{1
     en
 endf
 
-" }}}1
-fun! s:output_factory.destroy() dict abort " {{{1
+
+fun! s:output_factory.destroy() dict abort
     call timer_stop(self.timer)
     au! vimtex_output_window
     augroup! vimtex_output_window
     unlet s:output
 endf
 
-" }}}1
 
 
-" {{{1 Initialize module
+
+" Initialize module
 
 if !get(g:, 'vimtex_compiler_enabled') | finish | endif
 
@@ -414,4 +434,4 @@ aug  vimtex_compiler
     au VimLeave * call vimtex#compiler#stop_all()
 aug  END
 
-" }}}1
+

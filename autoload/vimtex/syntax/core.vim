@@ -80,6 +80,8 @@ fun! vimtex#syntax#core#init() abort "
 
         " Flag mismatching  ending brace delimiter
         syn match texGroupError "}"
+        hi def link texGroupError In_backticK
+        "\ 经常误报, 等编译失败时再检查?  debug buggy !!!!!!!!
 
         " Add generic option elements contained in common option groups
         syn match texOptEqual contained "="
@@ -882,9 +884,7 @@ fun! vimtex#syntax#core#init_highlights() abort
         hi def link texRefConcealedDelim  texDelim
         hi def link texMathDelimZone      texDelim
 
-        hi def link texGroupError         HidE
         hi def link texMathError          HidE
-        "\ 经常误报, 等编译失败时再检查?  debug buggy !!!!!!!!
 
         hi def link texPartConcealed      texCmdPart
 endf
@@ -1562,6 +1562,7 @@ endf
                 \ ['Im'                , 'ℑ'],
                 \ ['imath'             , 'ɩ'],
                 \ ['in'                , '∈'],
+                \ ['notin'             , '∉'],
                 \ ['infty'             , '∞'],
                 \ ['int'               , '∫'],
                 \ ['iint'              , '∬'],
@@ -1595,7 +1596,6 @@ endf
                 \ ['neg'               , '¬'],
                 \ ['neq'               , '≠'],
                 \ ['ni'                , '∋'],
-                \ ['notin'             , '∉'],
                 \ ['nwarrow'           , '↖'],
                 \ ['odot'              , '⊙'],
                 \ ['oint'              , '∮'],

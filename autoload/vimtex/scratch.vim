@@ -1,68 +1,64 @@
-" VimTeX - LaTeX plugin for Vim
-"
-" Maintainer: Karl Yngve Lervåg
-" Email:      karl.yngve@gmail.com
-"
+let s:scratch = { 'name' : 'VimtexScratch' }
 
-function! vimtex#scratch#new(opts) abort " {{{1
-  let l:buf = extend(deepcopy(s:scratch), a:opts)
-  call l:buf.open()
-endfunction
-
-" }}}1
+fun! vimtex#scratch#new(opts) abort
+    let l:buf = extend(
+        \ deepcopy(s:scratch),
+        \ a:opts,
+       \ )
+    call l:buf.open()
+endf
 
 
-let s:scratch = {
-      \ 'name' : 'VimtexScratch'
-      \}
-function! s:scratch.open() abort dict " {{{1
-  let l:bufnr = bufnr('')
-  let l:vimtex = get(b:, 'vimtex', {})
+fun! s:scratch.open() abort dict
+    let l:bufnr  = bufnr('')
+    let l:vimtex = get(b:, 'vimtex' , {})
 
-  silent execute 'keepalt edit' escape(self.name, ' ')
 
-  let self.prev_bufnr = l:bufnr
-  let b:scratch = self
-  let b:vimtex = l:vimtex
 
-  setlocal bufhidden=wipe
-  setlocal buftype=nofile
-  setlocal concealcursor=nvic
-  setlocal conceallevel=0
-  setlocal nobuflisted
-  setlocal nolist
-  setlocal nospell
-  setlocal noswapfile
-  setlocal nowrap
-  setlocal tabstop=8
+    silent execute '-tab drop' escape(self.name, ' ')
+    "\ silent execute 'keepalt edit' escape(self.name, ' ')
+                          "\ :edit file_name
 
-  nnoremap <silent><buffer><nowait> q     :call b:scratch.close()<cr>
-  nnoremap <silent><buffer><nowait> <esc> :call b:scratch.close()<cr>
-  nnoremap <silent><buffer><nowait> <c-6> :call b:scratch.close()<cr>
-  nnoremap <silent><buffer><nowait> <c-^> :call b:scratch.close()<cr>
-  nnoremap <silent><buffer><nowait> <c-e> :call b:scratch.close()<cr>
+    let self.prev_bufnr = l:bufnr
+    let b:scratch       = self
+    let b:vimtex        = l:vimtex
 
-  if has_key(self, 'syntax')
-    call self.syntax()
-  endif
+    setl  bufhidden=wipe
+    setl  buftype=nofile
+    setl  concealcursor=nvic
+    setl  conceallevel=0
+    setl  nobuflisted
+    setl  nolist
+    setl  nospell
+    setl  noswapfile
+    setl  nowrap
+    setl  tabstop=8
 
-  call self.fill()
-endfunction
+    "\ nno  <silent><buffer><nowait> q        :call b:scratch.close()<cr>
+    "\ nno  <silent><buffer><nowait> <esc>    :call b:scratch.close()<cr>
+    "\ nno  <silent><buffer><nowait> <c-6>    :call b:scratch.close()<cr>
+    "\ nno  <silent><buffer><nowait> <c-^>    :call b:scratch.close()<cr>
+    "\ nno  <silent><buffer><nowait> <c-e>    :call b:scratch.close()<cr>
 
-" }}}1
-function! s:scratch.close() abort dict " {{{1
-  silent execute 'keepalt buffer' self.prev_bufnr
-endfunction
+    if has_key(self, 'syntax')  | call self.syntax()  | en
 
-" }}}1
-function! s:scratch.fill() abort dict " {{{1
-  setlocal modifiable
-  %delete
+    call self.fill()
+endf
 
-  call self.print_content()
 
-  0delete _
-  setlocal nomodifiable
-endfunction
+fun! s:scratch.close() abort dict
+    silent execute 'keepalt buffer' self.prev_bufnr
+endf
 
-" }}}1
+
+fun! s:scratch.fill() abort dict
+    setl  modifiable
+    %delete
+
+    call self.print_content()
+
+    0delete _
+    "\ setl  nomodifiable
+endf
+
+

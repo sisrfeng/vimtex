@@ -1,4 +1,4 @@
-fun! vimtex#compiler#_template#new(opts) abort " {{{1
+fun! vimtex#compiler#_template#new(opts) abort
     return extend(deepcopy(s:compiler),  a:opts)
 endf
 
@@ -15,10 +15,16 @@ let s:compiler = {
             \ 'silence_next_callback'  :  0              ,
             \ }
 
-fun! s:compiler.new(options) abort dict " {{{1
+fun! s:compiler.new(options) abort dict
     let l:compiler = extend(deepcopy(self), a:options)
-    let l:backend = has('nvim') ? 'nvim' : 'jobs'
-    call extend(l:compiler, deepcopy(s:compiler_{l:backend}))
+
+    let l:backend  = has('nvim')
+                \ ? 'nvim'
+                \ : 'jobs'
+    call extend(
+        \ l:compiler,
+        \ deepcopy(s:compiler_{l:backend}),
+       \ )
 
     call l:compiler.__check_requirements()
 
@@ -34,22 +40,22 @@ fun! s:compiler.new(options) abort dict " {{{1
     return l:compiler
 endf
 
-" }}}1
 
-fun! s:compiler.__check_requirements() abort dict " {{{1
+
+fun! s:compiler.__check_requirements() abort dict
 endf
 
-" }}}1
-fun! s:compiler.__init() abort dict " {{{1
+
+fun! s:compiler.__init() abort dict
 endf
 
-" }}}1
-fun! s:compiler.__build_cmd() abort dict " {{{1
+
+fun! s:compiler.__build_cmd() abort dict
     throw 'VimTeX: __build_cmd method must be defined!'
 endf
 
-" }}}1
-fun! s:compiler.__pprint() abort dict " {{{1
+
+fun! s:compiler.__pprint() abort dict
     let l:list = []
 
     if self.state.tex !=# b:vimtex.tex
@@ -80,6 +86,7 @@ fun! s:compiler.__pprint() abort dict " {{{1
         call add(l:job, ['cmd', self.cmd])
         if self.continuous
             call add(l:job, ['pid', self.get_pid()])
+            echom "self.get_pid() 是: "   self.get_pid()
         en
         call add(l:list, ['job', l:job])
     en
@@ -87,9 +94,9 @@ fun! s:compiler.__pprint() abort dict " {{{1
     return l:list
 endf
 
-" }}}1
 
-fun! s:compiler.clean(full) abort dict " {{{1
+
+fun! s:compiler.clean(full) abort dict
     let l:files = ['synctex.gz', 'toc', 'out', 'aux', 'log']
     if a:full
         call extend(l:files, ['pdf'])
@@ -101,8 +108,8 @@ fun! s:compiler.clean(full) abort dict " {{{1
     call vimtex#jobs#run('rm -f ' . join(l:files), {'cwd': self.state.root})
 endf
 
-" }}}1
-fun! s:compiler.start(...) abort dict " {{{1
+
+fun! s:compiler.start(...) abort dict
     if self.is_running() | return | endif
 
     call self.create_build_dir()
@@ -111,19 +118,26 @@ fun! s:compiler.start(...) abort dict " {{{1
     call writefile([], self.output, 'a')
 
     " Prepare compile command
-    let self.cmd = self.__build_cmd()
-    let l:cmd = has('win32')
-                \ ? 'cmd /s /c "' . self.cmd . '"'
-                \ : ['sh', '-c', self.cmd]
+        let self.cmd = self.__build_cmd()
+        let l:cmd = has('win32')
+                    \ ? 'cmd /s /c "' . self.cmd . '"'
+                    \ : ['sh', '-c', self.cmd]
+
+                    "\ \ : ['zsh', '-c', self.cmd]
+                        "\ echom 'sh被我改成zsh了'
 
     " Execute command and toggle status
-    call self.exec(l:cmd)
-    let self.status = 1
+        call self.exec(l:cmd)
+        let self.status = 1
 
     " Use timer to check that compiler started properly
     if self.continuous
         let self.check_timer
-                    \ = timer_start(50, function('s:check_if_running'), {'repeat': 20})
+            \ = timer_start(
+                           \ 50,
+                           \ function('s:check_if_running'),
+                           \ {'repeat': 20},
+                         \ )
         let self.vimtex_id = b:vimtex_id
         let s:check_timers[self.check_timer] = self
     en
@@ -135,7 +149,7 @@ endf
 
 
 let s:check_timers = {}
-fun! s:check_if_running(timer) abort " {{{2
+fun! s:check_if_running(timer) abort
     if s:check_timers[a:timer].is_running() | return | endif
 
     call timer_stop(a:timer)
@@ -148,18 +162,18 @@ fun! s:check_if_running(timer) abort " {{{2
     call vimtex#log#error('Compiler did not start successfully!')
 endf
 
-" }}}2
 
-" }}}1
-fun! s:compiler.start_single() abort dict " {{{1
+
+
+fun! s:compiler.start_single() abort dict
     let l:continuous = self.continuous
-    let self.continuous = 0
-    call self.start()
+        let self.continuous = 0
+        call self.start()
     let self.continuous = l:continuous
 endf
 
-" }}}1
-fun! s:compiler.stop() abort dict " {{{1
+
+fun! s:compiler.stop() abort dict
     if !self.is_running() | return | endif
 
     silent! call timer_stop(self.check_timer)
@@ -171,9 +185,9 @@ fun! s:compiler.stop() abort dict " {{{1
     en
 endf
 
-" }}}1
 
-fun! s:compiler.create_build_dir() abort dict " {{{1
+
+fun! s:compiler.create_build_dir() abort dict
     " Create build dir if it does not exist
     " Note: This may need to create a hierarchical structure!
     if empty(self.build_dir) | return | endif
@@ -206,8 +220,8 @@ fun! s:compiler.create_build_dir() abort dict " {{{1
     endfor
 endf
 
-" }}}1
-fun! s:compiler.remove_build_dir() abort dict " {{{1
+
+fun! s:compiler.remove_build_dir() abort dict
     " Remove auxilliary output directories (only if they are empty)
     if empty(self.build_dir) | return | endif
 
@@ -227,64 +241,8 @@ fun! s:compiler.remove_build_dir() abort dict " {{{1
     en
 endf
 
-" }}}1
 
-
-let s:compiler_jobs = {}
-fun! s:compiler_jobs.exec(cmd) abort dict " {{{1
-    let l:options = {
-                \ 'in_io': 'null',
-                \ 'out_io': 'file',
-                \ 'err_io': 'file',
-                \ 'out_name': self.output,
-                \ 'err_name': self.output,
-                \ 'cwd': self.state.root,
-                \}
-    if self.continuous
-        let l:options.out_io = 'pipe'
-        let l:options.err_io = 'pipe'
-        let l:options.out_cb = function('s:callback_continuous_output')
-        let l:options.err_cb = function('s:callback_continuous_output')
-    el
-        let s:cb_target = self.state.tex !=# b:vimtex.tex ? self.state.tex : ''
-        let l:options.exit_cb = function('s:callback')
-    en
-
-    let self.job = job_start(a:cmd, l:options)
-endf
-
-" }}}1
-fun! s:compiler_jobs.kill() abort dict " {{{1
-    call job_stop(self.job)
-    for l:dummy in range(25)
-        sleep 1m
-        if !self.is_running() | return | endif
-    endfor
-endf
-
-" }}}1
-fun! s:compiler_jobs.wait() abort dict " {{{1
-    for l:dummy in range(500)
-        sleep 10m
-        if !self.is_running() | return | endif
-    endfor
-
-    call self.stop()
-endf
-
-" }}}1
-fun! s:compiler_jobs.is_running() abort dict " {{{1
-    return has_key(self, 'job') && job_status(self.job) ==# 'run'
-endf
-
-" }}}1
-fun! s:compiler_jobs.get_pid() abort dict " {{{1
-    return has_key(self, 'job')
-                \ ? get(job_info(self.job), 'process') : 0
-endf
-
-" }}}1
-fun! s:callback(ch, msg) abort " {{{1
+fun! s:callback(ch, msg) abort
     if !exists('b:vimtex.compiler')  | return | endif
     if b:vimtex.compiler.status == 0 | return | endif
                                  "\ status只有1 2 3
@@ -306,68 +264,72 @@ fun! s:callback(ch, msg) abort " {{{1
     endtry
 endf
 
-" }}}1
-fun! s:callback_continuous_output(channel, msg) abort " {{{1
+
+fun! s:callback_continuous_output(channel, msg) abort
     if exists('b:vimtex.compiler.output')
-                \ && filewritable(b:vimtex.compiler.output)
-        call writefile([a:msg], b:vimtex.compiler.output, 'aS')
+  \ && filewritable(b:vimtex.compiler.output)
+
+        call writefile(
+            \ [a:msg],
+            \ b:vimtex.compiler.output,
+            \ 'aS',
+           \ )
     en
 
     call s:check_callback(a:msg)
 
     if !exists('b:vimtex.compiler.hooks') | return | endif
+
     try
         for l:Hook in b:vimtex.compiler.hooks
             call l:Hook(a:msg)
+            echom "l:Hook 是: "   l:Hook
         endfor
     catch /E716/
     endtry
 endf
 
-" }}}1
-
 
 let s:compiler_nvim = {}
-fun! s:compiler_nvim.exec(cmd) abort dict " {{{1
-    let l:shell = {
+fun! s:compiler_nvim.exec(cmd) abort dict
+    let l:job_opts = {
                 \ 'stdin'      :  'null'                             ,
-                \ 'on_stdout'  :  function('s:callback_nvim_output') ,
-                \ 'on_stderr'  :  function('s:callback_nvim_output') ,
-                \ 'cwd'        :  self.state.root                    ,
-                \ 'tex'        :  self.state.tex                     ,
-                \ 'output'     :  self.output                        ,
+                \ 'on_stdout'  :  function('s:callback_nvim_stdout') ,
+                "\ \ 'on_stderr'  :  function('s:callback_nvim_stdout') ,
+                \ 'on_stderr'  :  function('s:callback_nvim_err') ,
+                \ 'cwd'        :  self.state.root                ,
+                \ 'tex'        :  self.state.tex                 ,
+                \ 'output'     :  self.output                    ,
                 \}
 
-   "\ "\ {
-   "\ \ 'output': '/tmp/nvimyQik0w/2',
-   "\ \ 'cwd': '/home/wf/d/tT/wf_tex',
-   "\ \ 'tex': '/home/wf/d/tT/wf_tex/PasS.tex',
-   "\ \ 'stdin': 'null',
-   "\ \ 'on_stdout': function('<SNR>224_callback_nvim_output'),
-   "\ \ 'on_stderr': function('<SNR>224_callback_nvim_output'),
-   "\ \ }
+    "\ "\ {
+        "\ \ 'output': '/tmp/nvimyQik0w/2',
+        "\ \ 'cwd': '/home/wf/d/tT/wf_tex',
+        "\ \ 'tex': '/home/wf/d/tT/wf_tex/PasS.tex',
+        "\ \ 'stdin': 'null',
+        "\ \ 'on_stdout': function('<SNR>224_callback_nvim_output'),
+        "\ \ 'on_stderr': function('<SNR>224_callback_nvim_output'),
+        "\ \ }
 
     if !self.continuous
-
-
-        let l:shell.on_exit = function('s:callback_nvim_exit')
+        let l:job_opts.on_exit = function('s:callback_nvim_exit')
     en
 
     let s:saveshell = [&shell, &shellcmdflag]
-        set   shell& shellcmdflag&
-        let self.job = jobstart(a:cmd, l:shell)
+        set   shell&   shellcmdflag&
+        let self.job = jobstart(a:cmd, l:job_opts)
         "\ echom "self.job 是: "   self.job
                                 "\ 一个id, 逐步加1
     let [&shell, &shellcmdflag] = s:saveshell
 endf
 
-" }}}1
-fun! s:compiler_nvim.kill() abort dict " {{{1
+
+fun! s:compiler_nvim.kill() abort dict
     call jobstop(self.job)
 endf
 
-" }}}1
-fun! s:compiler_nvim.wait() abort dict " {{{1
+
+fun! s:compiler_nvim.wait() abort dict
     let l:retvals = jobwait([self.job], 5000)
     if empty(l:retvals) | return | endif
     let l:status = l:retvals[0]
@@ -376,8 +338,8 @@ fun! s:compiler_nvim.wait() abort dict " {{{1
     if l:status == -1 | call self.stop() | endif
 endf
 
-" }}}1
-fun! s:compiler_nvim.is_running() abort dict " {{{1
+
+fun! s:compiler_nvim.is_running() abort dict
     try
         let pid = jobpid(self.job)
         return l:pid > 0
@@ -386,8 +348,8 @@ fun! s:compiler_nvim.is_running() abort dict " {{{1
     endtry
 endf
 
-" }}}1
-fun! s:compiler_nvim.get_pid() abort dict " {{{1
+
+fun! s:compiler_nvim.get_pid() abort dict
     try
         return jobpid(self.job)
     catch
@@ -395,20 +357,35 @@ fun! s:compiler_nvim.get_pid() abort dict " {{{1
     endtry
 endf
 
-" }}}1
-fun! s:callback_nvim_output(id, data, event) abort dict " {{{1
+
+fun! s:callback_nvim_stdout(id, data, event) abort dict
     " Filter out unwanted newlines
-    let l:data = split(substitute(join(a:data, 'QQ'), '^QQ\|QQ$', '', ''), 'QQ')
+    let l:data = split(substitute(
+                           \ join(a:data, 'QQ'),
+                           \ '^QQ\|QQ$',
+                           \ '',
+                           \ '',
+                         \ ), '
+              \ QQ'
+              \ )
 
     if !empty(l:data) && filewritable(self.output)
         call writefile(l:data, self.output, 'a')
     en
 
     call s:check_callback(
-                \ get(filter(copy(a:data),
-                \   {_, x -> x =~# '^vimtex_compiler_callback'}), -1, ''))
+                \ get(
+                    \ filter(
+                           \ copy(a:data),
+                           \ { _, x -> x =~# '^vimtex_compiler_callback'},
+                          \ ),
+                    \ -1,
+                    \ '',
+                   \ )
+               \ )
 
     if !exists('b:vimtex.compiler.hooks') | return | endif
+
     try
         for l:Hook in b:vimtex.compiler.hooks
             call l:Hook(join(a:data, "\n"))
@@ -417,7 +394,48 @@ fun! s:callback_nvim_output(id, data, event) abort dict " {{{1
     endtry
 endf
 
-" }}}1
+
+"\ 改编自 楼上
+fun! s:callback_nvim_err(id, data, event) abort dict
+
+    "\ echo 'lucy saids:  在调用callback_nvim_err_______'
+                         "\ a:data是个list
+    " Filter out unwanted newlines
+    let l:data = split(substitute(
+                           \ join(a:data, 'QQ'),
+                           \ '^QQ\|QQ$',
+                           \ '',
+                           \ '',
+                         \ ), '
+              \ QQ'
+              \ )
+
+    if !empty(l:data) && filewritable(self.output)
+        call writefile(l:data, self.output, 'a')
+    en
+
+    call s:check_callback(
+                \ get(
+                    \ filter(
+                           \ copy(a:data),
+                           \ { _, x -> x =~# '^vimtex_compiler_callback'},
+                          \ ),
+                    \ -1,
+                    \ '',
+                   \ )
+               \ )
+
+    if !exists('b:vimtex.compiler.hooks') | return | endif
+
+    try
+        for l:Hook in b:vimtex.compiler.hooks
+            call l:Hook(join(a:data, "\n"))
+        endfor
+    catch /E716/
+    endtry
+endf
+
+
 fun! s:callback_nvim_exit(id, data, event) abort dict
     "\ echom "event是: "   a:event
                         "\ exit
@@ -432,10 +450,10 @@ fun! s:callback_nvim_exit(id, data, event) abort dict
                                  "\ 没有error时 就是0, 否则是1
 endf
 
-" }}}1
 
 
-fun! s:build_dir_materialize(compiler) abort " {{{1
+
+fun! s:build_dir_materialize(compiler) abort
     if type(a:compiler.build_dir) != v:t_func | return | endif
 
     try
@@ -448,8 +466,8 @@ fun! s:build_dir_materialize(compiler) abort " {{{1
     endtry
 endf
 
-" }}}1
-fun! s:build_dir_respect_envvar(compiler) abort " {{{1
+
+fun! s:build_dir_respect_envvar(compiler) abort
     " Specifying the build_dir by environment variable should override the
     " current value.
     if empty($VIMTEX_OUTPUT_DIRECTORY) | return | endif
@@ -465,9 +483,9 @@ fun! s:build_dir_respect_envvar(compiler) abort " {{{1
     let a:compiler.build_dir = $VIMTEX_OUTPUT_DIRECTORY
 endf
 
-" }}}1
 
-fun! s:check_callback(line) abort " {{{1
+
+fun! s:check_callback(line) abort
     if a:line ==# 'vimtex_compiler_callback_compiling'
         call vimtex#compiler#callback(1)
 
@@ -479,4 +497,4 @@ fun! s:check_callback(line) abort " {{{1
     en
 endf
 
-" }}}1
+

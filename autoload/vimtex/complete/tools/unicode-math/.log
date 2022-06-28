@@ -1,0 +1,25 @@
+This is XeTeX, Version 3.141592653-2.6-0.999993 (TeX Live 2021/Homebrew) (preloaded format=xelatex 2022.3.3)  25 JUN 2022 17:54
+entering extended mode
+ \write18 enabled.
+ file:line:error style messages enabled.
+ %&-line parsing enabled.
+**/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-dist/tex/latex/
+tools/.tex
+
+(/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-dist/tex/latex/t
+ools/.tex
+LaTeX2e <2020-10-01> patch level 4
+L3 programming layer <2021-02-18> File ignored)
+! Emergency stop.
+<*> ...837_1/share/texmf-dist/tex/latex/tools/.tex
+                                                   
+Here is how much of TeX's memory you used:
+ 15 strings out of 476919
+ 516 string characters out of 5807504
+ 292912 words of memory out of 5000000
+ 20119 multiletter control sequences out of 15000+600000
+ 403430 words of font info for 27 fonts, out of 8000000 for 9000
+ 1348 hyphenation exceptions out of 8191
+ 12i,0n,15p,167b,10s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+No pages of output.

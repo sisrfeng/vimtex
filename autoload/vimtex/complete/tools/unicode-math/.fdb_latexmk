@@ -1,0 +1,13 @@
+# Fdb version 3
+["xdvipdfmx"] 0 ".xdv" ".pdf" "" 0
+  ".xdv" 0 -1 0 "xelatex"
+  (generated)
+  ".pdf"
+["xelatex"] 1656150858 "/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-dist/tex/latex/tools/.tex" ".xdv" "" 1656150858
+  ".aux" 1656150858 8 a94a2480d3289e625eea47cd1b285758 ""
+  "/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-dist/tex/latex/tools/.tex" 1618176823 1387 61978446de5910c38984a931259097b5 ""
+  "/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-dist/web2c/texmf.cnf" 1618176823 39975 4b05abf73e01b5eea84984a594557aa7 ""
+  "/home/linuxbrew/.linuxbrew/Cellar/texlive/58837_1/share/texmf-var/web2c/xetex/xelatex.fmt" 1618176823 5094392 be478abc62b36baa609330640d1500c8 ""
+  (generated)
+  ".log"
+  ".xdv"

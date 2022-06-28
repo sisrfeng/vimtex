@@ -1,7 +1,7 @@
 let s:toc = {}
 
 "\ can be called outside this script
-    fun! vimtex#toc#init_buffer() abort " {{{1
+    fun! vimtex#toc#init_buffer() abort
         if !g:vimtex_toc_enabled | return | endif
 
         com!  -buffer VimtexTocOpen   call b:vimtex.toc.open()
@@ -11,37 +11,37 @@ let s:toc = {}
         nno  <buffer> <plug>(vimtex-toc-toggle) :call b:vimtex.toc.toggle()<cr>
     endf
 
-    " }}}1
-    fun! vimtex#toc#init_state(state) abort " {{{1
+
+    fun! vimtex#toc#init_state(state) abort
         if !g:vimtex_toc_enabled | return | endif
 
         let a:state.toc = vimtex#toc#new()
     endf
 
-    " }}}1
 
-    fun! vimtex#toc#new(...) abort " {{{1
+
+    fun! vimtex#toc#new(...) abort
         return extend(
                     \ deepcopy(s:toc),
                     \ vimtex#util#extend_recursive(  deepcopy(g:vimtex_toc_config),   a:0 > 0 ? a:1 : {} )
                    \ )
     endf
 
-    " }}}1
-    fun! vimtex#toc#get_entries() abort " {{{1
+
+    fun! vimtex#toc#get_entries() abort
         if !has_key(b:vimtex, 'toc') | return [] | endif
 
         return b:vimtex.toc.get_entries(0)
     endf
 
-    " }}}1
-    fun! vimtex#toc#refresh() abort " {{{1
+
+    fun! vimtex#toc#refresh() abort
         if has_key(b:vimtex, 'toc')
             call b:vimtex.toc.get_entries(1)
         en
     endf
 
-    " }}}1
+
 
 
 "
@@ -49,7 +49,7 @@ let s:toc = {}
 "\ use function with 'dict' as method of a class in python
     " Open and close TOC window
     "
-    fun! s:toc.open() abort dict " {{{1
+    fun! s:toc.open() abort dict
         if self.is_open() | return | endif
 
         if has_key(self, 'layers')
@@ -83,13 +83,13 @@ let s:toc = {}
 
 
 
-    " }}}1
-    fun! s:toc.is_open() abort dict " {{{1
+
+    fun! s:toc.is_open() abort dict
         return bufwinnr(bufnr(self.name)) >= 0
     endf
 
-    " }}}1
-    fun! s:toc.toggle() abort dict " {{{1
+
+    fun! s:toc.toggle() abort dict
         if self.is_open()
             call self.close()
         el
@@ -100,12 +100,12 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
-    fun! s:toc.close() abort dict " {{{1
+
+    fun! s:toc.close() abort dict
         let self.fold_level = &l:foldlevel
 
         if self.resize
-            silent exe 'set columns -=' . self.split_width
+            silent exe 'set columns -=' .self.split_width
         en
 
         if self.split_pos ==# 'full'
@@ -115,19 +115,19 @@ let s:toc = {}
         en
 
 
-        "\ if self.bufnr_alternate >= 0
-        "\     let @# = self.bufnr_alternate
-        "\ en
-    endf
+        " if self.bufnr_alternate >= 0
+              " let @# = self.bufnr_alternate
+        " en
         try
             let @# = self.bufnr_alternate
         catch
-            echom 'self.bufnr_alternate 不存在?'
+            echo 'self.bufnr_alternate 有时不存在, 发生在BufEnter?'
             "\ echom  self
         endtry
+    endf
 
-    " }}}1
-    fun! s:toc.goto() abort dict " {{{1
+
+    fun! s:toc.goto() abort dict
         if self.is_open()
             let l:winid_prev = win_getid()
             silent execute bufwinnr(bufnr(self.name)) . 'wincmd w'
@@ -135,12 +135,12 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
+
 
     "
     " Get the TOC entries
     "
-    fun! s:toc.get_entries(force) abort dict " {{{1
+    fun! s:toc.get_entries(force) abort dict
         if has_key(self, 'entries') && !self.refresh_always && !a:force
             return self.entries
         en
@@ -198,24 +198,24 @@ let s:toc = {}
         return self.entries
     endf
 
-    " }}}1
-    fun! s:toc.get_visible_entries() abort dict " {{{1
+
+    fun! s:toc.get_visible_entries() abort dict
         return filter(deepcopy(get(self, 'entries', [])),
                     \ 'self.entry_is_visible(v:val)')
     endf
 
-    " }}}1
-    fun! s:toc.entry_is_visible(entry) abort " {{{1
+
+    fun! s:toc.entry_is_visible(entry) abort
         return get(a:entry, 'active', 1) && !get(a:entry, 'hidden')
                     \ && (a:entry.type !=# 'content' || a:entry.level <= self.tocdepth)
     endf
 
-    " }}}1
+
 
     "
     " Creating, refreshing and filling the buffer
     "
-    fun! s:toc.create() abort dict " {{{1
+    fun! s:toc.create() abort dict
         let l:bufnr           = bufnr('')
         let l:bufnr_alternate = bufnr('#')
         "\ echom "l:bufnr_alternate 是: "   l:bufnr_alternate
@@ -332,8 +332,8 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
-    fun! s:toc.refresh() abort dict " {{{1
+
+    fun! s:toc.refresh() abort dict
         let l:toc_winnr = bufwinnr(bufnr(self.name))
         let l:buf_winnr = bufwinnr(bufnr(''))
 
@@ -359,7 +359,7 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
+
     fun! s:toc.set_syntax() abort dict "{{{1
         syn  clear
 
@@ -426,12 +426,12 @@ let s:toc = {}
         syn  match VimtexTocSec4 /^L[4-9].*/ contains=VimtexTocSecLabel
     endf
 
-    " }}}1
+
 
     "
     " Print the TOC entries
     "
-    fun! s:toc.print_help() abort dict " {{{1
+    fun! s:toc.print_help() abort dict
         let self.help_nlines = 0
         if !self.show_help | return | endif
 
@@ -469,8 +469,8 @@ let s:toc = {}
         let self.help_nlines += len(help_text) + 1
     endf
 
-    " }}}1
-    fun! s:toc.print_entries() abort dict " {{{1
+
+    fun! s:toc.print_entries() abort dict
         call self.set_number_format()
 
         for entry in self.get_visible_entries()
@@ -478,8 +478,8 @@ let s:toc = {}
         endfor
     endf
 
-    " }}}1
-    fun! s:toc.print_entry(entry) abort dict " {{{1
+
+    fun! s:toc.print_entry(entry) abort dict
         "\ let output = '  ' ->repeat(a:entry.level)
         "\ let output = 'L' . a:entry.level . ' '
         let output = ''
@@ -504,8 +504,8 @@ let s:toc = {}
         call append('$', output)
     endf
 
-    " }}}1
-    fun! s:toc.print_number(number) abort dict " {{{1
+
+    fun! s:toc.print_number(number) abort dict
         if empty(a:number) | return '' | endif
         if type(a:number) == v:t_string | return a:number | endif
 
@@ -540,8 +540,8 @@ let s:toc = {}
         return join(number, '.')
     endf
 
-    " }}}1
-    fun! s:toc.set_number_format() abort dict " {{{1
+
+    fun! s:toc.set_number_format() abort dict
         let number_width = 0
         for entry in self.get_visible_entries()
             let number_width = max([number_width, strlen(self.print_number(entry.number)) + 1])
@@ -553,7 +553,7 @@ let s:toc = {}
         let self.number_format = '%-' . self.number_width . 's'
     endf
 
-    " }}}1
+
 
     "
     " Interactions with TOC buffer/window
@@ -573,7 +573,7 @@ let s:toc = {}
         return {}
     endf
 
-    " }}}1
+
     fun! s:toc.activate_hotkey(key) abort dict "{{{1
         for entry in self.entries
             if entry.hotkey ==# a:key
@@ -584,7 +584,7 @@ let s:toc = {}
         return {}
     endf
 
-    " }}}1
+
     fun! s:toc.activate_entry(entry, close_after) abort dict "{{{1
         let self.prev_index = vimtex#pos#get_cursor_line()
         let l:vimtex_main = get(b:vimtex, 'tex', '')
@@ -655,7 +655,7 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
+
     fun! s:toc.toggle_help() abort dict "{{{1
         let l:pos = vimtex#pos#get_cursor()
         if self.show_help
@@ -673,20 +673,20 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
+
     fun! s:toc.toggle_numbers() abort dict "{{{1
         let self.show_numbers = self.show_numbers ? 0 : 1
         call self.refresh()
     endf
 
-    " }}}1
+
     fun! s:toc.toggle_sorted_todos() abort dict "{{{1
         let self.todo_sorted = self.todo_sorted ? 0 : 1
         call self.get_entries(1)
         call vimtex#pos#set_cursor(self.get_closest_index())
     endf
 
-    " }}}1
+
     fun! s:toc.toggle_type(type) abort dict "{{{1
         let self.layer_status[a:type] = !self.layer_status[a:type]
         for entry in self.entries
@@ -697,19 +697,19 @@ let s:toc = {}
         call self.refresh()
     endf
 
-    " }}}1
+
     fun! s:toc.decrease_depth() abort dict "{{{1
         let self.tocdepth = max([self.tocdepth - 1, -2])
         call self.refresh()
     endf
 
-    " }}}1
+
     fun! s:toc.increase_depth() abort dict "{{{1
         let self.tocdepth = min([self.tocdepth + 1, 5])
         call self.refresh()
     endf
 
-    " }}}1
+
     fun! s:toc.filter() dict abort "{{{1
         let re_filter = input('filter entry title by: ')
         for entry in self.entries
@@ -718,7 +718,7 @@ let s:toc = {}
         call self.refresh()
     endf
 
-    " }}}1
+
     fun! s:toc.clear_filter() dict abort "{{{1
         for entry in self.entries
             let entry.hidden = 0
@@ -726,12 +726,12 @@ let s:toc = {}
         call self.refresh()
     endf
 
-    " }}}1
+
 
     "
     " Utility functions
     "
-    fun! s:toc.get_closest_index() abort dict " {{{1
+    fun! s:toc.get_closest_index() abort dict
         let l:calling_rank = 0
         let l:not_found = 1
         for [l:file, l:lnum, l:line] in vimtex#parser#tex(b:vimtex.tex)
@@ -763,23 +763,23 @@ let s:toc = {}
         return [0, l:closest_index + self.help_nlines, 0, 0]
     endf
 
-    " }}}1
-    fun! s:toc.position_save() abort dict " {{{1
+
+    fun! s:toc.position_save() abort dict
         let self.position = vimtex#pos#get_cursor()
     endf
 
-    " }}}1
-    fun! s:toc.position_restore() abort dict " {{{1
+
+    fun! s:toc.position_restore() abort dict
         if self.position[1] <= self.help_nlines
             let self.position[1] = self.help_nlines + 1
         en
         call vimtex#pos#set_cursor(self.position)
     endf
 
-    " }}}1
 
 
-    fun! s:foldexpr(lnum) abort " {{{1
+
+    fun! s:foldexpr(lnum) abort
         let pline = getline(a:lnum - 1)
         let cline = getline(a:lnum)
         let nline = getline(a:lnum + 1)
@@ -803,8 +803,8 @@ let s:toc = {}
         return '='
     endf
 
-    " }}}1
-    fun! s:foldtext() abort " {{{1
+
+    fun! s:foldtext() abort
         let l:line = getline(v:foldstart)[3:]
         if b:toc.todo_sorted
                     \ && l:line =~# '\v%(' . join(keys(g:vimtex_toc_todo_labels), '|') . ')'
@@ -814,9 +814,9 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
 
-    fun! s:int_to_roman(number) abort " {{{1
+
+    fun! s:int_to_roman(number) abort
         let l:number = a:number
         let l:result = ''
         for [l:val, l:romn] in [
@@ -843,8 +843,8 @@ let s:toc = {}
         return l:result
     endf
 
-    " }}}1
-    fun! s:base(n, k) abort " {{{1
+
+    fun! s:base(n, k) abort
         if a:n < a:k
             return [a:n]
         el
@@ -852,4 +852,4 @@ let s:toc = {}
         en
     endf
 
-    " }}}1
+

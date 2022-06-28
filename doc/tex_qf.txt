@@ -30,48 +30,60 @@
 
     Default value: 'latexlog'
 
+
 *g:vimtex_quickfix_blgparser*
-    This option controls the parsing of `blg` log files
-    (created by bibtex or  biber) for warnings and errors.
-    The option is a dictionary with the
-    following keys:
 
-        disable
-            Disable the parsing of `blg` entries.
+blg里找这个:
+    There were N多 error messages
 
-    Default value: {}
+
+        This option controls the parsing of `blg` log files
+        (created by  bibtex or  biber)  for warnings and  errors.
+        The option is a dictionary with the following keys:
+
+            disable
+                Disable the parsing of `blg` entries.
+
+        Default value: {}
 
 *g:vimtex_quickfix_autojump*
-    I recommend to keep it disabled for continuous compilation,
-    and  enable it if one prefers single shot compilations.
 
-    This option controls if vim should automatically jump to the first error
-    whenever the |quickfix| window is opened.
+        I recommend to keep it disabled for continuous compilation,
+        and  enable it if one prefers single shot compilations.
 
-    This option does not go well with continuous compilation and  callbacks,
-    since the callbacks will open the quickfix window if there are errors.
+        This option controls
+        if vim should automatically jump to the first error whenever the |quickfix| window is opened.
 
 
-*g:vimtex_quickfix_ignore_filters*
+        This option does not go well with continuous compilation and
+        callbacks,
+        since the callbacks will open the quickfix window if there are errors.
 
-    This option allows to provide a list of |regular-expression|s for filtering out undesired errors and
-    warnings.
-    This works regardless of which
-    quickfix method is enabled.
+    *g:vimtex_quickfix_ignore_filters*
 
+        This option allows to provide a list of |regular-expression|s for filtering out undesired errors and
+        warnings.
+        This works regardless of which
+        quickfix method is enabled.
 
-    The following example will ignore any messages that match "Marginpar on  page":
+        The following example will ignore any messages that match "Marginpar on  page":
 
 
         let g:vimtex_quickfix_ignore_filters = [
                     \ 'Marginpar on page',
                     \]
 
-    Default: []
+        Default: []
 
 *g:vimtex_quickfix_mode*
-    This option controls the behaviour of the |quickfix| window in case errors
-    and/or warnings are found.  The recognized options are:
+
+    This option controls the behaviour of the |quickfix| window in case errors and/or warnings are found.
+    The recognized options are:
+
+    The quickfix window will only be opened automatically if the compiler
+                if  `continuous` mode is disabled.
+                or is set to `continuous` mode
+                        and has `callbacks` enabled,
 
     Value  Effect
     0      The quickfix window is never opened/closed automatically.
@@ -80,26 +92,27 @@
     2      The quickfix window is opened automatically when there are errors,
                     but it does not become the active window.
 
-    The quickfix window will only be opened automatically if the compiler
-                is set to `continuous` mode and has `callbacks` enabled, or if
-                `continuous` mode is disabled.
 
     Default value: 2
 
 *g:vimtex_quickfix_autoclose_after_keystrokes*
-    If set to value greater than zero, then the quickfix window will close after
-    this number of motions (i.e. |CursorMoved| and |CursorMovedI| events). This
-    is most useful if one sets |g:vimtex_quickfix_mode| to 2, in which case this
-    option allows one to continue editing and removing the distraction of the
-    quickfix window automatically.
 
-    The count is reset when the quickfix window is entered.
+        If set to value greater than zero,
+        then the quickfix window will close after this number of motions
+        (i.e.  |CursorMoved| and |CursorMovedI| events).
+        This is most useful if one sets |g:vimtex_quickfix_mode| to 2,
+        in which case
+        this option allows one to continue editing and
+        removing the distraction of the quickfix window automatically.
 
-    Default value: 0
+        The count is reset when the quickfix window is entered.
+
+        Default value: 0
 
 *g:vimtex_quickfix_open_on_warning*
-    Control whether or not to automatically open the |quickfix| window in case
-    there are warning messages and no error messages.
+
+        Control  whether or  not to automatically open the |quickfix| window in case there are warning messages and
+        no error messages.
 
     Default value: 1
 

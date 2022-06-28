@@ -1,8 +1,8 @@
-fun! vimtex#qf#latexlog#new() abort " {{{1
+fun! vimtex#qf#latexlog#new() abort
     return deepcopy(s:qf)
 endf
 
-" }}}1
+
 
 
 let s:qf = {
@@ -15,7 +15,7 @@ fun! s:qf.init(state) abort dict "{{{1
                 \ 'v:val[1]')
 endf
 
-" }}}1
+
 fun! s:qf.set_errorformat() abort dict "{{{1
     "
     " note that The errorformat assumes we're using the -file-line-error with
@@ -93,8 +93,11 @@ fun! s:qf.set_errorformat() abort dict "{{{1
     setl  errorformat+=%-G%.%#
 endf
 
-" }}}1
+
 fun! s:qf.addqflist(tex, log) abort dict "{{{1
+                    "\ echom "log 是: "   a:log
+                    "\ log是个路径: 主tex文件的suffix改为log就是了
+
     if empty(a:log) || !filereadable(a:log)
         throw 'VimTeX: No log file found'
     en
@@ -107,8 +110,8 @@ fun! s:qf.addqflist(tex, log) abort dict "{{{1
     call self.fix_paths(a:log)
 endf
 
-" }}}1
-fun! s:qf.fix_paths(log) abort dict " {{{1
+
+fun! s:qf.fix_paths(log) abort dict
     let l:qflist = getqflist()
     let l:lines = readfile(a:log)
 
@@ -136,9 +139,9 @@ fun! s:qf.fix_paths(log) abort dict " {{{1
     call setqflist(l:qflist, 'r')
 endf
 
-" }}}1
 
-fun! s:fix_paths_hbox_warning(qf, log, root) abort " {{{1
+
+fun! s:fix_paths_hbox_warning(qf, log, root) abort
     if a:qf.text !~# 'Underfull\|Overfull' | return v:false | endif
 
     let l:index = match(a:log, '\V' . escape(a:qf.text, '\'))
@@ -177,8 +180,8 @@ fun! s:fix_paths_hbox_warning(qf, log, root) abort " {{{1
     return v:true
 endf
 
-" }}}1
-fun! s:fix_paths_invalid_bufname(qf, root) abort " {{{1
+
+fun! s:fix_paths_invalid_bufname(qf, root) abort
     " First check if the entry bufnr is already valid
     let l:file = getbufinfo(a:qf.bufnr)[0].name
     if filereadable(l:file) | return | endif
@@ -200,4 +203,4 @@ fun! s:fix_paths_invalid_bufname(qf, root) abort " {{{1
     en
 endf
 
-" }}}1
+

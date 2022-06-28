@@ -141,10 +141,10 @@ TABLE OF CONTENTS                                                  *vimtex-toc*
     to open a table of include files. This may be easily added with custom
     mappings:
 
-    augroup vimtex_customization
-        autocmd!
-        autocmd FileType tex call CreateTocs()
-    augroup END
+    aug  vimtex_customization
+        au!
+        au FileType tex call CreateTocs()
+    aug  END
 
     function CreateTocs()
         let g:custom_toc1 = vimtex#toc#new({
@@ -154,14 +154,14 @@ TABLE OF CONTENTS                                                  *vimtex-toc*
             \ 'show_numbers' : 0,
             \ 'mode' : 4,
             \})
-        nnoremap <silent> \ly :call g:custom_toc1.open()<cr>
+        nno  <silent> \ly :call g:custom_toc1.open()<cr>
 
         let g:custom_toc2 = vimtex#toc#new({
             \ 'layers' : ['include'],
             \ 'show_help' : 0,
             \})
-        nnoremap <silent> \lY :call g:custom_toc2.open()<cr>
-    endfunction
+        nno  <silent> \lY :call g:custom_toc2.open()<cr>
+    endf
 
     The `vimtex#toc#new` function takes a dictionary argument that may be used to
     override the combination of the default  values and |g:vimtex_toc_config|
@@ -190,8 +190,8 @@ If one prefers the |denite.nvim| or |unite.vim| source to the VimTeX interface,
 one may override the default mapping, e.g.:
 
 
-  nnoremap <localleader>lt :<c-u>Denite vimtex<cr>
-  nnoremap <localleader>lt :<c-u>Unite vimtex<cr>
+  nno  <localleader>lt :<c-u>Denite vimtex<cr>
+  nno  <localleader>lt :<c-u>Unite vimtex<cr>
 
 ------------------------------------------------------------------------------
 FZF INTEGRATION                                                   *vimtex-fzf*
@@ -204,7 +204,7 @@ quickly navigate VimTeX's built-in ToC feature. To use it, just define a
 mapping to `vimtex#fzf#run()` in your .vimrc, e.g.:
 
 
-  nnoremap <localleader>lt :call vimtex#fzf#run()<cr>
+  nno  <localleader>lt :call vimtex#fzf#run()<cr>
 
 You can also choose to only show certain entry "layers", according to this
 table (see |vimtex-toc| for detailed explanation of the "layers"):
@@ -242,13 +242,14 @@ VimTeX provides an interface to the following LaTeX compilers/compiler  backends
 The interface is implemented in a general way,
 which makes it relatively easy  to add new compilers.
 
-Compilation is started and
-stopped with |:VimtexCompile| and |:VimtexStop|.
-Although,  |:VimtexStop| stopping is only relevant for continuous compilations,
-and in this case,
-    |:VimtexCompile| itself works as a toggle.
+Compilation is started and  stopped with |:VimtexCompile|
+Under continuous compilations,
+    |:VimtexStop| can be used
+    |:VimtexCompile|  works as a toggle.
+
 Single shot compilation is always available through
     |:VimtexCompileSS|.
+
 Default mappings:  |vimtex-default-mappings|.
 
 
@@ -305,6 +306,15 @@ LATEXMK                                               *vimtex-compiler-latexmk*
 
     The compiler may be configured through:
 
+        *g:vimtex_compiler_method*
+            Available choices are:
+
+                Value      Documentation              Configuration
+                `latexmk`    |vimtex-compiler-latexmk|    |g:vimtex_compiler_latexmk|
+                `generic`    |vimtex-compiler-generic|    |g:vimtex_compiler_generic|
+
+            Default value: 'latexmk'
+
         *g:vimtex_compiler_latexmk*
             The values set by the user will take precedence over the default  values.
 
@@ -317,10 +327,10 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                         \ 'executable' : 'latexmk',
                         \ 'hooks'      : [],
                         \ 'options'    : [
-                        \   '-verbose',
-                        \   '-file-line-error',
-                        \   '-synctex=1',
-                        \   '-interaction=nonstopmode',
+                            \   '-verbose',
+                            \   '-file-line-error',
+                            \   '-synctex=1',
+                            \   '-interaction=nonstopmode',
                         \ ],
                         \}
 
@@ -348,13 +358,13 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                             the value becomes `test`.
 
                 If `build_dir` is specified,
-                then the specified build directory is created if it does not exist.
+                    then the specified build directory is created ¿if it does not exist¿.
 
                 Note 1: This option only works with `latexmk` version 4.27 and later.
                 Note 2: If `$out_dir` is added to `.latexmkrc`,
-                        then the `.latexmkrc` setting  will have priority.
+                            then the `.latexmkrc` setting  will have priority.
                 Note 3: If  *$VIMTEX_OUTPUT_DIRECTORY* is defined,
-                        it will have the highest  priority.
+                            it will have the highest  priority.
 
                         This environment variable allows to specify the output directory of auxiliary LaTeX files.
                         If it exists and
@@ -371,15 +381,53 @@ LATEXMK                                               *vimtex-compiler-latexmk*
 
 
             callback
-                If enabled,
+            If enabled,  (it is by default and there is really no  reason to disable it!),
                 tells `latexmk` to run |vimtex#compiler#callback|
                 after compilation is finished.
 
+                    then compilation errors will be parsed automatically.
+                    This is done by utilizing the tricks explained below.
+                        ps: Although `latexmk`  can control viewers directly,
+                            VimTeX disables this feature with `-view=none` (latexmk的option)
+                            so as to get full control of the viewers.
+
+                ✗可以把它们 放进latexmkrc:✗
+                autoload/vimtex/compiler/latexmk.vim 里, 有操作相当于指定这几个:
+
+                        $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
+                        $success_cmd   = "vim --remote-expr 'vimtex#compiler#callback(2)'";
+                        $failure_cmd   = "vim --remote-expr 'vimtex#compiler#callback(3)'";
+
+                (别手动放进latexmkrc)
+
+                Another neat way  to use this:
+                        is to use `xdotool` to change the window title of
+                        the viewer to indicate the compilation status:
+
+
+                            $compiling_cmd = "xdotool search --name \"%D\" " .
+                                            "set_window --name \"%D compiling...\"";
+                            $success_cmd   = "xdotool search --name \"%D\" " .
+                                            "set_window --name \"%D OK\"";
+                            $failure_cmd   = "xdotool search --name \"%D\" " .
+                                            "set_window --name \"%D FAILURE\"";
+
+                        If you define these options similar to the above `xdotool` trick and
+                            still want to enable the VimTeX callbacks:
+                                include  a semicolon at the end of the `cmd` strings so that
+                                VimTeX may append  safely to the options.
+
+                        More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
+
+
             continuous
-                If enabled, `latexmk` will run in continuous mode, i.e. with the `-pvc`
-                argument. This means that the document is compiled automatically by
-                `latexmk` every time a related file has been changed, until the processes
-                is stopped.
+                If enabled,
+                    `latexmk` will run in continuous mode,
+                    i.e. with the `-pvc`  argument.
+                                (preview-continuous )
+                    Document is compiled automatically by
+                    `latexmk` every time a related file has been changed,
+                        until the processes  is stopped.
 
                 If disabled, `latexmk` will run single shot compilations.
 
@@ -392,49 +440,49 @@ LATEXMK                                               *vimtex-compiler-latexmk*
             hooks
                 A list of |Funcref|s.
                 If running in continuous mode,
-                each hook will be  called for each line of output from `latexmk`,
-                with that line as argument.
-                E.g.,
-                to show information about the compilation run numbers,
-                one could do  this:
+                    each hook will be  called for each line of output from `latexmk`,
+                    with that line as argument.
+                    E.g.,
+                        to show information about the compilation run numbers,
+                        one could do  this:
 
 
-                    function! Callback(msg)
-                        let l:m = matchlist(a:msg, '\vRun number (\d+) of rule ''(.*)''')
-                        if !empty(l:m)
-                            echomsg l:m[2] . ' (' . l:m[1] . ')'
-                        endif
-                    endfunction
-                    let g:vimtex_compiler_latexmk = { 'hooks': [function('Callback')] }
+                        fun! Callback(msg)
+                            let l:m = matchlist(a:msg, '\vRun number (\d+) of rule ''(.*)''')
+                            if !empty(l:m)
+                                echomsg l:m[2] . ' (' . l:m[1] . ')'
+                            en
+                        endf
+                        let g:vimtex_compiler_latexmk = { 'hooks': [function('Callback')] }
 
             options
-                This is a list of options that are passed to `latexmk`. The default
-                options should work well for most people.
+                This is a list of options that are passed to `latexmk`.
+                The default  options should work well for most people.
 
                 Options like `-pdf` or `-lualatex` should NOT be added to this list.
-                            These are options used to specify the LaTeX processor/engine, see
-                            instead |g:vimtex_compiler_latexmk_engines|.
+                See  instead |g:vimtex_compiler_latexmk_engines|
 
-                Options may also be specified indirectly to `latexmk` through both
-                            a global and a project specific `.latexmkrc` file. One should know,
-                            though, that options specified on the command line has priority, and
-                            so if one wants to override one of the above default options, then
-                            one has to set this key to a list that contains the desired options.
+                Options may also be set through both
+                    a global and a project specific `.latexmkrc` file.
+
+                Options specified on the command line has priority (高于latexmkrc?)
 
         *g:vimtex_compiler_latexmk_engines*
-            Defines a map between TeX program directive (|vimtex-tex-program|) and
-            compiler engine. This is used by |vimtex-compiler-latexmk| to define the
-            LaTeX program. The `_` key defines the default engine.
+            Defines a map between TeX program directive (|vimtex-tex-program|)
+            and  compiler engine.
+            This is used by |vimtex-compiler-latexmk| to define the  LaTeX program.
+            The `_` key defines the default engine.
 
-            If the TeX program directive is not specified within the main project
-                        file, and if `$pdf_mode` is added to a project-specific `.latexmkrc`
-                        file, then the compiler engine will be deduced from the value of
-                        `$pdf_mode`. The supported values of `$pdf_mode` are 0 (pdflatex), 4
-                        (lualatex) and 5 (xelatex). See the latexmk documentation for details.
+            If the TeX program directive is not specified within the main project  file,
+             `$pdf_mode` is added to a project-specific `.latexmkrc` file,
+                the compiler engine will be deduced from the value of `$pdf_mode`.
+                The supported values of `$pdf_mode` are
+                    0 (pdflatex),
+                    4 (lualatex)
+                and 5 (xelatex).
+                See the latexmk documentation for details.
 
             Default value:
-
-
                 let g:vimtex_compiler_latexmk_engines = {
                         \ '_'                : '-pdf',
                         \ 'pdfdvi'           : '-pdfdvi',
@@ -454,65 +502,12 @@ LATEXMK                                               *vimtex-compiler-latexmk*
             Default value: 1
 
         *g:vimtex_compiler_silent*
-            Set this to 1 or |v:true| to silence the compiler messages during start,
+            Set this to 1 to silence the compiler messages during start,
             stop, and callbacks.
 
             Default: 0
 
-        *g:vimtex_compiler_method*
-            Set the compiler method. Available choices are:
 
-                Value      Documentation              Configuration
-                `latexmk`    |vimtex-compiler-latexmk|    |g:vimtex_compiler_latexmk|
-                `generic`    |vimtex-compiler-generic|    |g:vimtex_compiler_generic|
-
-            Default value: 'latexmk'
-
-    If the `callback` key is enabled
-    (it is by default and there is really no  reason to disable it!),
-        then compilation errors will be parsed automatically.
-    This is done by utilizing the tricks explained below.
-    Although `latexmk`  can control viewers directly,
-    VimTeX disables this feature with `-view=none`
-    so as to get full control of the viewers.
-
-    As stated,
-    one may customize the `latexmk` options through
-    |g:vimtex_compiler_latexmk|.
-    However, one may also configure `latexmk`
-    explicitly through a global `~/.latexmkrc` file, or a project specific
-    `.latexmkrc` file.
-    Command line arguments have  priority,
-
-
-    These options can be used to
-    specify commands that are run by
-    `latexmk` before and
-    after compilation.
-
-
-        $compiling_cmd = "vim --remote-expr 'vimtex#compiler#callback(1)'";
-        $success_cmd   = "vim --remote-expr 'vimtex#compiler#callback(2)'";
-        $failure_cmd   = "vim --remote-expr 'vimtex#compiler#callback(3)'";
-
-    Another neat way to use this is to use `xdotool` to change the window title of
-    the viewer to indicate the compilation status:
-
-
-        $compiling_cmd = "xdotool search --name \"%D\" " .
-                        "set_window --name \"%D compiling...\"";
-        $success_cmd   = "xdotool search --name \"%D\" " .
-                        "set_window --name \"%D OK\"";
-        $failure_cmd   = "xdotool search --name \"%D\" " .
-                        "set_window --name \"%D FAILURE\"";
-
-        If you define these options similar to the above `xdotool` trick and
-            still want to enable the VimTeX callbacks,
-            then one must include
-            a semicolon at the end of the `cmd` strings so that
-            VimTeX may append  safely to the options.
-
-        More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
 
 
 ------------------------------------------------------------------------------
@@ -578,7 +573,8 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
     forward search with synctex should
         usually work without any further configuration.
 
-    Inverse search requires configuration on the viewer side in most cases.
+    Inverse search
+    requires configuration on the viewer side in most cases.
 
 
     *g:vimtex_view_method*
@@ -595,21 +591,21 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
 
     各种选项
         *g:vimtex_view_enabled*
-            Use this option to disable/enable the VimTeX viewer interface.
+            enable the VimTeX viewer interface.
             Default value: 1
 
         *g:vimtex_view_automatic*
             源码:
-                function! s:viewer.compiler_callback(outfile) dict abort " {{{1
+                fun! s:viewer.compiler_callback(outfile) dict abort
                     if !g:vimtex_view_automatic
                     \ || has_key(self, 'started_through_callback')
                         return
                     el
                         call self._start(a:outfile)
                         let self.started_through_callback = 1
-                    endif
+                    en
 
-                endfunction
+                endf
 
             If enabled:
                 if compilation `continuous` mode is disabled.
@@ -657,35 +653,6 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
                 the |VimtexEventCompileSuccess| event to update the viewer.
 
 
-        *g:vimtex_view_forward_search_on_start*
-            This option is only relevant when |g:vimtex_view_method|
-            is set to  `mupdf` or `zathura`.
-                |vimtex-view-mupdf|,
-                |vimtex-view-zathura|.
-
-            Default value: 1
-
-            If disabled,
-                the ¿first invocation¿ of the viewer will not
-                perform a forward search to the current cursor position.
-
-        *g:vimtex_view_reverse_search_edit_cmd*
-
-            When working in a multi-file project,
-            initiating inverse search (see |vimtex-synctex-inverse-search|)
-            may require opening a file that is
-            not currently open in a window.
-
-            This option controls the command that is
-            used to
-            open files as a result of an inverse search.
-
-            Examples:
-                * `edit`
-                * `tabedit`
-                * `split`
-
-            Default value: `edit`
 
         *g:vimtex_view_general_options*
             Set options for the specified general viewer,
@@ -700,12 +667,8 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
             Default value: '@pdf'
 
         *g:vimtex_view_mupdf_options*
-        *g:vimtex_view_zathura_options*
-            Set options for mupdf (|vimtex-view-mupdf|) and Zathura
-            (|vimtex-view-zathura|),
-            respectively.
-
             Default value: ''
+
 
         *g:vimtex_view_general_viewer*
             Use generic viewer application, see |vimtex-view-general|.
@@ -715,276 +678,190 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
                 macOS:   `open`
                 Windows: `SumatraPDF` or `mupdf` if available, else `start ""`
 
-        *g:vimtex_view_zathura_check_libsynctex*
-            Default value: 1
-
-            Check on startup if Zathura is compiled with libsynctex.
-            This is done by  default because Zathura on some systems
-            is compiled without libsynctex
-            support, in which case forward and inverse search will not work. When this
-            is the case, the startup check will provide a notification to the user.
-
-            If this option is set to 0 or |v:false|, then the check is skipped.
 
 
 
-
-    The following is a list of popular PDF viewers, in alphabetic order, and how
-    they can be configured to work with VimTeX.
-
-    Evince~
-                *vimtex-view-evince*
-        https://wiki.gnome.org/Apps/Evince
-        Evince is a document viewer for viewing multiple document formats, including
-        PDFs. It comes by default with Gnome.
-
-        Configuration:
-
-        let g:vimtex_view_general_viewer = 'evince'
-
-
-        Evince only supports synctex through DBus, which is not supported by
-            VimTeX. Thus VimTeX does not support forward and inverse search with
-            Evince. However, the Vim plugin `SVED` by Peter Jorgensen is reported to
-            work well in combination with VimTeX. See the plugin page [0] for more
-            information.
-
-            [0]: https://github.com/peterbjorgensen/sved
-
-    MuPDF~
-             https://www.mupdf.com/
-             *vimtex-view-mupdf*
-        MuPDF is a very minimalistic and quick PDF viewer. It does not support synctex
-        itself, but VimTeX provides both forward and inverse search by abusing
-        `xdotool`. Inverse search must be used from within VimTeX with the mapping
-        |<plug>(vimtex-reverse-search)| (default mapping: `'<localleader>lr'`).
-
-        One can also use |g:vimtex_view_mupdf_send_keys| to specify a set of keys that
-        is sent to MuPDF on startup.
-
-        Configuration:
-
-        let g:vimtex_view_method = 'mupdf'
-
-        Associated settings:
-        * |g:vimtex_view_mupdf_options|
-        * |g:vimtex_view_mupdf_send_keys|
-
-        Both forward and inverse search requires `xdotool` to work. Forward
-            search will only take you to the correct page. Inverse search will take
-            you to the line in Vim that corresponds to the first line of the current
-            page in MuPDF.
-
-        Viewer handling uses window title matching. If there exists another pdf
-            viewer with the same name as the current project pdf file, then there
-            might be conflicts, and so MuPDF might not work as expected.
-
-    Okular~
-        https://okular.kde.org/
-        Okular is a very feature rich PDF viewer that supports both forward and
-        inverse search.  *vimtex-view-okular*
-
-        Configuration:
-
-        let g:vimtex_view_general_viewer = 'okular'
-        let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
-
-        Inverse search can be set up within Okular in the settings pane under
-        "Settings > Editor > Custom Text Editor" [0]. Use the viewer configuration as
-        explained in |vimtex-synctex-inverse-search|.
-
-        To perform an inverse search in Okular, do `shift + click` while browse mode
-        is enabled.
-
-        [0]: https://docs.kde.org/stable5/en/okular/okular/inverse_search.html
-
-
-    qpdfview~
-        https://launchpad.net/qpdfview
-        qpdfview is a tabbed document viewer. It supports both forward and inverse
-        search. The latter must be set up from within the viewer. Use the viewer
-        configuration as explained in |vimtex-synctex-inverse-search|, but note that
-        the interpolation variables should be `%1` for the filename and `%2` for the
-        line number.  *vimtex-view-qpdfview*
-
-        Configuration:
-
-        let g:vimtex_view_general_viewer = 'qpdfview'
-        let g:vimtex_view_general_options
-            \ = '--unique @pdf\#src:@tex:@line:@col'
-
-    Sioyek~
-        https://sioyek.info/
-        Sioyek is a PDF viewer designed for reading research papers and technical
-        books.  *vimtex-view-sioyek*
-
-        Configuration:
-
-        let g:vimtex_view_method = 'sioyek'
-
-        Inverse search should be automatically configured and work out of the box.
-        VimTeX will try to pass options to Sioyek to automatically configure inverse
-        search. This means that, in most cases, inverse search should work as expected
-        without any further configuration. One may still be interested in learning how
-        inverse-search configuration works, in which case one should read
-        |vimtex-synctex-inverse-search|. The interpolation variables for Sioyek
-        configuration are `%2` and `%1`, not `%l` and `%f`.
-
-        Associated settings:
-        * |g:vimtex_view_sioyek_exe|
-
-
-    *vimtex-view-sumatrapdf*
-    SumatraPDF~
-    https://www.sumatrapdfreader.org/free-pdf-reader.html
-    SumatraPDF is a PDF viewer for windows that is powerful, small, portable and
-    starts up very fast. It supports both forward and inverse search.
-
-    Configuration:
-
-    let g:vimtex_view_general_viewer = 'SumatraPDF'
-    let g:vimtex_view_general_options
-        \ = '-reuse-instance -forward-search @tex @line @pdf'
-
-    For convenience, the above configuration is used by default on Windows if
-    `SumatraPDF` is detected as executable.
-
-    Inverse search must be configured under `Settings --> Options` from within
-    SumatraPDF. Find the section `Set inverse search command-line` in the bottom
-    and use the viewer configuration as explained in
-    |vimtex-synctex-inverse-search|.
-
-    Inverse search is activated with a double click in the PDF file.
-
-    There is a known issue with VimTeX + SumatraPDF when you use `xelatex`,
-        where the pdf file in SumatraPDF is not refreshed after compilation.
-        A workaround was found and posted by @Whitebeard0 here:
-        https://github.com/lervag/vimtex/issues/1410#issuecomment-506143020
 
     *vimtex-view-zathura*
     Zathura~
-    https://pwmt.org/projects/zathura/
-    Zathura is, like MuPDF, a very fast and minimalistic viewer. Compared to
-    MuPDF, it allows more user configuration. Zathura has full support for both
-    forward and inverse search. Zathura should be straightforward to install and
-    use on Linux with Xorg. It should also work on macOS, but users may want to
-    read |vimtex-faq-zathura-macos|.
+        Zathura should be straightforward to install and  use on Linux with Xorg.
 
-    Configuration:
+        Configuration:
 
-    let g:vimtex_view_method = 'zathura'
+        let g:vimtex_view_method = 'zathura'
 
-    VimTeX will try to start Zathura with the `-x` argument to specify the inverse
-    search options automatically. This means that, in most cases, inverse search
-    should work as expected without any further configuration. One may still be
-    interested in learning how inverse-search configuration works, in which case
-    one should read |vimtex-synctex-inverse-search|. The interpolation variables
-    for Zathura configuration are `%{line}` and `%{input}`, not `%l` and `%f`.
+        VimTeX will try to start Zathura with the `-x` argument to specify the
+        ¿inverse¿  search options automatically.
+        Inverse search
+        should work as expected without any further configuration.
+        One may still be  interested in learning how inverse-search configuration works,
+        in which case
+        one should read |vimtex-synctex-inverse-search|.
+        The ¿interpolation variables¿
+        for Zathura configuration are `%{line}` and `%{input}`
 
-    Associated settings:
-    * |g:vimtex_view_zathura_check_libsynctex|
-    * |g:vimtex_view_zathura_options|
+        Associated settings:
+        *g:vimtex_view_zathura_options*
+                Default value: ''
 
-    Forward search requires `xdotool` to work properly. That is, `xdotool`
-        is used to avoid duplicate Zathura instances when the
-        |:VimtexView| command is issued. This is a more severe restriction
-        if the |g:vimtex_view_forward_search_on_start| option is disabled.
+        *g:vimtex_view_zathura_check_libsynctex*
+                Default value: 1
 
-    Recent versions of Zathura no longer ensures synctex support. This has
-        resulted in synctex support being dropped on some platforms, e.g. on
-        OpenSUSE, cf. https://github.com/lervag/vimtex/issues/384. A workaround
-        is to build Zathura from source manually.
+                Check on startup if Zathura is compiled with libsynctex.
 
-    Viewer handling uses window title matching. If there exists another pdf
-        viewer with the same name as the current project pdf file, then there
-        might be conflicts. In particular, this might affect forward/inverse
-        searching for Zathura.
+                If this option is set to 0 or |v:false|, then the check is skipped.
 
+        Forward search requires `xdotool` to work properly.
+        That is,
+        `xdotool`  is used to avoid duplicate Zathura instances when the
+            |:VimtexView| command is issued.
+            This is a more severe restriction
+            if the |g:vimtex_view_forward_search_on_start| option is disabled.
+
+        Some version of Zathura  has NO  synctex support.
+
+        Viewer handling uses window title matching.
+            If there exists another pdf viewer with the same name as the current project pdf file,
+                then there might be conflicts.
+                this might affect forward/inverse searching for Zathura.
+
+    From zathura's manual:
+        For gvim forward and backwards synchronization support can be set up as follows:
+        First add the following to the vim configuration:
+
+          fun! Synctex()
+             exe  "silent !zathura --synctex-forward " . line('.') . ":" . col('.') . ":" . bufname('%') . " " . g:syncpdf
+             redraw!
+          endf
+          map <C-enter> :call Synctex()<cr>
+
+       Then launch zathura with
+
+          zathura -x "gvim --servername vim -c \"let g:syncpdf='$1'\" --remote +%{line} %{input}" $file
 
 
 ------------------------------------------------------------------------------
 SYNCTEX SUPPORT                                                *vimtex-synctex*
 
-    Synctex is a tool that enables synchronization of the text editor position and
-    the pdf viewer position.
-    The tool may be used to
-    add mappings in vim to go to the current position in the compiled pdf document (forward search),
-    and also to go from a specific position in the pdf file to the corresponding position in vim (inverse search).
+    To make synctex work,
+    it must be enabled.
+    VimTeX enables this by  ¿default¿
+    by
+    passing `-synctex=1` on the command line,
+    unless the user overrides the option
+    (see the `option` key for |g:vimtex_compiler_latexmk| )
 
 
-    To make synctex work, it must be enabled. VimTeX enables this by default by
-    passing `-synctex=1` on the command line, unless the user overrides the
-    option (see the `option` key for |g:vimtex_compiler_latexmk| or
-    |g:vimtex_compiler_latexrun|).
+    Alternatively,
+            for |vimtex-compiler-latexmk|,
+            one can put this in ones `~/.latexmkrc` file:
 
-    Alternatively, for |vimtex-compiler-latexmk|, one can put this in ones
-    `~/.latexmkrc` file:
-
-
-    $pdflatex = 'pdflatex -synctex=1 %O %S';
+                $pdflatex = 'pdflatex -synctex=1 %O %S';
 
     Forward search~
-    *vimtex-synctex-forward-search*
-    For supported viewers, |:VimtexView| (<localleader>lv) will issue a forward
-    search if the viewer is already opened. The forward search will take you to
-    the page or position in the viewer that corresponds to the current line in
-    your vim session. See |g:vimtex_view_method| for a list of supported viewers.
+        For supported viewers,
+            |:VimtexView| (<localleader>lv)
+        will issue a forward search if the viewer is ¿already opened¿.
+        The forward search will take you to the page or
+        position in the viewer that corresponds to the current ¿line¿ in your vim session.
+        _  *vimtex-synctex-forward-search*
 
-    Inverse search~
+        *g:vimtex_view_forward_search_on_start*
+            This option is only relevant when |g:vimtex_view_method|
+            is set to  `mupdf` or `zathura`.
+
+            Default value: 1
+
+
+
+
+    Reverse search~
     *vimtex-synctex-inverse-search*
     *vimtex-synctex-backward-search*
     *:VimtexInverseSearch*
 
-    In supported viewers, one may set up inverse search, which allows one to go
-    directly from a selected line in the viewer (typically by double clicking with
-    the mouse or something similar) to the corresponding line inside the Vim
-    instance. This is sometimes also called backward search or reverse search.
-
-    Inverse search relies on communicating with Vim/neovim from the viewer by use
-    of shell commands executed by the viewer. It is usually configured within the
-    specific viewer through an option named something like "inverse search
-    command-line". The option specifies the necessary shell command to perform the
-    inverse search. The target line and file are provided as interpolation
-    variables. In the following, we use `%l` and `%f`, but the interpolation
-    variables may be named different in some viewers (e.g. |vimtex-view-skim|).
-    A typical shell command looks like this:
+        In supported viewers,
+        one may set up inverse search,
+        which allows one to go directly from a selected line in the viewer (typically by
+        double clicking with the mouse or  something similar)
+        to the corresponding line inside the Vim instance.
+        This is sometimes also called
+            backward search or
+            reverse search.
 
 
-    vim --remote-silent +%l %f
+        Inverse search relies on communicating with Vim/neovim from the viewer by
+        use of shell commands executed by
+        the viewer.
+        It is usually configured within the specific viewer through
+        an option named something like
+            "inverse search command-line".
 
-    Luckily, VimTeX provides a convenience function to simplify the viewer
-    configuration. The command `VimtexInverseSearch` will execute
-    |vimtex#view#inverse_search| with the target line and file as arguments inside
-    the desired Vim or neovim instance. The latter function is the one that really
-    performs the inverse search. The combined effect is a more robust experience
-    that will seamlessly handle multiple Vim or neovim instances and multiple
-    VimTeX instances. The user doesn't need to worry about passing the correct
-    servernames.
+        The option specifies the necessary shell command to perform the inverse search.
+        The target line and
+        file are provided as ¿interpolation¿ variables.
+        In the following,
+        we use `%l` and `%f`,
+        but the interpolation variables may be named different in some viewers (e.g.  |vimtex-view-skim|).
+        A typical shell command looks like this:
 
-    To configure with `VimtexInverseSearch`, use:
+                    vim --remote-silent +%l %f
+
+        VimTeX provides a convenience function to simplify the viewer configuration.
+        The command `VimtexInverseSearch` will execute |vimtex#view#inverse_search| with the target line and
+        file as arguments inside the desired Vim or  neovim instance.
+        The latter function is the one that really performs the inverse search.
+        The combined effect is a more robust experience that will seamlessly handle multiple Vim or
+        neovim instances and
+        ¿multiple VimTeX instances¿.
+        The user doesn't need to worry about passing the correct ¿servernames¿.
+
+        To configure with `VimtexInverseSearch`, use:
+
+            nvim --headless -c "VimtexInverseSearch %l '%f'"
 
 
-    vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
+        *g:vimtex_view_reverse_search_edit_cmd*
 
-    nvim --headless -c "VimtexInverseSearch %l '%f'"
+            When working in a multi-file project,
+                initiating inverse search (see |vimtex-synctex-inverse-search|)
+                may require opening a file that is
+                not currently open in a window.
 
-    On Windows, the above commands may lead to an annoying command window "popup".
-    This may be avoided, or at least reduced, with the following variants:
+            This option controls the command that is
+            used to
+            open files as a result of an inverse search.
+
+            Examples:
+                * `edit`
+                * `tabedit`
+                * `split`
+
+            Default value: `edit`
 
 
-    cmd /c start /min "" vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
 
-    cmd /c start /min "" nvim --headless -c "VimtexInverseSearch %l '%f'"
+        On Windows, (not WSL?)
+            the above commands may lead to an annoying command window "popup".
+            This may be avoided,
+            or at least reduced,
+            with the following variants:
 
-    Vim users should be aware that one may need to ensure that the server is
-        really running, see |vimtex-clientserver|.
+                    cmd /c start /min "" vim -v --not-a-term -T dumb -c "VimtexInverseSearch %l '%f'"
+
+                    cmd /c start /min "" nvim --headless -c "VimtexInverseSearch %l '%f'"
+
+            Vim users should be aware that one may need to ensure that
+            the server is  really running,
+            see |vimtex-clientserver|.
+
+
 
 ==============================================================================
 LATEX DOCUMENTATION                                           *vimtex-latexdoc*
 
 VimTeX provides the command |:VimtexDocPackage| to open documentation for packages and
 documentclasses.
-The command is mapped to `K`
 
 
 For simplicity,
@@ -999,11 +876,7 @@ For users that want to use a local `texdoc` installation as the main method:
 
 See https://www.tug.org/texdoc/doc/texdoc.pdf for more info about `texdoc`.
 
-In the following,
-I list some relevant online and
-offline alternatives for accessing LaTeX documentation.
-These methods are not integrated into VimTeX and
-are listed purely for the readers convenience.
+Following methods are not integrated into VimTeX
 
 
 ------------------------------------------------------------------------------
@@ -1129,7 +1002,7 @@ API REFERENCE                                                 *vimtex-code-api*
 
         If called without arguments,
             the position refers to the cursor position.
-        Else
+        el
             must be called with two arguments:
                 the line number and
                 column number.
@@ -1247,17 +1120,22 @@ A: This might be due to the |isfname| setting, which by default contains `{,}`
 ------------------------------------------------------------------------------
 *vimtex-faq-texmfhome*
 Q: How can I change `TEXMFHOME`?
-A: If you change `TEXMFHOME` in your `.bashrc` or `.zshrc` or similar and use `gvim`
-   invoked from the desktop environment (from menus, hotkeys, etc.), gvim does
-   not know about the new value of `TEXMFHOME`. The reason for this is that
-   `vim` invokes shells (e.g. with `!` or `system()`) as non-interactive and
-   non-login shell, which means `.bashrc` or `.zshrc` are not read.  If you
-   start `gvim` from an interactive shell which has read `.bashrc` or `.zshrc,
-   `gvim` inherits these values and therefore they are consistent.
+A: If you change `TEXMFHOME` in your `.bashrc` or `.zshrc` or similar and
+    use `gvim`  invoked from the desktop environment
+    (from menus, hotkeys, etc.),
+    gvim does  not know about the new value of `TEXMFHOME`.
+    The reason for this is that  `vim` invokes shells
+    (e.g. with `!` or `system()`)
+    as non-interactive and  non-login shell,
+   which means `.bashrc` or `.zshrc` are not read.
+   If you  start `gvim` from an interactive shell which
+   has read `.bashrc` or `.zshrc,
+        `gvim` ¿inherits¿ these values and therefore they are consistent.
 
-   One can make the invoked shells interactive by setting |shellcmdflag| to
-   "-ic".  If you want to keep them non-interactive, you can create an
-   additional shell startup file where you keep your environment variables:
+   One can make the invoked shells interactive by
+   setting |shellcmdflag| to  "-ic".
+   If you want to keep them non-interactive,
+   you can create an  additional shell startup file where you keep your environment variables:
 
    1. If bash is your default shell, create e.g. the file `.bashenv` containing
       your customized `TEXMFHOME` variable and add `$BASH_ENV=$HOME/.bashenv` to
@@ -1275,90 +1153,104 @@ A: If you change `TEXMFHOME` in your `.bashrc` or `.zshrc` or similar and use `g
 
 ------------------------------------------------------------------------------
 *vimtex-faq-wsl*
-Q: Does VimTeX support WSL (Windows Subsystem for Linux)?
-A: For the moment, rudimentarily, as follows: To set up the viewer, install
-   mupdf [0] or SumatraPDF [1], add the executable to %PATH%, say by Rapidee
-   [2]. In your vimrc, the lines
+    Q: Does VimTeX support WSL (Windows Subsystem for Linux)?
+    A: For the moment, rudimentarily, as follows:
+            To set up the viewer,
+            install  mupdf [0] or SumatraPDF [1],
+            add the executable to %PATH%,
 
-   if has('win32') || (has('unix') && exists('$WSLENV'))
-     if executable('mupdf.exe')
-       let g:vimtex_view_general_viewer = 'mupdf.exe'
-     elseif executable('SumatraPDF.exe')
-       let g:vimtex_view_general_viewer = 'SumatraPDF.exe'
-     endif
-   endif
+            [2]. In your vimrc, the lines
 
-   make |:VimtexView| work under Windows, and also under WSL, provided that at
-   least Windows 10 version 1903 [3] of WSL is installed, the current work dir
-   and the compiled file is contained in the Linux home directory $HOME (as
-   opposed to %USERPROFILE% in Windows).
-
-   However, client-server capabilities seem to be disabled (perhaps because
-   WSL does not have built-in support for X11) and therefore inverse search
-   does not work. Neither does forward search work: While SumatraPDF opens
-   fine the PDF file in \\wsl$\<DistroName>\..., the forward search in
-   SumatraPDF itself does not find the corresponding source file in
-   \\wsl$\<DistroName>\....
-
-   To set up a LaTeX distribution, while reusing that of Windows as proposed
-   at [4] seems efficient, in practice accessing files on mounted NTFS drives
-   from WSL is slow, even more so under WSL2 [5]. Therefore a full TeXLive
-   installation is recommended.
-
-   If only basic functionality is required, then a minimal TeXLive
-   installation, such as TinyTeX [6] or a minimal set of packages to compile
-   LaTeX as provided by your distribution, is an option, as discussed at [7].
-   For example, under openSUSE, it suffices to install the packages
-   texlive-scheme-basic, texlive-latexmk, texlive-collection-fontsrecommended.
-
-   [0]: https://chocolatey.org/packages/mupdf
-   [1]: https://chocolatey.org/packages/sumatrapdf
-   [2]: https://www.rapidee.com/en/about
-   [3]: https://devblogs.microsoft.com/commandline/whats-new-for-wsl-in-windows-10-version-1903/
-   [4]: https://github.com/lervag/vimtex/issues/1380
-   [5]: https://vxlabs.com/2019/12/06/wsl2-io-measurements/
-   [6]: https://yihui.org/tinytex/
-   [7]: https://tex.stackexchange.com/questions/397174/minimal-texlive-installation
-
-------------------------------------------------------------------------------
-*vimtex-faq-zathura-macos*
-Q: Does Zathura + VimTeX work on macOS?
-A: Yes, it should work.  The following recipe has been reported to work [0].
-   The steps assume the user has installed and knows how to use Homebrew [1].
-
-   1. Zathura needs `dbus` to work properly. Install it with the following:
-      `brew install dbus`, or, if it is already installed, reinstall (this
-      seems necessary for some unknown reason): `brew reinstall dbus`
-
-   2. Add this to your `.bashrc` or `.zshrc` file (or similar):
+            if has('win32') || (has('unix') && exists('$WSLENV'))
+                if executable('mupdf.exe')
+                let g:vimtex_view_general_viewer = 'mupdf.exe'
+                elseif executable('SumatraPDF.exe')
+                let g:vimtex_view_general_viewer = 'SumatraPDF.exe'
+                en
+            en
 
 
-      export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_LAUNCHD_SESSION_BUS_SOCKET"
-
-   3. Changed the value of `<auth><\auth>` in
-      `/usr/local/opt/dbus/share/dbus-1/session.conf` from `EXTERNAL` to
-      `DBUS_COOKIE_SHA1`.
-
-   4. Run `brew services start dbus`
-
-   5. Now install Zathura (most recent version, aka HEAD):
+                make |:VimtexView| work under Windows,
+                and also under WSL,
+                provided that at least Windows 10 version 1903 [3] of WSL is installed,
+                the current work dir and
+                the compiled file is contained in the Linux home directory $HOME
+                (as opposed to %USERPROFILE% in Windows).
 
 
-      brew tap zegervdv/zathura
-      brew install girara --HEAD
-      brew install zathura --HEAD --with-synctex
-      brew install zathura-pdf-poppler
-      mkdir -p $(brew --prefix zathura)/lib/zathura
-      ln -s $(brew --prefix zathura-pdf-poppler)/libpdf-poppler.dylib $(brew --prefix zathura)/lib/zathura/libpdf-poppler.dylib
+            However, client-server capabilities seem to be disabled
+            (perhaps because  WSL does not have built-in support for X11)
+            and therefore inverse search  does not work.
+            Neither does forward search work:
+                While SumatraPDF opens fine the PDF file in \\wsl$\<DistroName>\...,
+                the forward search in  SumatraPDF itself does not find the corresponding source file in
+                    \\wsl$\<DistroName>\....
 
-   6. Reboot and enjoy.
 
-   If you already had Zathura and girara installed and things don't
-         work, then first uninstall and unlink them and try to follow the
-         above steps from step 1.
+                Therefore a full TeXLive installation in wsl (instead of in MS-Windows) is recommended.
 
-   [0]: https://github.com/lervag/vimtex/issues/1737#issuecomment-759953886
-   [1]: https://brew.sh
+
+                If only basic functionality is required,
+                then a minimal TeXLive installation,
+                such as TinyTeX [6] or a minimal set of packages to compile LaTeX as provided by
+                your distribution,
+                is an option,
+                as discussed at [7].
+                For example,
+                under openSUSE,
+                    it suffices to install the packages texlive-scheme-basic,
+                        texlive-latexmk,
+                        texlive-collection-fontsrecommended.
+
+
+            [0]: https://chocolatey.org/packages/mupdf
+            [1]: https://chocolatey.org/packages/sumatrapdf
+            [2]: https://www.rapidee.com/en/about
+            [3]: https://devblogs.microsoft.com/commandline/whats-new-for-wsl-in-windows-10-version-1903/
+            [4]: https://github.com/lervag/vimtex/issues/1380
+            [5]: https://vxlabs.com/2019/12/06/wsl2-io-measurements/
+            [6]: https://yihui.org/tinytex/
+            [7]: https://tex.stackexchange.com/questions/397174/minimal-texlive-installation
+
+    ------------------------------------------------------------------------------
+    *vimtex-faq-zathura-macos*
+    Q: Does Zathura + VimTeX work on macOS?
+    A: Yes, it should work.  The following recipe has been reported to work [0].
+    The steps assume the user has installed and knows how to use Homebrew [1].
+
+    1. Zathura needs `dbus` to work properly. Install it with the following:
+        `brew install dbus`, or, if it is already installed, reinstall (this
+        seems necessary for some unknown reason): `brew reinstall dbus`
+
+    2. Add this to your `.bashrc` or `.zshrc` file (or similar):
+
+
+        export DBUS_SESSION_BUS_ADDRESS="unix:path=$DBUS_LAUNCHD_SESSION_BUS_SOCKET"
+
+    3. Changed the value of `<auth><\auth>` in
+        `/usr/local/opt/dbus/share/dbus-1/session.conf` from `EXTERNAL` to
+        `DBUS_COOKIE_SHA1`.
+
+    4. Run `brew services start dbus`
+
+    5. Now install Zathura (most recent version, aka HEAD):
+
+
+        brew tap zegervdv/zathura
+        brew install girara --HEAD
+        brew install zathura --HEAD --with-synctex
+        brew install zathura-pdf-poppler
+        mkdir -p $(brew --prefix zathura)/lib/zathura
+        ln -s $(brew --prefix zathura-pdf-poppler)/libpdf-poppler.dylib $(brew --prefix zathura)/lib/zathura/libpdf-poppler.dylib
+
+    6. Reboot and enjoy.
+
+    If you already had Zathura and girara installed and things don't
+            work, then first uninstall and unlink them and try to follow the
+            above steps from step 1.
+
+    [0]: https://github.com/lervag/vimtex/issues/1737#issuecomment-759953886
+    [1]: https://brew.sh
 
 ==============================================================================
 TROUBLESHOOTING                                       *vimtex-troubleshooting*
@@ -1377,8 +1269,10 @@ troubleshooting section.
 Problem: Continuous compilation seems to hang~
 
 Upon starting continuous compilation the status bar indicates "VimTeX:
-Compiler started in continuous mode", but the compilation never terminates and
+Compiler started in continuous mode",
+but the compilation never terminates and
 the quickfix window does not load.
+
 
 Tips:
 1. Ensure that a latexmk process and a Perl process have started. If they have

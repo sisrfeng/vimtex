@@ -1,10 +1,9 @@
-fun! vimtex#compiler#latexmk#init(options) abort " {{{1
+fun! vimtex#compiler#latexmk#init(options) abort
     return s:compiler.new(a:options)
 endf
 
-" }}}1
 
-fun! vimtex#compiler#latexmk#get_rc_opt(root, opt, type, default) abort " {{{1
+fun! vimtex#compiler#latexmk#get_rc_opt(root, opt, type, default) abort
     "
     " Parse option from .latexmkrc.
     "
@@ -37,28 +36,38 @@ fun! vimtex#compiler#latexmk#get_rc_opt(root, opt, type, default) abort " {{{1
     " Candidate files
     " - each element is a pair [path_to_file, is_local_rc_file].
     let l:files = [
-                \ [a:root . '/latexmkrc', 1],
-                \ [a:root . '/.latexmkrc', 1],
-                \ [fnamemodify('~/.latexmkrc', ':p'), 0],
-                \ [fnamemodify(
-                \    !empty($XDG_CONFIG_HOME) ? $XDG_CONFIG_HOME : '~/.config', ':p')
-                \    . '/latexmk/latexmkrc', 0]
-                \]
+            \ [a:root . '/latexmkrc'      , 1]        ,
+            \ [a:root . '/.latexmkrc'     , 1]        ,
+            \ [fnamemodify('~/.latexmkrc' , ':p'), 0] ,
+            \ [fnamemodify(
+                    \    !empty($XDG_CONFIG_HOME)
+                            \ ? $XDG_CONFIG_HOME
+                            \ : '~/.config', ':p'
+                        \ )
+                      \    . '/latexmk/latexmkrc'  ,
+              \ 0
+             \ ]
+          \]
 
     let l:result = [a:default, -1]
 
     for [l:file, l:is_local] in l:files
         if filereadable(l:file)
             let l:match = matchlist(readfile(l:file),   l:pattern)
+            "\ echom "l:match 是: "   l:match
+            "\ ['$pdf_mode =  5', '5', '', '', '', '', '', '', '', '']
             if len(l:match) > 1
                 let l:result = [l:match[1], l:is_local]
+                "\ echom "l:result 是: "   l:result
+                        "\ ['5', 0]
                 break
             en
         en
     endfor
 
     " Parse the list
-    if a:type == 2 && l:result[1] > -1
+    if a:type == 2
+  \ && l:result[1] > -1  "\ 并非 is_local
         let l:array = split(l:result[0], ',')
         let l:result[0] = []
         for l:x in l:array
@@ -69,16 +78,17 @@ fun! vimtex#compiler#latexmk#get_rc_opt(root, opt, type, default) abort " {{{1
     en
 
     return l:result
+    echom "return的 result 是: "   l:result
 endf
 
-" }}}1
+
 
 
 let s:compiler = vimtex#compiler#_template#new({
-            \ 'continuous' : 1         ,
-            \ 'callback'   : 1         ,
-            \ 'name'       : 'latexmk' ,
-            \ 'executable' : 'latexmk' ,
+            \ 'continuous'  :  1         ,
+            \ 'callback'    :  1         ,
+            \ 'name'        :  'latexmk' ,
+            \ 'executable'  :  'latexmk' ,
             \ 'options'    : [
                 \   '-verbose'                 ,
                 \   '-file-line-error'         ,
@@ -87,20 +97,27 @@ let s:compiler = vimtex#compiler#_template#new({
             \ ],
             \})
 
-fun! s:compiler.__check_requirements() abort dict " {{{1
+fun! s:compiler.__check_requirements() abort dict
     if !executable(self.executable)
         call vimtex#log#warning(self.executable . ' is not executable')
         throw 'VimTeX: Requirements not met'
     en
 endf
 
-" }}}1
-fun! s:compiler.__init() abort dict " {{{1
-    " Check if .latexmkrc sets the build_dir - if so this should be respected
-    let l:out_dir =
-                \ vimtex#compiler#latexmk#get_rc_opt(self.state.root, 'out_dir', 0, '')[0]
+
+fun! s:compiler.__init() abort dict
+    " Check if .latexmkrc sets the build_dir
+    "\ if so this should be respected
+    let l:out_dir =   vimtex#compiler#latexmk#get_rc_opt(
+                          \ self.state.root,
+                          \ 'out_dir',
+                          \ 0,
+                          \ '',
+                        \ )[0]
+
     if !empty(l:out_dir)
-        if !empty(self.build_dir) && (self.build_dir !=# l:out_dir)
+        if !empty(self.build_dir)
+      \ && (self.build_dir !=# l:out_dir)
             call vimtex#log#warning(
                         \ 'Setting out_dir from latexmkrc overrides build_dir!',
                         \ 'Changed build_dir from: ' . self.build_dir,
@@ -110,11 +127,13 @@ fun! s:compiler.__init() abort dict " {{{1
     en
 endf
 
-" }}}1
-fun! s:compiler.__build_cmd() abort dict " {{{1
+
+fun! s:compiler.__build_cmd() abort dict
     let l:cmd = (has('win32')
-                \ ? 'set max_print_line=2000 & '
-                \ : 'max_print_line=2000 ') . self.executable
+              \ ? 'set max_print_line=2000 & '
+              \ : 'max_print_line=2000 '
+        \ )
+        \ . self.executable
 
     let l:cmd .= ' ' . join(self.options)
     let l:cmd .= ' ' . self.get_engine()
@@ -128,11 +147,21 @@ fun! s:compiler.__build_cmd() abort dict " {{{1
 
         if self.callback
             for [l:opt, l:val] in [
-                        \ ['compiling_cmd', 'vimtex_compiler_callback_compiling'],
-                        \ ['success_cmd', 'vimtex_compiler_callback_success'],
-                        \ ['failure_cmd', 'vimtex_compiler_callback_failure'],
+                        \ ['compiling_cmd' , 'vimtex_compiler_callback_compiling'] ,
+                        \ ['success_cmd'   , 'vimtex_compiler_callback_success']   ,
+                        \ ['failure_cmd'   , 'vimtex_compiler_callback_failure']   ,
                         \]
-                let l:cmd .= s:wrap_option_appendcmd(l:opt, 'echo ' . l:val)
+                let l:cmd .= s:wrap_option_appendcmd(l:opt,    'echo ' . l:val)
+
+                "\ echom   s:wrap_option_appendcmd(l:opt,    'echo ' . l:val)
+                        "\ # --remote-expr
+                        "\     # Evaluate {expr} in server
+                        "\     # # print the result  on stdout
+
+                " 把 $compiling_cmd等传给latexmk:
+                    "\ $compiling_cmd = 'nvim   --remote-expr  "vimtex#compiler#callback(1)"';
+                    "\ $success_cmd   = 'nvim   --remote-expr  "vimtex#compiler#callback(2)"';
+                    "\ $failure_cmd   = 'nvim   --remote-expr  "vimtex#compiler#callback(3)"';
             endfor
         en
     en
@@ -140,18 +169,18 @@ fun! s:compiler.__build_cmd() abort dict " {{{1
     return l:cmd . ' ' . vimtex#util#shellescape(self.state.base)
 endf
 
-" }}}1
-fun! s:compiler.__pprint_append() abort dict " {{{1
+
+fun! s:compiler.__pprint_append() abort dict
     return [
-                \ ['callback', self.callback],
-                \ ['continuous', self.continuous],
-                \ ['executable', self.executable],
-                \]
+    \ ['callback'   , self.callback],
+    \ ['continuous' , self.continuous],
+    \ ['executable' , self.executable],
+    \]
 endf
 
-" }}}1
 
-fun! s:compiler.clean(full) abort dict " {{{1
+
+fun! s:compiler.clean(full) abort dict
     let l:cmd = self.executable . ' ' . (a:full ? '-C ' : '-c ')
     if !empty(self.build_dir)
         let l:cmd .= printf(' -outdir=%s ', fnameescape(self.build_dir))
@@ -161,8 +190,8 @@ fun! s:compiler.clean(full) abort dict " {{{1
     call vimtex#jobs#run(l:cmd, {'cwd': self.state.root})
 endf
 
-" }}}1
-fun! s:compiler.get_engine() abort dict " {{{1
+
+fun! s:compiler.get_engine() abort dict
     " Parse tex_program from TeX directive
     let l:tex_program_directive = self.state.get_tex_program()
     let l:tex_program = l:tex_program_directive
@@ -195,24 +224,29 @@ fun! s:compiler.get_engine() abort dict " {{{1
         en
     en
 
-    return get(g:vimtex_compiler_latexmk_engines,
-                \ l:tex_program,
-                \ g:vimtex_compiler_latexmk_engines._)
+    return get(
+        \ g:vimtex_compiler_latexmk_engines,
+        \ l:tex_program,
+        \ g:vimtex_compiler_latexmk_engines._,
+       \ )
 endf
 
-" }}}1
 
 
-fun! s:wrap_option_appendcmd(name, value) abort " {{{1
-    " Note: On Linux, we use double quoted perl strings; these interpolate
-    "       variables. One should therefore NOT pass values that contain `$`.
-    let l:win_cmd_sep = has('nvim') ? '^&' : '&'
-    let l:common = printf('$%s = ($%s ? $%s', a:name, a:name, a:name)
+
+fun! s:wrap_option_appendcmd(name, value) abort
+    " On Linux, we use double quoted perl strings;
+        " these interpolate  variables.
+        " One should therefore NOT pass values that contain `$`.
+    let l:win_cmd_sep = has('nvim')
+                    \ ? '^&'
+                    \ : '&'
+    let l:common = printf('$%s = ($%s ? $%s',    a:name, a:name, a:name)
     return has('win32')
-                \ ? printf(' -e "%s . '' %s '' : '''') . ''%s''"',
-                \          l:common, l:win_cmd_sep, a:value)
-                \ : printf(' -e ''%s . " ; " : "") . "%s"''',
-                \          l:common, a:value)
+            \ ? printf(' -e "%s . '' %s '' : '''') . ''%s''"',
+            \          l:common, l:win_cmd_sep, a:value )
+            \ : printf(' -e ''%s . " ; " : "") . "%s"''',
+            \          l:common, a:value )
 endf
 
 "}}}1
