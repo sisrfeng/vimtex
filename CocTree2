@@ -1,0 +1,75 @@
+OUTLINE
+- 函数 s:qf.addqflist 26
+      self.db_files 34
+      self.file 27
+      self.root 28
+      self.types 31
+- 函数 s:qf.fix_paths 42
+      l:qf 50
+      l:qflist 43
+      l:title 47
+      l:title 45
+      l:type 51
+- 函数 s:qf.get_db_files 66
+      l:cand 81
+      l:file 75
+      l:files 71
+      l:preamble 68
+      self.db_files 83
+      self.db_files 79
+      self.db_files 77
+      self.db_files 74
+- 函数 s:qf.get_entry_key 132
+      l:entry 136
+      l:file 133
+- 函数 s:qf.get_filename 93
+      l:candidate 96
+      l:root 95
+- 函数 s:qf.get_key_lnum 119
+      l:annotated_lines 124
+      l:lines 122
+      l:lnums 123
+      l:matches 125
+- 函数 s:qf.get_key_pos 107
+      l:file 108
+      l:lnum 109
+  函数 s:qf.set_errorformat 18
+- 函数 s:type_duplicate.fix 170
+      a:entry.filename 174
+      a:entry.lnum 175
+      a:entry.text 176
+      l:key 173
+      l:matches 172
+- 函数 s:type_encoding.fix 225
+      a:entry.filename 232
+      a:entry.lnum 233
+      a:entry.text 228
+      l:key 227
+      l:pos 230
+- 函数 s:type_no_driver.fix 183
+      a:entry.filename 190
+      a:entry.lnum 191
+      a:entry.text 186
+      l:key 185
+      l:pos 188
+- 函数 s:type_not_found.fix 204
+      a:entry.filename 212
+      a:entry.lnum 211
+      a:entry.text 207
+      l:file 209
+      l:key 206
+      l:line 209
+      l:lnum 209
+- 函数 s:type_parse_error.fix 152
+      a:entry.filename 155
+      a:entry.lnum 156
+      a:entry.text 161
+      l:key 159
+      l:matches 154
+  函数 vimtex#qf#biblatex#addqflist 1
+    s:qf 12
+    s:type_duplicate 169
+    s:type_encoding 224
+    s:type_no_driver 182
+    s:type_not_found 203
+    s:type_parse_error 151

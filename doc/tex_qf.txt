@@ -33,7 +33,7 @@
 
 *g:vimtex_quickfix_blgparser*
 
-blg里找这个:
+blg里可以手动找这个:
     There were N多 error messages
 
 

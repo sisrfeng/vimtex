@@ -1,4 +1,4 @@
-fun! vimtex#init() abort " {{{1
+fun! vimtex#init() abort
     if exists('#User#VimtexEventInitPre')
         doautocmd <nomodeline> User VimtexEventInitPre
     en
@@ -19,15 +19,15 @@ fun! vimtex#init() abort " {{{1
     aug  END
 endf
 
-" }}}1
 
-fun! s:init_state() abort " {{{1
+
+fun! s:init_state() abort
     call vimtex#state#init()
     call vimtex#state#init_local()
 endf
 
-" }}}1
-fun! s:init_buffer() abort " {{{1
+
+fun! s:init_buffer() abort
     " This function configures settings for the buffer,
     " which may be either of
     " filetype "tex" or "bib". A lot of settings are shared, but some are
@@ -123,8 +123,8 @@ fun! s:init_buffer() abort " {{{1
     endfor
 endf
 
-" }}}1
-fun! s:init_default_mappings() abort " {{{1
+
+fun! s:init_default_mappings() abort
     if !g:vimtex_mappings_enabled | return | endif
 
     call s:map(0, 'n', '<localleader>li', '<plug>(vimtex-info)')
@@ -312,14 +312,14 @@ fun! s:init_default_mappings() abort " {{{1
     en
 endf
 
-" }}}1
 
-fun! s:filename_changed_pre() abort " {{{1
+
+fun! s:filename_changed_pre() abort
     let s:filename_changed = expand('%:p') ==# b:vimtex.tex
 endf
 
-" }}}1
-fun! s:filename_changed_post() abort " {{{1
+
+fun! s:filename_changed_post() abort
     if s:filename_changed
         let l:base_old = b:vimtex.base
         let b:vimtex.tex = fnamemodify(expand('%'), ':p')
@@ -341,8 +341,8 @@ fun! s:filename_changed_post() abort " {{{1
     en
 endf
 
-" }}}1
-fun! s:buffer_deleted(reason) abort " {{{1
+
+fun! s:buffer_deleted(reason) abort
     "
     " We need a simple cache of buffer ids because a buffer unload might clear
     " buffer variables, so that a subsequent buffer wipe will not trigger a full
@@ -361,8 +361,8 @@ fun! s:buffer_deleted(reason) abort " {{{1
     en
 endf
 
-" }}}1
-fun! s:quit() abort " {{{1
+
+fun! s:quit() abort
     for l:state in vimtex#state#list_all()
         call l:state.cleanup()
     endfor
@@ -370,9 +370,9 @@ fun! s:quit() abort " {{{1
     call vimtex#cache#write_all()
 endf
 
-" }}}1
 
-fun! s:map(ftype, mode, lhs, rhs, ...) abort " {{{1
+
+fun! s:map(ftype, mode, lhs, rhs, ...) abort
     if (a:ftype == 0
                 \     || a:ftype == 1 && &filetype ==# 'tex'
                 \     || a:ftype == 2 && &filetype ==# 'bib')
@@ -385,7 +385,7 @@ fun! s:map(ftype, mode, lhs, rhs, ...) abort " {{{1
     en
 endf
 
-" }}}1
+
 
 " {{{1 Initialize module
 
@@ -394,4 +394,4 @@ let s:modules = map(
             \ "fnamemodify(v:val, ':t:r')")
 call remove(s:modules, index(s:modules, 'test'))
 
-" }}}1
+

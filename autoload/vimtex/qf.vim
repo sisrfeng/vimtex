@@ -53,13 +53,10 @@ fun! vimtex#qf#open(force) abort
     endtry
 
     if empty(getqflist())
-        if a:force
-            call vimtex#log#info('getqflist为空')
-        en
+        if a:force  | call vimtex#log#info('getqflist为空')  | en
 
-        if g:vimtex_quickfix_mode > 0
-            cclose
-        en
+        if g:vimtex_quickfix_mode > 0  | cclose  | en
+
         return
     en
 
@@ -152,7 +149,8 @@ fun! vimtex#qf#setqflist(...) abort
             call setqflist(
                     \ []                                          ,
                     \ 'r'                                         ,
-                    \ {'title': 'TeX的qf : ' . b:vimtex.qf.name } ,
+                    \ {'title':  b:vimtex.qf.name } ,
+                    "\ \ {'title': 'TeX的qf : ' . b:vimtex.qf.name } ,
                \ )
                 "\ If the optional {what} dictionary argument is supplied,
                 "\     Only the items listed in {what} are set.

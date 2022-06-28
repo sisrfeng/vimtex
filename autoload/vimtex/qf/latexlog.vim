@@ -6,8 +6,8 @@ endf
 
 
 let s:qf = {
-            \ 'name' : 'LaTeX logfile',
-            \}
+    \ 'name' : 'LaTeX logfile',
+    \}
 
 fun! s:qf.init(state) abort dict "{{{1
     let self.types = map(

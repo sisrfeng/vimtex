@@ -176,22 +176,28 @@ TABLE OF CONTENTS                                                  *vimtex-toc*
 DENITE AND UNITE SOURCES                                        *vimtex-denite*
 *vimtex-unite*
 
-                                        https://github.com/Shougo/denite.nvim
-                                          https://github.com/Shougo/unite.vim
-|denite.nvim| is is a popular interface for many things, including outlines.
-Although VimTeX includes a simple interface for a tables of contents, it also
-makes sense to provide these as a source to |denite.nvim|. The source name is
-simply `vimtex`.
+https://github.com/Shougo/denite.nvim
+https://github.com/Shougo/unite.vim
 
-|unite.vim| is the predecessor to |denite.nvim|. As for denite, there is a source
-called `vimtex`.
+|denite.nvim| is is a popular interface for many things,
+including outlines.
+Although VimTeX includes a simple interface for a tables of contents,
+it also makes sense to provide these as a source to |denite.nvim|.
+The source name is simply `vimtex`.
+
+
+|unite.vim| is the predecessor to |denite.nvim|.
+As for denite,
+    there is a source called `vimtex`.
+
 
 If one prefers the |denite.nvim| or |unite.vim| source to the VimTeX interface,
-one may override the default mapping, e.g.:
+one may override the default mapping,
+e.g.:
 
 
-  nno  <localleader>lt :<c-u>Denite vimtex<cr>
-  nno  <localleader>lt :<c-u>Unite vimtex<cr>
+    nno  <localleader>lt :<c-u>Denite vimtex<cr>
+    nno  <localleader>lt :<c-u>Unite vimtex<cr>
 
 ------------------------------------------------------------------------------
 FZF INTEGRATION                                                   *vimtex-fzf*
@@ -448,6 +454,7 @@ LATEXMK                                               *vimtex-compiler-latexmk*
 
 
                         fun! Callback(msg)
+                        这个正则被我改错了?
                             let l:m = matchlist(a:msg, '\vRun number (\d+) of rule ''(.*)''')
                             if !empty(l:m)
                                 echomsg l:m[2] . ' (' . l:m[1] . ')'

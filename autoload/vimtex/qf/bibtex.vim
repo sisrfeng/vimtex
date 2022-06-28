@@ -46,7 +46,7 @@ function! s:qf.fix_paths() abort
     try
         let l:title = getqflist({'title': 1})
     catch /E118/
-        let l:title = 'VimTeX errors'
+        let l:title = 'bibtex错误'
     endtry
 
     for l:qf in l:qflist
@@ -55,7 +55,8 @@ function! s:qf.fix_paths() abort
         endfor
     endfor
 
-    call setqflist(l:qflist, 'r')
+    call setqflist(l:qflist, 'a')
+    "\ echom "setqflist(l:qflist, 是: "   l:qflist
 
     " Set title if supported
     try
