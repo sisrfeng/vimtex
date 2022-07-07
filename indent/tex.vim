@@ -22,10 +22,10 @@ setl  indentkeys=!^F,
                 "\ \],
                 "\ \},
                 \\&,
-                \0=\\item,
                 \0=\\else,
                 \0=\\fi
 
+                "\ \0=\\item,
 
 " Add standard closing math delimiters to indentkeys
 for s:delim in [

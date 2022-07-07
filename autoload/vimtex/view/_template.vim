@@ -25,23 +25,21 @@ endf
 
 fun! s:viewer.out() dict abort
     if g:vimtex_view_use_temp_files
-    " Copy pdf
-        let l:out = b:vimtex.root . '/' . b:vimtex.name . '_bk.pdf'
+        " Copy pdf
+            let l:out = b:vimtex.root . '/' . b:vimtex.name . '_bk.pdf'
 
-        if getftime(b:vimtex.out())   >   getftime(l:out)
-            call writefile(
-                      \ readfile(b:vimtex.out(), 'b'),
-                      \ l:out,
-                      \ 'b',
-                   \ )
-        en
+            if getftime(b:vimtex.out())   >   getftime(l:out)
+                call writefile(
+                        \ readfile(b:vimtex.out(), 'b'),
+                        \ l:out,
+                        \ 'b',
+                    \ )
+            en
 
-    " Copy synctex file
+        " Copy synctex file
             let l:old = b:vimtex.ext('synctex.gz')
             let l:new = fnamemodify(l:out, ':r') . '.synctex.gz'
-            if getftime(l:old)   >    getftime(l:new)
-                call rename(l:old, l:new)
-            en
+            if getftime(l:old)   >    getftime(l:new)  | call rename(l:old, l:new)  | en
     el
         let l:out = b:vimtex.out(1)
     en
@@ -55,9 +53,9 @@ endf
 fun! s:viewer.view(file) dict abort
     if !self.check() | return | endif
 
-    if !empty(a:file)
-        echom "a:file 是: "   a:file
-        let l:outfile = a:file
+    if !empty( fnameescape(a:file) )
+        "\ echom "a:file 是: "   a:file
+        let l:outfile = fnameescape(a:file)
     el
         let l:outfile = self.out()
     en
@@ -65,9 +63,13 @@ fun! s:viewer.view(file) dict abort
     if !filereadable(l:outfile)
         if l:outfile == ''
             "\ let g:vimtex_view_use_temp_files = 0会导致进入这里?
-            "\ echom  'l:outfile 为空'
+            echom  'l:outfile为空,pdf不存在吧,  现在调用compile_ss()'
+            call vimtex#compiler#compile_ss()
+
         el
-            call vimtex#log#warning('此PDF不满足 filereadable(): ', l:outfile)
+            "\ pdf就算能打开 filereadable也为0?
+            "\ call vimtex#log#warning('此PDF不满足 filereadable(): ', l:outfile)
+            "\ echom  '此PDF不满足 filereadable(): ' . l:outfile
         en
         return
     en

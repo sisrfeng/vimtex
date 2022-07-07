@@ -146,11 +146,11 @@ fun! s:compiler.__build_cmd() abort dict
         let l:cmd .= ' -pvc -view=none'
 
         if self.callback
-            for [l:opt, l:val] in [
-                        \ ['compiling_cmd' , 'vimtex_compiler_callback_compiling'] ,
-                        \ ['success_cmd'   , 'vimtex_compiler_callback_success']   ,
-                        \ ['failure_cmd'   , 'vimtex_compiler_callback_failure']   ,
-                        \]
+             for [l:opt, l:val] in [
+                             \ ['compiling_cmd' , 'vimtex_compiler_callback_compiling'] ,
+                             \ ['success_cmd'   , 'vimtex_compiler_callback_success']   ,
+                             \ ['failure_cmd'   , 'vimtex_compiler_callback_failure']   ,
+                            \]
                 let l:cmd .= s:wrap_option_appendcmd(l:opt,    'echo ' . l:val)
 
                 "\ echom   s:wrap_option_appendcmd(l:opt,    'echo ' . l:val)

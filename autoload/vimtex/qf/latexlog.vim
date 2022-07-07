@@ -3,10 +3,8 @@ fun! vimtex#qf#latexlog#new() abort
 endf
 
 
-
-
 let s:qf = {
-    \ 'name' : 'LaTeX logfile',
+    \ 'name' : 'latexlog解析',
     \}
 
 fun! s:qf.init(state) abort dict "{{{1
@@ -116,8 +114,9 @@ fun! s:qf.fix_paths(log) abort dict
     let l:lines = readfile(a:log)
 
     for l:qf in l:qflist
-        " Handle missing buffer/filename: Fallback to the main file (this is always
-        " correct in single-file projects and is thus a good fallback).
+        " Handle missing buffer/filename:
+        " Fallback to the main file
+        " (this is always  correct in single-file projects and is thus a good fallback).
         if l:qf.bufnr == 0
             let l:bufnr_main = bufnr(self.main)
             if bufnr(self.main) < 0
@@ -132,13 +131,12 @@ fun! s:qf.fix_paths(log) abort dict
             continue
         en
 
-        " Check and possibly fix invalid file from file:line type entries
+        " Check and possibly fix invalid file from    file:line type entries
         call s:fix_paths_invalid_bufname(l:qf, self.root)
     endfor
 
     call setqflist(l:qflist, 'r')
 endf
-
 
 
 fun! s:fix_paths_hbox_warning(qf, log, root) abort
@@ -202,5 +200,4 @@ fun! s:fix_paths_invalid_bufname(qf, root) abort
         let a:qf.filename = l:file
     en
 endf
-
 

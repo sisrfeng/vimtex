@@ -1,14 +1,8 @@
-" VimTeX - LaTeX plugin for Vim
-"
-" Maintainer: Karl Yngve Lervåg
-" Email:      karl.yngve@gmail.com
-"
-
-function! vimtex#parser#toc#bibliography#new() abort " {{{1
+function! vimtex#parser#toc#bibliography#new() abort
   return s:matcher
 endfunction
 
-" }}}1
+
 
 let s:matcher = {
       \ 'prefilter_cmds' : ['printbib', 'begin', 'bibliography'],
@@ -19,7 +13,7 @@ let s:matcher = {
       \        . '|bibliography\s*\{)',
       \ 're_biblatex' : '\v^\s*\\printbib%(liography|heading)',
       \}
-function! s:matcher.get_entry(context) abort dict " {{{1
+function! s:matcher.get_entry(context) abort dict
   let l:entry = {
         \ 'title'  : 'Bibliography',
         \ 'number' : '',
@@ -49,8 +43,8 @@ function! s:matcher.get_entry(context) abort dict " {{{1
   return l:entry
 endfunction
 
-" }}}1
-function! s:matcher.continue(context) abort dict " {{{1
+
+function! s:matcher.continue(context) abort dict
   let [l:end, l:count] = vimtex#parser#tex#find_closing(
         \ 0, a:context.line, self.count, '[')
   if l:count == 0
@@ -63,8 +57,8 @@ function! s:matcher.continue(context) abort dict " {{{1
   endif
 endfunction
 
-" }}}1
-function! s:matcher.parse_options(context, entry) abort dict " {{{1
+
+function! s:matcher.parse_options(context, entry) abort dict
   " Parse the options
   let l:opt_pairs = map(
         \ vimtex#util#texsplit(self.options),
@@ -101,12 +95,12 @@ function! s:matcher.parse_options(context, entry) abort dict " {{{1
   endtry
 endfunction
 
-" }}}1
-function! s:matcher.filter(entries) abort dict " {{{1
+
+function! s:matcher.filter(entries) abort dict
   if !empty(
         \ filter(deepcopy(a:entries), 'get(v:val, "added_to_toc")'))
     call filter(a:entries, 'get(v:val, "added_to_toc", 1)')
   endif
 endfunction
 
-" }}}1
+

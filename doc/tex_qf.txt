@@ -77,23 +77,23 @@ blg里可以手动找这个:
 
 *g:vimtex_quickfix_mode*
 
+    The quickfix window will only be opened automatically
+    (for the compiler)
+        if  `continuous` mode is disabled.
+        or is set to `continuous` mode
+                and has `callbacks` enabled,
+
+
     This option controls the behaviour of the |quickfix| window in case errors and/or warnings are found.
     The recognized options are:
 
-    The quickfix window will only be opened automatically if the compiler
-                if  `continuous` mode is disabled.
-                or is set to `continuous` mode
-                        and has `callbacks` enabled,
+        Value  Effect
+        0
+        1      opened automatically when there are errors,
+                        and it becomes the active window.
+        2                  not become the active window.
 
-    Value  Effect
-    0      The quickfix window is never opened/closed automatically.
-    1      The quickfix window is opened automatically when there are errors,
-                    and it becomes the active window.
-    2      The quickfix window is opened automatically when there are errors,
-                    but it does not become the active window.
-
-
-    Default value: 2
+        Default value: 2
 
 *g:vimtex_quickfix_autoclose_after_keystrokes*
 

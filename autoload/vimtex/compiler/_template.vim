@@ -13,7 +13,7 @@ let s:compiler = {
             \ 'state'                  :  {}             ,
             \ 'status'                 :  -1             ,
             \ 'silence_next_callback'  :  0              ,
-            \ }
+        \ }
 
 fun! s:compiler.new(options) abort dict
     let l:compiler = extend(deepcopy(self), a:options)
@@ -198,6 +198,8 @@ fun! s:compiler.create_build_dir() abort dict
                     \ l:dirs, "fnamemodify(v:val, ':h')"),
                     \ {_, x -> x !=# '.'})
         call filter(l:dirs, {_, x -> stridx(x, '../') != 0})
+        "\ echom "has_key  dirs 是: "   l:dirs
+        "\ ['data', 'data', 'data', 'data', 'data', 'data', 'data', 'tables', 'pic_by_tex', 'pic_by_tex', 'data', 'data', 'data', 'data', 'data', 'data', 'data']
     el
         let l:dirs = glob(self.state.root . '/**/*.tex', v:false, v:true)
         call map(l:dirs, "fnamemodify(v:val, ':h')")
@@ -205,15 +207,28 @@ fun! s:compiler.create_build_dir() abort dict
     en
     call uniq(sort(filter(l:dirs, '!empty(v:val)')))
 
-    call map(l:dirs, {_, x ->
-                \ (vimtex#paths#is_abs(self.build_dir) ? '' : self.state.root . '/')
-                \ . self.build_dir . '/' . x})
+    "\ echom "l:dirs 是: "   l:dirs
+    "\ l:dirs 是:  ['data', 'data/ref', 'pic_by_tex', 'tables']
+
+    call map( l:dirs,
+           \ {_, x ->
+                      \ (vimtex#paths#is_abs(self.build_dir)
+                          \ ? ''
+                          \ : self.state.root . '/'
+                      \ )
+                      \ . self.build_dir . '/' . x})
+
     call filter(l:dirs, '!isdirectory(v:val)')
+
+    "\ echom "l:dirs 是: "   l:dirs
+    "\ l:dirs 是:  []
+
     if empty(l:dirs) | return | endif
 
     " Create the non-existing directories
-    call vimtex#log#warning(["Creating build_dir directorie(s):"]
-                \ + map(copy(l:dirs), {_, x -> '* ' . x}))
+    "\ call vimtex#log#warning(["Creating build_dir directorie(s):"]
+    "\                     \ + map(  copy(l:dirs), {_, x -> '* ' . x} )
+    "\                 \ )
 
     for l:dir in l:dirs
         call mkdir(l:dir, 'p')

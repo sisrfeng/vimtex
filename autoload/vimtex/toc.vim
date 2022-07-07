@@ -242,6 +242,10 @@ let s:toc = {}
 
         setl  bufhidden=wipe
         setl  buftype=nofile
+        setl  filetype=vim
+                "\ 不设这个, 折叠不方便
+        "\ setl  filetype=toc
+        "\ setl  filetype=text
         setl  concealcursor=nvic
         setl  conceallevel=2
         setl  cursorline
@@ -275,22 +279,21 @@ let s:toc = {}
                \ )
         en
 
-        nno  <silent><buffer><nowait><expr>   gg     b:toc.show_help  ?  'gg}}j'  : 'gg'
+        "\ nno  <silent><buffer><nowait><expr>   gg     b:toc.show_help  ?  'gg}}j'  : 'gg'
 
-        nno  <silent><buffer><nowait>    <esc>OA       k
-        nno  <silent><buffer><nowait>    <esc>OC       k
-        nno  <silent><buffer><nowait>    <esc>OB       j
-        nno  <silent><buffer><nowait>    <esc>OD       j
+        "\ nno  <silent><buffer><nowait>    <esc>OA       k
+        "\ nno  <silent><buffer><nowait>    <esc>OC       k
+        "\ nno  <silent><buffer><nowait>    <esc>OB       j
+        "\ nno  <silent><buffer><nowait>    <esc>OD       j
 
         nno  <silent><buffer><nowait>    q              :call b:toc.close()<cr>
         nno  <silent><buffer><nowait>    go             :call b:toc.close()<cr>
-
-        "\ nno  <silent><buffer><nowait>    <esc>         :call b:toc.close()<cr>
 
         "\ nno  <silent><buffer><nowait>    <space>       :call b:toc.activate_current(0)<cr>
         nno  <silent><buffer><nowait>    <2-leftmouse> :call b:toc.activate_current(0)<cr>
         nno  <silent><buffer><nowait>    <cr>          :call b:toc.activate_current(1)<cr>
 
+        "\ 别占一个键位, 忘了就来本文件找
         "\ nno  <silent><buffer><nowait>    h             :call b:toc.toggle_help()<cr>
         nno  <silent><buffer><nowait>    s             :call b:toc.toggle_numbers()<cr>
         nno  <silent><buffer><nowait>    t             :call b:toc.toggle_sorted_todos()<cr>
@@ -299,10 +302,12 @@ let s:toc = {}
         nno  <silent><buffer><nowait>    <m-f>             :call b:toc.clear_filter()<cr>
 
         nno  <silent><buffer><nowait>    r                 :call b:toc.get_entries(1)<cr>
-        nno  <silent><buffer><nowait>    <M-h>             :call b:toc.decrease_depth()<cr>
-        nno  <silent><buffer><nowait>    <M-l>             :call b:toc.increase_depth()<cr>
+        "\ 和zathura的按键感觉一致:
+            nno  <silent><buffer><nowait>    zl             :call b:toc.increase_depth()<cr>
+            nno  <silent><buffer><nowait>    zm             :call b:toc.decrease_depth()<cr>
+            nno  <silent><buffer><nowait>    f              :call b:toc.decrease_depth()<cr>
 
-        com!  -buffer VimtexTocToggle call b:toc.close()
+
 
         for [type, key] in items(self.layer_keys)
             exe  printf(
@@ -351,7 +356,7 @@ let s:toc = {}
         call self.print_entries()
 
         0delete _
-        setl  nomodifiable
+        "\ setl  nomodifiable
         call self.position_restore()
 
         if l:buf_winnr != l:toc_winnr
@@ -430,7 +435,7 @@ let s:toc = {}
 
     "
     " Print the TOC entries
-    "
+    " 使用说明 help
     fun! s:toc.print_help() abort dict
         let self.help_nlines = 0
         if !self.show_help | return | endif
@@ -788,17 +793,11 @@ let s:toc = {}
         let l:nn = matchstr(nline, '^L\zs\d')
 
         " Don't fold options
-        if cline =~# '^\s*$'
-            return 0
-        en
+        if cline =~# '^\s*$'  | return 0  | en
 
-        if l:nn > l:cn
-            return '>' . l:nn
-        en
+        if l:nn > l:cn  | return '>' . l:nn  | en
 
-        if l:cn < l:pn
-            return l:cn
-        en
+        if l:cn < l:pn  | return l:cn  | en
 
         return '='
     endf

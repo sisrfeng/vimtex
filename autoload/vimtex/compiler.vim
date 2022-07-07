@@ -2,27 +2,30 @@ fun! vimtex#compiler#init_buffer() abort
     if !g:vimtex_compiler_enabled | return | endif
 
     " Define commands
-    com!     -buffer        VimtexCompile                          call vimtex#compiler#compile()
-    com!     -buffer -bang  VimtexCompileSS                        call vimtex#compiler#compile_ss()
-    com!     -buffer -range VimtexCompileSelected   <line1>,<line2>call vimtex#compiler#compile_selected('command')
-    com!     -buffer        VimtexCompileOutput        call vimtex#compiler#output()
-    com!     -buffer        VimtexStop                 call vimtex#compiler#stop()
-    com!     -buffer        VimtexStopAll              call vimtex#compiler#stop_all()
-    com!     -buffer -bang  VimtexClean                call vimtex#compiler#clean(<q-bang> == "!")
-    com!     -buffer -bang  VimtexStatus               call vimtex#compiler#status(<q-bang> == "!")
+        com!     -buffer        VimtexCompile                          call vimtex#compiler#compile()
+        com!     -buffer        VimtexCompileSS                        call vimtex#compiler#compile_ss()
+        "\ com!     -buffer -bang  VimtexCompileSS                        call vimtex#compiler#compile_ss()
+        com!     -buffer -range VimtexCompileSelected   <line1>,<line2>call vimtex#compiler#compile_selected('command')
+        com!     -buffer        VimtexCompileOutput        call vimtex#compiler#output()
+        com!     -buffer        VimtexStop                 call vimtex#compiler#stop()
+        com!     -buffer        VimtexStopAll              call vimtex#compiler#stop_all()
+        com!     -buffer -bang  VimtexClean                call vimtex#compiler#clean(<q-bang> == "!")
+        com!     -buffer -bang  VimtexStatus               call vimtex#compiler#status(<q-bang> == "!")
 
     " Define mappings
-    nno      <buffer> <plug>(vimtex-compile)              :call vimtex#compiler#compile()<cr>
-    nno      <buffer> <plug>(vimtex-compile-ss)           :call vimtex#compiler#compile_ss()<cr>
-    nno      <buffer> <plug>(vimtex-compile-selected)     :set opfunc=vimtex#compiler#compile_selected<cr>g@
-    xn       <buffer> <plug>(vimtex-compile-selected)     :<c-u>call vimtex#compiler#compile_selected('visual')<cr>
-    nno      <buffer> <plug>(vimtex-compile-output)       :call vimtex#compiler#output()<cr>
-    nno      <buffer> <plug>(vimtex-stop)                 :call vimtex#compiler#stop()<cr>
-    nno      <buffer> <plug>(vimtex-stop-all)             :call vimtex#compiler#stop_all()<cr>
-    nno      <buffer> <plug>(vimtex-clean)                :call vimtex#compiler#clean(0)<cr>
-    nno      <buffer> <plug>(vimtex-clean-full)           :call vimtex#compiler#clean(1)<cr>
-    nno      <buffer> <plug>(vimtex-status)               :call vimtex#compiler#status(0)<cr>
-    nno      <buffer> <plug>(vimtex-status-all)           :call vimtex#compiler#status(1)<cr>
+      nno  <buffer> <plug>(vimtex-compile)              :call vimtex#compiler#compile()<cr>
+      nno  <buffer> <plug>(vimtex-compile-ss)           :call vimtex#compiler#compile_ss()<cr>
+
+      nno  <buffer> <plug>(vimtex-compile-selected)    :set opfunc=vimtex#compiler#compile_selected<cr>g@
+      xn   <buffer> <plug>(vimtex-compile-selected)    :<c-u>call vimtex#compiler#compile_selected('visual')<cr>
+
+      nno  <buffer> <plug>(vimtex-compile-output)       :call vimtex#compiler#output()<cr>
+      nno  <buffer> <plug>(vimtex-stop)                 :call vimtex#compiler#stop()<cr>
+      nno  <buffer> <plug>(vimtex-stop-all)             :call vimtex#compiler#stop_all()<cr>
+      nno  <buffer> <plug>(vimtex-clean)                :call vimtex#compiler#clean(0)<cr>
+      nno  <buffer> <plug>(vimtex-clean-full)           :call vimtex#compiler#clean(1)<cr>
+      nno  <buffer> <plug>(vimtex-status)               :call vimtex#compiler#status(0)<cr>
+      nno  <buffer> <plug>(vimtex-status-all)           :call vimtex#compiler#status(1)<cr>
 endf
 
 
@@ -118,7 +121,7 @@ fun! vimtex#compiler#compile_ss() abort
     if g:vimtex_compiler_silent
         return
     el
-        call vimtex#log#info('单次compile')
+        "\ call vimtex#log#info('单次compile')
     endif
 
 endf
@@ -128,25 +131,28 @@ fun! vimtex#compiler#compile_selected(type) abort range
     " Values of a:firstline  and a:lastline are not available in ¿nested¿ function  calls,
         " so we must handle them here.
     let l:opts = a:type ==# 'command'
-                \ ? {
-                    \ 'type': 'range',
-                    \ 'range': [a:firstline, a:lastline],
-                   \ }
-                \ : {'type':  a:type =~# '\vline|char|block' ? 'operator' : a:type}
+                    \ ? {
+                        \ 'type': 'range',
+                        \ 'range': [a:firstline, a:lastline],
+                      \ }
+                    \ : {'type':  a:type =~# '\vline|char|block'
+                                    \? 'operator'
+                                    \: a:type
+                       \}
 
-    let l:file = vimtex#parser#selection_to_texfile(l:opts)
+    let l:files = vimtex#parser#selection_to_texfile(l:opts)
 
-    if empty(l:file) | return | endif
+    if empty(l:files) | return | endif
 
     let l:tex_program = b:vimtex.get_tex_program()
-    let l:file.get_tex_program = {-> l:tex_program}
+    let l:files.get_tex_program = {-> l:tex_program}
 
     " Create and initialize temporary compiler
     let l:compiler = s:init_compiler({
-                                \ 'state'       :  l:file ,
-                                \ 'continuous'  :  0      ,
-                                \ 'callback'    :  0      ,
-                                \})
+                            \ 'state'       :  l:files ,
+                            \ 'continuous'  :  0      ,
+                            \ 'callback'    :  0      ,
+                            \})
 
     if empty(l:compiler) | return | endif
 
@@ -156,7 +162,7 @@ fun! vimtex#compiler#compile_selected(type) abort range
     call l:compiler.wait()
 
     " Check if successful
-    if vimtex#qf#inquire(l:file.base)
+    if vimtex#qf#inquire(l:files.base)
         call vimtex#log#set_silent_restore()
         call vimtex#log#warning('Compiling selected lines ... failed!')
         botright cwindow
@@ -164,7 +170,7 @@ fun! vimtex#compiler#compile_selected(type) abort range
         return
     el
         call l:compiler.clean(0)
-        call b:vimtex.viewer.view(l:file.pdf)
+        call b:vimtex.viewer.view(l:files.pdf)
         call vimtex#log#set_silent_restore()
         call vimtex#log#info('Compiling selected lines ... done')
     en
@@ -258,7 +264,7 @@ fun! vimtex#compiler#clean(full) abort
     "\ 100m 需要调大?
     sleep 100m
     call b:vimtex.compiler.remove_build_dir()
-    echom 'Compiler 清理 finished'
+
     call vimtex#log#info('Compiler clean finished'
                         \ . (a:full ?
                             \ ' (full)' :
@@ -295,15 +301,13 @@ fun! vimtex#compiler#status(detailed) abort
         en
     el
         if exists('b:vimtex.compiler')
-                    \ && b:vimtex.compiler.is_running()
+      \ && b:vimtex.compiler.is_running()
             call vimtex#log#info('Compiler is running')
         el
             call vimtex#log#info('Compiler is not running!')
         en
     en
 endf
-
-
 
 
 fun! s:init_compiler(options) abort

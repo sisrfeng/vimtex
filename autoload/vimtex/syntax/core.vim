@@ -48,14 +48,13 @@ fun! vimtex#syntax#core#init() abort "
                                           \texTabularChar,
                                           \@NoSpell
 
-
     " TeX symbols and special characters
     "\ 在下面也有, 设了conceal的
         syn match texLigature     "--"
         syn match texLigature     "---"
         syn match texLigature     "\v%(``|''|,,)"
-        syn match texTabularChar  "&"
-        syn match texTabularChar  "\\\\"
+        syn match texTabularChar  "&"           conceal
+        syn match texTabularChar  "\\\\"        conceal
 
                                     "  \$ \& \% \# \{ \} \_
         syn match texSpecialChar "\\[$&%#{}_]"           contains=texPartConcealed
@@ -79,7 +78,7 @@ fun! vimtex#syntax#core#init() abort "
         call vimtex#syntax#core#new_arg('texGroup', {'opts': ''})
 
         " Flag mismatching  ending brace delimiter
-        syn match texGroupError "}"
+        syn match texGroupError   "}"
         hi def link texGroupError In_backticK
         "\ 经常误报, 等编译失败时再检查?  debug buggy !!!!!!!!
 

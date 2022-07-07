@@ -84,8 +84,6 @@ fun! s:viewer.get_pid() dict abort
 endf
 
 
-
-
 fun! s:cmdline(outfile, synctex, start) abort
     let l:cmd  = 'zathura'
 

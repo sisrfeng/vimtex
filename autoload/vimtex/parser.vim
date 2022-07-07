@@ -1,24 +1,24 @@
-fun! vimtex#parser#tex(file, ...) abort " {{{1
+fun! vimtex#parser#tex(file, ...) abort
     return vimtex#parser#tex#parse(a:file, a:0 > 0 ? a:1 : {})
 endf
 
-" }}}1
-fun! vimtex#parser#preamble(file, ...) abort " {{{1
+
+fun! vimtex#parser#preamble(file, ...) abort
     return vimtex#parser#tex#parse_preamble(a:file, a:0 > 0 ? a:1 : {})
 endf
 
-" }}}1
-fun! vimtex#parser#auxiliary(file) abort " {{{1
+
+fun! vimtex#parser#auxiliary(file) abort
     return vimtex#parser#auxiliary#parse(a:file)
 endf
 
-" }}}1
-fun! vimtex#parser#fls(file) abort " {{{1
+
+fun! vimtex#parser#fls(file) abort
     return vimtex#parser#fls#parse(a:file)
 endf
 
-" }}}1
-fun! vimtex#parser#toc(...) abort " {{{1
+
+fun! vimtex#parser#toc(...) abort
     let l:vimtex = a:0 > 0 ? a:1 : b:vimtex
 
     let l:cache = vimtex#cache#open('parsertoc', {
@@ -38,14 +38,14 @@ fun! vimtex#parser#toc(...) abort " {{{1
     return deepcopy(l:current.entries)
 endf
 
-" }}}1
-fun! vimtex#parser#bib(file, ...) abort " {{{1
+
+fun! vimtex#parser#bib(file, ...) abort
     return vimtex#parser#bib#parse(a:file, a:0 > 0 ? a:1 : {})
 endf
 
-" }}}1
 
-fun! vimtex#parser#get_externalfiles() abort " {{{1
+
+fun! vimtex#parser#get_externalfiles() abort
     let l:preamble = vimtex#parser#preamble(b:vimtex.tex)
 
     let l:result = []
@@ -61,22 +61,24 @@ fun! vimtex#parser#get_externalfiles() abort " {{{1
     return l:result
 endf
 
-" }}}1
-fun! vimtex#parser#selection_to_texfile(opts) range abort " {{{1
+
+fun! vimtex#parser#selection_to_texfile(opts) range abort
     let l:opts = extend({
-                    \ 'type'          : 'range'                            ,
-                    \ 'range'         : [0, 0]                             ,
-                    \ 'name'          : b:vimtex.name . '_vimtex_selected' ,
-                    \ 'template_name' : 'vimtex-template.tex'              ,
-                    \},
+                    \ 'type'           :  'range'                   ,
+                    \ 'range'          :  [0, 0]                    ,
+                    \ 'name'           :  b:vimtex.name . '_Select' ,
+                    \ 'template_name'  :  'vimtex-template.tex'     ,
+                    \ }                                             ,
                     \ a:opts
                   \ )
 
     " Set range from selection type
     if l:opts.type ==# 'command'
         let l:opts.range = [a:firstline, a:lastline]
+
     elseif l:opts.type ==# 'visual'
         let l:opts.range = [line("'<"), line("'>")]
+
     elseif l:opts.type ==# 'operator'
         let l:opts.range = [line("'["), line("']")]
     en
@@ -135,16 +137,18 @@ fun! vimtex#parser#selection_to_texfile(opts) range abort " {{{1
     en
 
     " Write content to temporary file
-    let l:file = {}
-    let l:file.root = b:vimtex.root
-    let l:file.base = l:opts.name
-    let l:file.tex  = l:file.root . '/' . l:file.base . '.tex'
-    let l:file.pdf  = l:file.root . '/' . l:file.base . '.pdf'
-    let l:file.log  = l:file.root . '/' . l:file.base . '.log'
-    let l:file.base .= '.tex'
-    call writefile(l:lines, l:file.tex)
+    let l:files = {}
+    let l:files.root = b:vimtex.root
+    let l:files.base = l:opts.name      "\  主文件名
 
-    return l:file
+
+    let l:files.tex  = l:files.root . '/' . b:vimtex.compiler.build_dir . '/' . l:files.base . '.tex'
+    let l:files.pdf  = l:files.root . '/' . b:vimtex.compiler.build_dir . '/' . l:files.base . '.pdf'
+    let l:files.log  = l:files.root . '/' . b:vimtex.compiler.build_dir . '/' . l:files.base . '.log'
+    let l:files.base .= '.tex'
+    call writefile(l:lines, l:files.tex)
+
+    return l:files
 endf
 
-" }}}1
+

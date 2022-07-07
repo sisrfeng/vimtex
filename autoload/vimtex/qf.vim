@@ -1,3 +1,5 @@
+let g:wf_vimtex_stick_to_qf = 0
+
 fun! vimtex#qf#init_buffer() abort
     if !g:vimtex_quickfix_enabled | return | endif
 
@@ -44,12 +46,14 @@ fun! vimtex#qf#open(force) abort
         if g:vimtex_quickfix_mode > 0  | cclose  | en
 
         return
+
     catch
         echom "v:exceptiov:exceptionn 是: "   v:exception
         call vimtex#log#error( 'parse log files 失败',  )
 
         if g:vimtex_quickfix_mode > 0  | cclose  | en
         return
+
     endtry
 
     if empty(getqflist())
@@ -61,10 +65,12 @@ fun! vimtex#qf#open(force) abort
     en
 
     "
-    " There are two options that determine when to open the quickfix window.  If
-    " forced, the quickfix window is always opened when there are errors or
-    " warnings (forced typically imply that the functions is called from the
-    " normal mode mapping).  Else the behaviour is based on the settings.
+    "
+    " If  forced,
+        " the quickfix window is always opened when there are errors or  warnings
+        " (forced typically imply that the functions is called from the  normal mode mapping).
+    " Else
+        " the behaviour is based on the settings.
     "
     let l:errors_or_warnings = s:qf_has_errors()
                        \ || g:vimtex_quickfix_open_on_warning
@@ -73,9 +79,11 @@ fun! vimtex#qf#open(force) abort
         let s:previous_window = win_getid()
         botright cwindow
         if g:vimtex_quickfix_mode == 2
+       \&& g:wf_vimtex_stick_to_qf == 0
             redraw
             call win_gotoid(s:previous_window)
         en
+
         if g:vimtex_quickfix_autoclose_after_keystrokes > 0
             aug  vimtex_qf_autoclose
                 au!

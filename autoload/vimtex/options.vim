@@ -1,4 +1,4 @@
-fun! vimtex#options#init() abort " {{{1
+fun! vimtex#options#init() abort
     if s:initialized | return | endif
 
     call s:init_highlights()
@@ -469,9 +469,9 @@ endf
 
 let s:initialized = v:false
 
-" }}}1
 
-fun! s:check_for_deprecated_options() abort " {{{1
+
+fun! s:check_for_deprecated_options() abort
     let l:deprecated = filter([
                 \ 'g:vimtex_change_complete_envs',
                 \ 'g:vimtex_change_ignored_delims_pattern',
@@ -550,9 +550,9 @@ fun! s:check_for_deprecated_options() abort " {{{1
     en
 endf
 
-" }}}1
 
-fun! s:init_highlights() abort " {{{1
+
+fun! s:init_highlights() abort
     for [l:name, l:target] in [
                 \ ['VimtexImapsArrow', 'Comment'],
                 \ ['VimtexImapsLhs', 'ModeMsg'],
@@ -592,8 +592,8 @@ fun! s:init_highlights() abort " {{{1
     endfor
 endf
 
-" }}}1
-fun! s:init_option(opt, default) abort " {{{1
+
+fun! s:init_option(opt, default) abort
     let l:global_opt = 'g:' . a:opt
                     "\ 虽然l:global_opt是函数的var, 但'g:'让它能改变全局变量
                     "\ 另外,这个函数不需要return
@@ -610,4 +610,4 @@ fun! s:init_option(opt, default) abort " {{{1
     "\ echom "l:global_opt 是: "   l:global_opt
 endf
 
-" }}}1
+

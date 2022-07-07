@@ -99,8 +99,6 @@ documentclass and `.sty` files for packages).
 TABLE OF CONTENTS                                                  *vimtex-toc*
 
 
-
-    The ToC entries may be activated/jumped to with <cr> or <space>.
     There are currently four different "layers" of entries:
 
 
@@ -112,65 +110,339 @@ TABLE OF CONTENTS                                                  *vimtex-toc*
 
     The ToC is configured with |g:vimtex_toc_config|.
 
-
-
     The ToC parser uses a list of matchers to parse the LaTeX project for the ToC entries.
 
+    One may force file input entries of the "include" type
+        into the ToC through
+        comments with the following syntax:
 
-    One may force file input entries of the "include" type into the ToC through
-    comments with the following syntax:
+                % vimtex-include: /path/to/file
 
-            % vimtex-include: /path/to/file
+        The path may be absolute or  relative.
+            In the latter case,
+                it will be relative to the current root (as printed by  |:VimtexInfo|).
 
-
-    The path may be absolute or  relative.
-        In the latter case,
-            it will be relative to the current root (as printed by  |:VimtexInfo|).
-    This will add an entry in the ToC which
-        makes it easy to open any file.
-    Any file opened through
-        the ToC that was included in this manner will be linked to the current VimTeX project,
-    and thus the ToC and
-    similar commands will be available,
-    even if the file is not a LaTeX file.
+        This will add an entry in the ToC which
+            makes it easy to open any file.
+        Any file opened through
+            the ToC that was included in this manner will be linked to the current VimTeX project,
+        and thus the ToC and
+        similar commands will be available,
+        ¿even if the file is not a LaTeX file¿.
 
 
-    *vimtex-toc-custom-maps*
-    Some people may want to have separate mappings for different ToC contents,
-    e.g. one mapping to open a table of labels and todos and a different mapping
-    to open a table of include files. This may be easily added with custom
-    mappings:
+    Some people may want to have separate mappings for different ToC contents,  *vimtex-toc-custom-maps*
+    e.g. one mapping to open a table of labels and todos
+    and a different mapping  to open a table of include files.
+    This may be easily added with custom  mappings:
 
-    aug  vimtex_customization
-        au!
-        au FileType tex call CreateTocs()
-    aug  END
+        aug  vimtex_customization
+            au!
+            au FileType tex call CreateTocs()
+        aug  END
 
-    function CreateTocs()
-        let g:custom_toc1 = vimtex#toc#new({
-            \ 'layers' : ['label', 'todo'],
-            \ 'todo_sorted' : 0,
-            \ 'show_help' : 0,
-            \ 'show_numbers' : 0,
-            \ 'mode' : 4,
-            \})
-        nno  <silent> \ly :call g:custom_toc1.open()<cr>
+        function CreateTocs()
+            let g:custom_toc1 = vimtex#toc#new({
+                \ 'layers' : ['label', 'todo'],
+                \ 'todo_sorted' : 0,
+                \ 'show_help' : 0,
+                \ 'show_numbers' : 0,
+                \ 'mode' : 4,
+                \})
+            nno  <silent> \ly :call g:custom_toc1.open()<cr>
 
-        let g:custom_toc2 = vimtex#toc#new({
-            \ 'layers' : ['include'],
-            \ 'show_help' : 0,
-            \})
-        nno  <silent> \lY :call g:custom_toc2.open()<cr>
-    endf
+            let g:custom_toc2 = vimtex#toc#new({
+                \ 'layers' : ['include'],
+                \ 'show_help' : 0,
+                \})
+            nno  <silent> \lY :call g:custom_toc2.open()<cr>
+        endf
 
     The `vimtex#toc#new` function takes a dictionary argument that may be used to
     override the combination of the default  values and |g:vimtex_toc_config|
 
-    * |g:vimtex_toc_enabled|
-    * |g:vimtex_toc_custom_matchers|
-    * |g:vimtex_toc_todo_labels|
-    * |g:vimtex_toc_show_preamble|
-    * |g:vimtex_toc_config|
+    options
+
+        *g:vimtex_toc_config*
+            This is a dictionary that can be used to
+
+            For configuration of specific matchers,
+            see |g:vimtex_toc_config_matchers|.
+
+
+            the possible configuration keys are explained briefly and
+            the default values are indicated.
+
+
+                `name` : `Table of contents (VimTeX)`
+                    The name of the ToC buffer.
+
+                `mode` : 1
+                    The ToC display mode, one of:
+
+                        1: Separate window.
+                        2: Separate window and location list.
+                            代码里 ¿call self.create()¿ 生成separate window
+
+                        3: Location list (and don't open it).
+                        4: Location list (and open it).
+
+                `fold_enable` : 0
+                    Whether to enable folding in the ToC window.
+
+                `fold_level_start` : -1
+                    The starting fold level.
+                    The value -1 indicates that the start level is
+                    the same as the `tocdepth` value.
+
+                `hide_line_numbers` : 1
+                    If enabled, then line numbers will be hidden in the ToC window by
+                    setting |nonumber| and |norelativenumber| locally.
+
+                `hotkeys_enabled` : 0
+                    Set to 1 to enable individual hotkeys for ToC entries.
+
+                `hotkeys` : `abcdegijklmnopuvxyz`
+                    A string of keys that are used to create individual hotkeys.
+
+                `hotkeys_leader` : `;`
+                    The hotkey leader. Set to empty string to disable the leader.
+
+                `indent_levels` : 0
+                    Set to 1 to indent the section levels in the ToC window.
+
+                `layer_status` : Dictionary
+
+                        { 'content': 1,
+                            'label': 1,
+                            'todo': 1,
+                            'include': 1 }
+                    The initial state of the layers (1 for active, 0 for inactive).
+
+                    `layers` :
+                        As a shorthand:
+                        it accepts a list of layers  that should be active.
+
+                `layer_keys` : Dictionary
+
+                        { 'content': 'C',
+                            'label': 'L',
+                            'todo': 'T',
+                            'include': 'I'}
+                    Specify hotkeys for enabling/disabling the different layers.
+
+                `resize` : 0
+                    automatically resize vim when index windows are  opened.
+                    This option makes sense if the index window is vertically split.
+
+                `refresh_always` : 1
+                    Set to 0 to manually refresh ToC entries.
+                    This may be useful for very  large projects where generating the ToC entries becomes slow.
+
+                    It may be useful to combine manually refreshing with a |BufWritePost|
+                    autocommand, e.g.:
+
+
+                        aug  VimTeX
+                            au!
+                            au BufWritePost *.tex call vimtex#toc#refresh()
+                        aug  END
+
+                    Or, if preferred, one may use a mapping such as:
+
+                        nno  <silent> <localleader>lf :call vimtex#toc#refresh()
+
+                `show_help` : 1
+                    Whether to display the index help text.
+
+                `show_numbers` : 1
+                    Set whether or not to show section numbers in ToC.
+
+                `split_pos` : `vert leftabove`
+
+                    Define where index windows should be opened.
+                    This is a string that contains either the word 'full' to open in the current window,
+                    or a position command.
+                    Use |:vert| if a vertical split is desired,
+                    and one of |:leftabove|,
+                                |:rightbelow|,
+                                |:topleft|,
+                            and |:botright| to specify the desired split position.
+
+
+                `split_width` : 30
+                    For vertically split windows: Set width of index window.
+
+                `tocdepth` : 3
+                    Define the depth of section levels to display.
+                    This attempts to mimic
+                    the corresponding latex variable `tocdepth`.
+                    For more info, see:
+                        https://en.wikibooks.org/w/index.php?title=LaTeX/Document_Structure
+
+                    This will also change the width of the number column according to
+                                the space needed to show the section numbers.
+
+                `todo_sorted` : 1
+                    Whether or not to sort the TODOs at the top of the ToC window.
+
+        *g:vimtex_toc_config_matchers*
+
+            This is a dictionary that can be used to
+            configure the built-in ToC matchers.
+            See below for a specification of the ToC matcher "objects"
+            and the various keys that can be defined/changed (|toc_matcher_specification|).
+
+
+            To configure/alter a built-in matcher, one can do this:
+
+
+                let g:vimtex_toc_config_matchers = {
+                            \ 'MATCHER1': {OPTIONS},
+                            \ 'MATCHER2': {OPTIONS},
+                            \}
+
+
+            The available options are described in |toc_matcher_specification|.
+            The built-in matchers should generally just work well for most people.
+            However,
+            this option allows at least 2 useful things:
+            to disable a built-in matcher and
+            to change the priority of a built-in matcher.
+            The following is a full example
+
+                let g:vimtex_toc_config_matchers = {
+                            \ 'beamer_frame' : {'disable': 1},
+                            \ 'todo_fixme'   : {'priority': -1},
+                            \ 'index'        : {'title': 'MyFancy Index Title'},
+                            \}
+
+            The available built-in matchers are defined in separate files under
+                        `autoload/vimtex/parser/toc/*.vim`.
+
+            Default value: {}
+
+        *toc_matcher_specification*
+            A ToC matcher is defined as a |Dictionary| where the possible keys
+            are specified below.
+            In order to write a matcher,
+                one should also be aware of the `context` argument that is
+                passed to the matcher functions,
+                as well as the specification of the `toc entry` return value.
+            However,
+                since this kind of customization is advanced I refer users to the source file for further specification of these objects.
+            In particular,
+            see the function `s:toc.parse(...)` in `autoload/vimtex/toc.vim`.
+
+
+                re
+                    Type: |String|
+                    Required: `yes`
+                    This specifies a regular expression that should match the current line
+                    for the desired ToC entry.
+
+                prefilter  2选1
+                    prefilter_re
+                        Type: |String|
+
+                        This specifies a regular expression that must match the current line for the desired ToC entry.
+                        This is used as a prefilter to make things faster,
+                        and it does not need to be a perfect match.
+                        The `re` key may often be a complex and
+                        therefore slow regular expression.
+                        This key should represent a simple and
+                        fast regular expression that may match more than
+                        the desired entry.
+
+                    prefilter_cmds
+                        Type: List of |String|
+                        This is similar to `prefilter_re`, except it specifies a list of command
+                        names (regular expressions). For instance, it should contain `todo` for
+                        a ToC matcher for `\todo` commands.
+
+                priority
+                    Type: |expr-number| (default: 0)
+                    Required: `no`
+                    Priority is used for sorting the ToC matchers.
+                    High priority matchers will be tried first,
+                    and only one matcher will match a given line.
+                    Built-in matchers have priority values between
+                    0 and  2.
+
+
+                in_preamble
+                    Type: 0 or 1 (default: 0)
+                    Required: `no`
+                    If the entry may appear in the preamble.
+
+                in_content
+                    Type: 0 or 1 (default: 1)
+                    Required: `no`
+                    If the entry may appear in the main content.
+
+                title
+                    Type: |String|
+                    Required: `no`
+                    If the matcher does not have a `get_entry` key, then it will use
+                    a simple, general matcher function to generate the entry. In this case,
+                    the `title` key should be specified to give the title of the ToC entry.
+
+                get_entry
+                    Type: |Dictionary-function|
+                    Arguments: `context`
+                    Returns: `toc entry`
+                    Required: `no`
+                    This is the general way to define ToC entries. It allows to define the
+                    ToC entry based on the context. See `autoload/vimtex/parser/toc.vim` for
+                    examples on how to use this.
+
+                continue
+                    Type: |Dictionary-function|
+                    Arguments: `context`
+                    Returns: `toc entry`
+                    Required: `no`
+                    Some entries may be specified over several lines, in which case this key
+                    becomes necessary in combination with the `get_entry` key. See the built
+                    in `s:matcher_section` matcher for an example on how to use this.
+
+                name
+                    Type: |String|
+                    Required: `no`
+                    Mostly for making it easier to debug a specific matcher. Without a name,
+                    the matcher will be registered with a semi random numbered name like
+                    `custom1`.
+
+                disable
+                    Type: |Boolean| (default: |v:false|)
+                    Required: `no`
+                    If true, then the matcher will be disabled.
+
+        *g:vimtex_toc_custom_matchers*
+            This option is a list of custom ToC matchers,
+
+            As an example, one can use this option to add ToC entries for a custom
+            environment. Say you have defined an environment `mycustomenv`, then
+            instances of this environment could be added to the ToC with the following
+            configuration:
+
+
+                let g:vimtex_toc_custom_matchers = [
+                                \ { 'title' : 'My Custom Environment',
+                                \   're' : '\v^\s*\\begin\{mycustomenv\}' }
+                                \]
+
+            Default value: []
+
+
+        *g:vimtex_toc_todo_labels*
+            Dictionary of keywords that should be recognized in comments for the todo
+            layer. The values represent the labels used in the ToC.
+
+            Default value: `{'TODO': 'TODO: ', 'FIXME': 'FIXME: '}`
+
+        *g:vimtex_toc_show_preamble*
+
+            Default value: 1
 
 ------------------------------------------------------------------------------
 DENITE AND UNITE SOURCES                                        *vimtex-denite*
@@ -366,9 +638,9 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                 If `build_dir` is specified,
                     then the specified build directory is created ¿if it does not exist¿.
 
-                Note 1: This option only works with `latexmk` version 4.27 and later.
                 Note 2: If `$out_dir` is added to `.latexmkrc`,
                             then the `.latexmkrc` setting  will have priority.
+
                 Note 3: If  *$VIMTEX_OUTPUT_DIRECTORY* is defined,
                             it will have the highest  priority.
 
@@ -380,10 +652,7 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                         This has two main use cases:
 
                             1. It allows to use a custom build directory for different projects.
-                            2. It allows to specify an output directory for projects where one uses
-                                compiler backends such as |arara|
-                                This makes it  possible to make e.g. the |vimtex-view| feature to work as expected
-                                if  output directories are used with arara.
+                            2. for compiler backends such as |arara|
 
 
             callback
