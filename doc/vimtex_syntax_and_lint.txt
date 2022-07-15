@@ -341,7 +341,7 @@ settings:
     *g:vimtex_syntax_packages*
         A dictionary for package specific syntax configuration.
         Each key represent
-        a single package and the values are themselves configuration dictionaries.
+            a single package and the values are themselves configuration dictionaries.
         All packages share the following options:
 
             `load`  Specify when to load the package syntax addon.
@@ -351,7 +351,7 @@ settings:
                 2 = always enable this syntax package
 
         The following is a list of the available packages and, if applicable,
-        their  configuration keys or where they deviate from the above specified defaults.
+        their configuration keys or where they deviate from the above specified defaults.
 
             amsmath
                 `load`  is 2 by default
@@ -693,96 +693,117 @@ Table 4: A list of other important groups.~
 ==============================================================================
 SYNTAX CHECKING (LINTING)                                       *vimtex-lint*
 
-    VimTeX provides syntax checking (linting) for TeX and BibTeX files through
-    three compilers: `lacheck` [1], `chktex` [2], and `biber` [3].
-    These may be  activated with the |:compiler| command,
-    see |compiler-select|. A selected
-    compiler may then be used e.g. with |:make| or |:lmake|.
+    VimTeX provides syntax checking  (linting) for TeX and BibTeX files through
+    three compilers:
+        `lacheck` [1], `chktex` [2], and `biber` [3]. (bibertool)
 
-    It is possible to use more automatic linting through
-    dedicated plugins.
-    For  more information, see |vimtex-af-linting|.
+    These may be  activated with the |:compiler| command,
+    A selected  compiler may then be used e.g. with |:make| or |:lmake|.
+
+    It is possible to use more automatic linting through  dedicated plugins.
+    For more information, see |vimtex-af-linting|.
 
     Associated settings:
-    * |g:vimtex_lint_chktex_parameters|
-    * |g:vimtex_lint_chktex_ignore_warnings|
+
+    *g:vimtex_lint_chktex_ignore_warnings*
+        A string variable of options to pass for `chktex` to specify to ignore
+        certain warning messages.
+
+        Default value: `'-n1 -n3 -n8 -n25 -n36'`
+
+    *g:vimtex_lint_chktex_parameters*
+        A string variable of parameters to pass to `chktex`.
+
+        VimTeX will look for a configuration file at `$XDG_CONFIG_HOME/chktexrc`,
+        or  `$HOME/.config/chktexrc` if `$XDG_CONFIG_HOME` is undefined.
+        If this file  exists, it is specified by default with `--localrc=...`.
+
+        Default value: `'--localrc=PATH/chktexrc'` or `''` (see above)
+
 
     ------------------------------------------------------------------------------
 
     A common workflow is to utilize the |location-list| with |:lmake|:
 
     - To lint the currently open TeX file with `lacheck`, run
-        `:compiler lacheck|lmake`
-    - To lint the currently open TeX file with `chktex`, run
-        `:compiler chktex|lmake`
-    - To lint the currently open BibTeX file with `biber`, run
-        `:compiler bibertool|lmake`
+        `:compiler lacheck | lmake `
 
     After linting,
-    the compiler or
-    linter messages are added to the location list.
+        the compiler or
+        linter messages are added to the location list.
     This list may be displayed in the location-list window with |:lwindow|,
     and one may jump between
-    the entries with |:lN| and |:lp|.
-    To automatically open the location-list window after linting is finished,
-    one may add the following to one's |vimrc|:
+        the entries with |:lN| and |:lp|.
 
+    To automatically open the location-list window after linting is finished,
+        one may add the following to one's |vimrc|:
 
     augroup VimTeX
         autocmd!
         autocmd QuickFixCmdPost lmake lwindow
     augroup END
 
-    For convenience, one may also define a command for linting for each file type
-    and add an autocmd to automatically lint on save. The following gives an
-    example for `bibertool` and BibTeX, but one may of course do the same with
-    `lacheck` and/or `chktex` for TeX files as well. First, add the following to
-    `~/.vim/after/ftplugin/bib.vim`:
 
+    For convenience,
+        one may also define a command for linting for each file type and
+        add an autocmd to automatically lint on save.
+    The following gives an example
+        for `bibertool` and BibTeX.
 
-    command! -buffer -bang Lint compiler bibertool | lmake<bang>
+    First,
+    add the following to `~/.vim/after/ftplugin/bib.vim`:
+            command! -buffer -bang Lint compiler bibertool | lmake<bang>
 
     Then, add to `~/.vim/after/ftplugin/bib.vim`:
+            augroup VimTeX
+                autocmd!
+                autocmd BufWrite <buffer=abuf> compiler bibertool | lmake!
+            augroup END
+
+    If one minds that Vim becomes unresponsive while linting,
+    then one may utilize plugins like |vim-dispatch| [4],
+                                        |AsyncRun| [5] or |tasks.vim| [6].
+        With `vim-dispatch`,
+            one may replace the `:lmake` call with `:Make`.
+
+            This may conflict with the listing of compilation errors,
+                since `:Make` from `vim-dispatch` uses the ¿quickfix¿ window.
+
+        `tasks.vim`
+            provide `:LMake` which allows one to use the location list.
+
+        `AsyncRun`:
+            one may define a cstom `:Make` command with:
+
+                command! -bang -nargs=* -complete=file Make
+                            \ AsyncRun<bang> -auto=make -program=make
+
+            The quickfix window that lists the linter errors and
+            warnings can then be opened by
+                |:cwindow| and they can be jumped to by
+                |:cN| respectively
 
 
-    augroup VimTeX
-        autocmd!
-        autocmd BufWrite <buffer=abuf> compiler bibertool | lmake!
-    augroup END
 
-    If one minds that Vim becomes unresponsive while linting, then one may utilize
-    plugins like |vim-dispatch| [4], |AsyncRun| [5] or |tasks.vim| [6]. With
-    `vim-dispatch`, one may replace the `:lmake` call with `:Make`. This
-    may conflict with the listing of compilation errors, since `:Make` from
-    `vim-dispatch` uses the quickfix window. `tasks.vim` provide `:LMake` which
-    allows one to use the location list. For `AsyncRun`, one may define a cstom
-    `:Make` command with:
+    Often,
+    a syntax error in a BibTeX file is due to a ¿missing comma after an entry¿.
+        One may define a command to automatically add such missing commas,
+        e.g.
+        by
+        adding the following lines in `~/.vim/after/ftplugin/bib.vim`:
 
+            command! -buffer -range=% -bar AddMissingCommas keeppatterns
+                    \ <line1>,<line2>substitute:\v([}"])(\s*\n)+(\s*\a+\s*\=):\1,\2\3:giep
 
-    command! -bang -nargs=* -complete=file Make
-            \ AsyncRun<bang> -auto=make -program=make
+        To call this automatically after saving a BibTeX file,
+        add the following  autocommand inside a proper autocommand group
+        in `~/.vim/after/ftplugin/bib.vim`:
 
-    The quickfix window that lists the linter errors and warnings can then be
-    opened by |:cwindow| and they can be jumped to by |:cN| respectively |:cp|.
+            autocmd BufWrite <buffer> exe
+                \ 'normal! m`' | silent AddMissingCommas | silent! exe 'normal! g``'
 
-    Often, a syntax error in a BibTeX file is due to a missing comma after an
-    entry. One may define a command to automatically add such missing commas, e.g.
-    by adding the following lines in `~/.vim/after/ftplugin/bib.vim`:
-
-
-    command! -buffer -range=% -bar AddMissingCommas keeppatterns
-            \ <line1>,<line2>substitute:\v([}"])(\s*\n)+(\s*\a+\s*\=):\1,\2\3:giep
-
-    To call this automatically after saving a BibTeX file, add the following
-    autocommand inside a proper autocommand group (e.g. `augroup VimTeX` as
-    suggested above) in `~/.vim/after/ftplugin/bib.vim`:
-
-
-    autocmd BufWrite <buffer> exe
-            \ 'normal! m`' | silent AddMissingCommas | silent! exe 'normal! g``'
-
-    Finally, for more full-fledged linting in Vim, see the plug-ins mentioned in
-    |vimtex-and-friends|.
+    Finally, for more full-fledged linting in Vim,
+    see  |vimtex-and-friends|.
 
     [1] https://ctan.org/pkg/lacheck
     [2] https://www.nongnu.org/chktex/
@@ -794,98 +815,163 @@ SYNTAX CHECKING (LINTING)                                       *vimtex-lint*
 ==============================================================================
 GRAMMAR CHECKING                                               *vimtex-grammar*
 
-VimTeX provides several compilers for grammar checking TeX files through
-the |compiler-select| feature in Vim.
-A compiler may be activated with the |:compiler| command
-(see |vimtex-lint| above for some more tips on how to use this feature).
-The selected compiler may then be used e.g.
-    with |:make| or |:lmake|.
-As an example,
-one may do the following to use the |location-list| with a given checker:
+    VimTeX provides several compilers for grammar checking TeX files through
+    the |compiler-select| feature in Vim.
+    A compiler may be activated with the |:compiler| command
+    (see |vimtex-lint| above for some more tips on how to use this feature).
+    The selected compiler may then be used e.g.
+        with |:make| or |:lmake|.
+    As an example,
+    one may do the following to use the |location-list| with a given checker:
+        :compiler {checker}|lmake
 
-    :compiler {checker}|lmake
+    Other possibilities for grammar and language checking are:
+        * The LTeX project:
+                A grammar and spell checking tool available as a language  server.
+                See |vimtex-af-lsp| for more info.
+
+        * Angry Reviewer:
+            An off-line vim plugin for the AngryReviewer service that
+            provides style suggestions for academic and scientific text in the quickfix list.
+        https://github.com/anufrievroman/vim-angry-reviewer
+
 
 The following is a list of the available checkers:
-
-  textidote~
-
-  vlty~
-
-  style-check~
-
-
-Other possibilities for grammar and language checking are:
-    * The LTeX project:
-             a grammar and spell checking tool available as a language  server.
-             See |vimtex-af-lsp| for more info.
-
-    * Angry Reviewer:
-         An off-line vim plugin for the AngryReviewer service that
-        provides style suggestions for academic and scientific text in the quickfix list.
-    https://github.com/anufrievroman/vim-angry-reviewer
 
 ------------------------------------------------------------------------------
 TEXTIDOTE                                            *vimtex-grammar-textidote*
 
-The `textidote` compiler is a VimTeX wrapper over TeXtidote [1]. TeXtidote is
-a correction tool for LaTeX documents to check grammar, style, and perform
-spell checking.
+    The `textidote` compiler is a VimTeX wrapper over TeXtidote [1].
+    TeXtidote is a correction tool for LaTeX documents to check
+        grammar,
+        style,
+        and perform spell checking.
 
-Configuration of the wrapper is controlled by the Vim dictionary
-|g:vimtex_grammar_textidote|. In particular, it is important to specify the
-`jar` key to the path of the executable jar file `textidote.jar`. Please note
-that if one installs `textidote` with a package manager e.g. in some common
-Linux distributions, the `.jar` file might be missing. If so, it should be
-possible to download it manually from [1]. However, before one does that, it
-can be smart to check the top lines of the installed executable, as it may be
-a simple Bash script wrapper.
+    Configuration of the wrapper is controlled by
+    the Vim dictionary |g:vimtex_grammar_textidote|.
 
-[1]: https://sylvainhalle.github.io/textidote/
+    *g:vimtex_grammar_textidote*
+
+        A dictionary with the following keys:
+            jar
+                The path to `textidote.jar`.
+                This key must be defined.
+
+
+                If one installs `textidote` with a package manager e.g.
+                    in some common Linux distributions,
+                    the `.jar` file might be missing.
+                If so,
+                it should be possible to  download it manually from [1].
+                [1]: https://sylvainhalle.github.io/textidote/
+
+                Before one does that,
+                    it can be smart to check the top lines of the installed executable,
+                    as it may be a simple Bash script wrapper.
+
+            args
+                 Specify arguments to be passed to the TeXtidote grammar checker.
+
+        Default:
+                let g:vimtex_grammar_textidote = {
+                            \ 'jar': '',
+                            \ 'args': '',
+                            \}
 
 ------------------------------------------------------------------------------
 VLTY                                                      *vimtex-grammar-vlty*
 
-The `vlty` compiler uses the Python package `YaLafi` [1] for extracting the
-plain text and combines this with the proofreading software
-`LanguageTool` [2]. The name `vlty` comes from VimTeX + LanguageTool + YaLafi.
+    The `vlty` compiler uses the Python package `YaLafi` [1]
+                                for extracting the plain text and
+                                            pip install --user yalafi
+    combines this with the proofreading software `LanguageTool` [2].
+                                     An archive of `LanguageTool` can be downloaded from [3].
 
-In order to use `vlty`, you need local installations of both components. An
-archive of `LanguageTool` can be downloaded from [3]. After uncompressing at
-a suitable place, the path to it is specified as shown below. On a system like
-`Arch Linux`, `LanguageTool` may also be installed with:
+    The name `vlty` comes from VimTeX + LanguageTool + YaLafi.
 
+    Spell checking with `LanguageTool` is only enabled
+    if a country code is  specified in |'spelllang'|.
+                :set spelllang=en_gb
 
-  sudo pacman -S languagetool
+    Calling `:compiler vlty` will raise an error message if some component cannot
+    be found.
 
-`YaLafi` itself can be installed with:
+    *g:vimtex_grammar_vlty*
+    A dictionary with the following keys :
+            lt_directory
+                Path to the `LanguageTool` software, if installed manually.
 
+                The given directory has to contain the `LanguageTool` software,
+                    including, for instance, the file `languagetool-server.jar`.
+                If instead
+                    `LanguageTool` is installed through
+                    a package manager as mentioned above,
+                    one could write:
+                        \ 'lt_directory'         : 'languagetool'
 
-  pip install --user yalafi
+            lt_command
+                Name of `LanguageTool` executable,
+                if installed via package manager.
+                This has precedence over `lt_directory`!
 
-Configuration is controlled by the Vim dictionary |g:vimtex_grammar_vlty|.
-As a minimal example, one could write in |vimrc|:
+            lt_disable
+            lt_enable
+            lt_disablecategories
+            lt_enablecategories
+                Options for `LanguageTool` that control application of rules and rule
+                categories.
+                For more info, see:
+                http://wiki.languagetool.org/command-line-options
 
+            server
+                Specify whether an HTTP server should be used.
+                This may be ¿faster¿ for  short texts.
+                Possible values are:
 
-  let g:vimtex_grammar_vlty = {'lt_directory': 'path/to/LanguageTool'}
-  set spelllang=en_gb
+                    `no`    Do not use a server.
+                    `my`    Use a local `LanguageTool` server.
+                            If not yet running,
+                            it is  started.
 
-The given directory has to contain the `LanguageTool` software, including for
-instance the file `languagetool-server.jar`. If instead `LanguageTool` is
-installed through a package manager as mentioned above, one could write:
+                    `lt`    Contact the Web server provided by `LanguageTool`.
+                            In this case,  no local installation is necessary.
+                            Please see the following page for conditions and restrictions:
+                                https://dev.languagetool.org/public-http-api
 
+            shell_options
+                Pass additional options to `YaLafi`,
+                e.g., `--equation-punctuation displ`;
+                for more info, see:
+                    https://github.com/matze-dd/YaLafi
 
-  let g:vimtex_grammar_vlty = {'lt_command': 'languagetool'}
-  set spelllang=en_gb
+            show_suggestions
+                If set to 1,
+                    `LanguageTool's` replacement suggestions are included
+                    in the |quickfix| or |location-list| messages.
 
-Calling `:compiler vlty` will raise an error message if some component cannot
-be found.
+            encoding
+                Encoding of the
+                (La)TeX source file.
+                For default value `auto`,
+                the encoding is taken from |fileencoding| or |encoding|.
 
-Spell checking with `LanguageTool` is only enabled if a country code is
-      specified in |'spelllang'|.
+        Default:
+                let g:vimtex_grammar_vlty = {
+                            \ 'lt_directory'         : '~/lib/LanguageTool',
+                            \ 'lt_command'           : '',
+                            \ 'lt_disable'           : 'WHITESPACE_RULE',
+                            \ 'lt_enable'            : '',
+                            \ 'lt_disablecategories' : '',
+                            \ 'lt_enablecategories'  : '',
+                            \ 'server'               : 'no',
+                            \ 'shell_options'        : '',
+                            \ 'show_suggestions'     : 0,
+                            \ 'encoding'             : 'auto',
+                            \}
 
-[1] https://github.com/matze-dd/YaLafi
-[2] https://www.languagetool.org
-[3] https://www.languagetool.org/download/
+    [1] https://github.com/matze-dd/YaLafi
+    [2] https://www.languagetool.org
+    [3] https://www.languagetool.org/download/
 
 
 

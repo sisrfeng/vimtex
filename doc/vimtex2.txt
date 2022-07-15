@@ -356,8 +356,9 @@ TABLE OF CONTENTS                                                  *vimtex-toc*
 
                     prefilter_cmds
                         Type: List of |String|
-                        This is similar to `prefilter_re`, except it specifies a list of command
-                        names (regular expressions). For instance, it should contain `todo` for
+                        This is similar to `prefilter_re`,
+                            except it specifies a list of command  names (regular expressions).
+                        For instance, it should contain `todo` for
                         a ToC matcher for `\todo` commands.
 
                 priority

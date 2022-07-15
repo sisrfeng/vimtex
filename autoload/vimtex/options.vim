@@ -160,16 +160,16 @@ fun! vimtex#options#init() abort
                 \ 'args': '',
                 \})
     call s:init_option('vimtex_grammar_vlty', {
-                \ 'lt_directory': '~/lib/LanguageTool',
-                \ 'lt_command': '',
-                \ 'lt_disable': 'WHITESPACE_RULE',
-                \ 'lt_enable': '',
-                \ 'lt_disablecategories': '',
-                \ 'lt_enablecategories': '',
-                \ 'server': 'no',
-                \ 'shell_options': '',
-                \ 'show_suggestions': 0,
-                \ 'encoding': 'auto',
+                \ 'lt_directory'         : '~/lib/LanguageTool',
+                \ 'lt_command'           : '',
+                \ 'lt_disable'           : 'WHITESPACE_RULE',
+                \ 'lt_enable'            : '',
+                \ 'lt_disablecategories' : '',
+                \ 'lt_enablecategories'  : '',
+                \ 'server'               : 'no',
+                \ 'shell_options'        : '',
+                \ 'show_suggestions'     : 0,
+                \ 'encoding'             : 'auto',
                 \})
 
     call s:init_option('vimtex_imaps_enabled', 1)

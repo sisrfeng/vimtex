@@ -428,17 +428,20 @@ INTEGRATION WITH OTHER PLUGINS                             *vimtex-and-friends*
 
     Linting and syntax checking
     *vimtex-af-linting*
-        VimTeX has some support for linting through the |:compiler| command, see
-        |vimtex-lint|. There exists several more dedicated, automatic linting
-        plugins. The following plugins have support for (La)TeX syntax checking
+        VimTeX has some support for linting through the |:compiler| command,
+        see  |vimtex-lint|.
+        There exists several more dedicated,
+        automatic linting  plugins.
+        The following plugins have support for (La)TeX syntax checking
         through `lacheck` [0], `chktex` [1], and `proselint` [2].
 
             `ale`         https://github.com/dense-analysis/ale
             `neomake`     https://github.com/neomake/neomake
             `syntastic`   https://github.com/vim-syntastic/syntastic
 
-        `neomake` also supports `rubberinfo` [3]. One may also be interested in
-        `blacktex` [4], which may be used to clean up/fix LaTeX code.
+        `neomake` also supports `rubberinfo` [3].
+        One may also be interested in  `blacktex` [4],
+            which may be used to clean up/fix LaTeX code.
 
         [0]: https://www.ctan.org/pkg/lacheck
         [1]: http://www.nongnu.org/chktex/

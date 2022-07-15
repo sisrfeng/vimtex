@@ -683,92 +683,6 @@ OPTIONS                                                        *vimtex-options*
 
         Default value: See source in `/autoload/vimtex/options.vim`
 
-    *g:vimtex_grammar_textidote*
-        This option is used to configure the `textidote` grammar and document checker,
-        see |vimtex-grammar-textidote|. It is a dictionary with the following keys
-
-            jar
-                The path to `textidote.jar`. This key must be defined if you want to use
-                the TeXtidote wrapper! Please If one installs `textidote` with
-                a package manager e.g. in some common Linux distributions, the `.jar`
-                file might be missing. If so, it should be possible to download it
-                manually.
-
-            args
-                 Specify arguments to be passed to the TeXtidote grammar checker.
-
-        Default:
-
-
-                let g:vimtex_grammar_textidote = {
-                            \ 'jar': '',
-                            \ 'args': '',
-                            \}
-
-    *g:vimtex_grammar_vlty*
-        This option is used to
-        configure the `vlty` grammar checker.
-        This checker relies on the Python package `YaLafi` in combination
-        with the proofreading software `LanguageTool` (see |vimtex-grammar-vlty| for more details).
-        The option is a dictionary with the following keys :
-            lt_directory
-                Path to the `LanguageTool` software, if installed manually.
-
-            lt_command
-                Name of `LanguageTool` executable, if installed via package manager. Note
-                that this has precedence over `lt_directory`!
-
-            lt_disable
-            lt_enable
-            lt_disablecategories
-            lt_enablecategories
-                Options for `LanguageTool` that control application of rules and rule
-                categories. For more info, see:
-                http://wiki.languagetool.org/command-line-options
-
-            server
-                Specify whether an HTTP server should be used. This may be faster for
-                short texts. Possible values are:
-
-                `no`    Do not use a server.
-                `my`    Use a local `LanguageTool` server. If not yet running, it is
-                                started.
-                `lt`    Contact the Web server provided by `LanguageTool`. In this case,
-                            no local installation is necessary. Please see the following page
-                            for conditions and restrictions:
-                            https://dev.languagetool.org/public-http-api
-
-            shell_options
-                Pass additional options to `YaLafi`,
-                e.g., `--equation-punctuation displ`;
-                for more info, see:
-                https://github.com/matze-dd/YaLafi
-
-            show_suggestions
-                If set to 1,
-                    `LanguageTool's` replacement suggestions are included
-                    in the |quickfix| or |location-list| messages.
-
-            encoding
-                Encoding of the (La)TeX source file. For default value `auto`, the
-                encoding is taken from |fileencoding| or |encoding|.
-
-        Default:
-
-
-                let g:vimtex_grammar_vlty = {
-                            \ 'lt_directory': '~/lib/LanguageTool',
-                            \ 'lt_command': '',
-                            \ 'lt_disable': 'WHITESPACE_RULE',
-                            \ 'lt_enable': '',
-                            \ 'lt_disablecategories': '',
-                            \ 'lt_enablecategories': '',
-                            \ 'server': 'no',
-                            \ 'shell_options': '',
-                            \ 'show_suggestions': 0,
-                            \ 'encoding': 'auto',
-                            \}
-
     *g:vimtex_imaps_enabled*
         Use this option to disable/enable the insert mode mappings.
 
@@ -938,21 +852,6 @@ OPTIONS                                                        *vimtex-options*
         enables the highlighting of matching delimiters.
 
         Default value: 1
-
-    *g:vimtex_lint_chktex_ignore_warnings*
-        A string variable of options to pass for `chktex` to specify to ignore
-        certain warning messages.
-
-        Default value: `'-n1 -n3 -n8 -n25 -n36'`
-
-    *g:vimtex_lint_chktex_parameters*
-        A string variable of parameters to pass to `chktex`.
-
-        VimTeX will look for a configuration file at `$XDG_CONFIG_HOME/chktexrc`, or
-        `$HOME/.config/chktexrc` if `$XDG_CONFIG_HOME` is undefined. If this file
-        exists, it is specified by default with `--localrc=...`.
-
-        Default value: `'--localrc=PATH/chktexrc'` or `''` (see above)
 
     *g:vimtex_log_ignore*
         A list of regexes to filter info, warning, and error messages. If a logged

@@ -178,9 +178,7 @@ then you can lookup the path in the table of contents and click on it.
             The main API relies on the functions `vimtex#cmd#get_*(...)`, e.g.
             `vimtex#cmd#get_current()`.
             A simple example usage:
-
             ```vim
-
                 let l:cmd = vimtex#cmd#get_current()
                 if empty(l:cmd) | return | endif
 

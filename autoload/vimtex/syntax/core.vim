@@ -61,7 +61,15 @@ fun! vimtex#syntax#core#init() abort "
         syn match texSpecialChar "\\[SP@]\ze[^a-zA-Z@]"  conceal
                                     " \S  花体S,
                                         " \P 旗帜
-        syn match texSpecialChar "\\[,;:!]"
+        syn match texSpecialChar "\\[!,:;]"           conceal
+                                    "\ \quad	space equal to the current font size (= 18 mu)
+                                    "\ \!	-3/18 of \quad (= -3 mu)
+                                    "\ \,	3/18 of \quad (= 3 mu)
+                                    "\ \:	4/18 of \quad (= 4 mu)
+                                    "\ \;	5/18 of \quad (= 5 mu)
+                                    "\ \ (space after backslash!)	equivalent of space in normal text
+                                    "\ \qquad	twice of \quad (= 36 mu)
+
         syn match texSpecialChar "\v\^\^%(\S|[0-9a-f]{2})"
                                         " ^^A 在dtx里表示注释
 
@@ -77,10 +85,11 @@ fun! vimtex#syntax#core#init() abort "
         " Note: This is necessary to keep track of all nested ¿braces¿
         call vimtex#syntax#core#new_arg('texGroup', {'opts': ''})
 
-        " Flag mismatching  ending brace delimiter
-        syn match texGroupError   "}"
+        "\ debug buggy !!!!!!!!
+        " mismatching  ending brace delimiter
+        syn match texGroupError   "}"  conceal
         hi def link texGroupError In_backticK
-        "\ 经常误报, 等编译失败时再检查?  debug buggy !!!!!!!!
+        "\ 经常误报, 等编译失败时再检查?
 
         " Add generic option elements contained in common option groups
         syn match texOptEqual contained "="
@@ -593,7 +602,7 @@ fun! vimtex#syntax#core#init() abort "
             " * This is used to restrict the whitespace between environment name and
             "   the option group (see https://github.com/lervag/vimtex/issues/2043).
             "
-            " syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
+            "\ syn match texCmdEnvM "\v\\%(begin|end)>" contained nextgroup=texEnvMArgName
             syn match texCmdEnvM "\v\\begin>" contained conceal cchar=      nextgroup=texEnvMArgName
             syn match texCmdEnvM "\v\\end>"   contained conceal cchar=      nextgroup=texEnvMArgName
 
@@ -606,14 +615,13 @@ fun! vimtex#syntax#core#init() abort "
                 \ )
 
         " Math regions: environments
-            call vimtex#syntax#core#new_region_math('displaymath')
            "\  Use any of this to typeset maths in ¿display mode¿ (单独成行):
                         "\ \[...\]
                         "\ \begin{displaymath}...\end{displaymath}
                         "\ \begin{equation}...\end{equation}
-
-            call vimtex#syntax#core#new_region_math('eqnarray')
+            call vimtex#syntax#core#new_region_math('displaymath')
             call vimtex#syntax#core#new_region_math('equation')
+            call vimtex#syntax#core#new_region_math('eqnarray')
             call vimtex#syntax#core#new_region_math('math')
 
         " Math regions: Inline Math Zones
@@ -647,15 +655,18 @@ fun! vimtex#syntax#core#init() abort "
                           \ 'skip="\\\\\|\\\$"'
                                     "\ 跳过¿\\¿ 或¿\¿结尾
                           \ 'end="\$"'
-                          \ 'contains=@texClusterMath,@In_fancY keepend'
+                          \ 'contains=@texClusterMath,@In_fancY'
+                          \ 'keepend'
                           \ 'nextgroup=texMathTextAfter'
                           \ l:conceal
 
 
-            exe   'syntax region texMathZoneXX matchgroup=texMathDelimZone'
+            exe   'syntax region texMathZoneXX'
+                            \ 'matchgroup=texMathDelimZone'
                             \ 'start="\$\$"'
                             \ 'end="\$\$"'
-                            \ 'contains=@texClusterMath,@In_fancY keepend'
+                            \ 'contains=@texClusterMath,@In_fancY'
+                            \ 'keepend'
                             \ l:conceal
 
         " This is to disable spell check for text just after "$" (e.g. "$n$th")
@@ -988,6 +999,7 @@ endf
             let l:group_cmd = l:pre . l:name . 'Cmd'
             let l:group_opt = l:pre . l:name . 'Opt'
             let l:group_arg = l:pre . l:name . 'Arg'
+            "\ Mathwf_LeftOpt   Mathwf_LeftArg  等
 
         " Specify rules for next groups
             if !empty(l:cfg.nextgroup)
@@ -1023,7 +1035,7 @@ endf
                     en
 
                 if l:cfg.mathmode
-                    let l:set_arg.contains    = '@texClusterMath'
+                    let l:set_arg.contains = '@texClusterMath'
                 elseif !l:cfg.argspell
                     let l:set_arg.contains = 'TOP,@Spell'
                 en
@@ -1136,11 +1148,15 @@ endf
 
     fun! vimtex#syntax#core#new_region_math(mathzone, ...) abort
         let l:cfg = extend(
-                        \ { 'starred' : 1, 'next' : ''  },
-                        \ a:0 > 0 ? a:1 : {},
-                    \ )
+                    \ { 'starred' : 1, 'next' : ''  },
+                    \ a:0 > 0
+                        \ ? a:1
+                        \ : {},
+                 \ )
 
-        let l:envname = a:mathzone . (l:cfg.starred ? '\*\?' : '')
+        let l:envname = a:mathzone . (l:cfg.starred
+                                \ ? '\*\?'
+                                \ : '')
 
         exe     'syntax match texMathError  "\\end{' . l:envname . '}"  '
 
@@ -1156,8 +1172,14 @@ endf
         exe     'syntax region texMathZoneEnv'
                     \ 'start="\\begin{\z(' . l:envname . '\)}"'
                     \ 'end="\\end{\z1}"'
-                    \ 'contains=texMathEnvBgnEnd,@texClusterMath,texCmdGreek'
+                    \ 'contains=texMathEnvBgnEnd,@texClusterMath,texCmdGreek,@In_fancY'
                     \ 'keepend'
+
+
+                    "\ \ 'contains=ALL, texMathEnvBgnEnd,@texClusterMath,texCmdGreek,@In_fancY'
+                    "\ 就算加了ALL, 下面这个环境里的内容, 有些效果还是出不来
+                    "\ \begin{equation}
+                    "\ \end{equation}
 
                        "\ keepend导致@texClusterMath里的cmd不会被匹配? 应该不会
     endf
@@ -1195,15 +1217,15 @@ endf
             \}
 
         for [l:group, l:pattern] in [
-        \ ['texCmdStyleBoldItal' , 'emph']   ,
-        \ ['texCmdStyleBoldItal' , 'textit'] ,
-        \ ['texCmdStyleBoldItal' , 'textsl'] ,
-        \ ['texCmdStyleItalBold' , 'textbf'] ,
-        \ ['texCmdStyleBold'     , 'textbf'] ,
-        \ ['texCmdStyleItal'     , 'emph']   ,
-        \ ['texCmdStyleItal'     , 'textit'] ,
-        \ ['texCmdStyleItal'     , 'textsl'] ,
-                                \]
+            \ ['texCmdStyleBoldItal' , 'emph']   ,
+            \ ['texCmdStyleBoldItal' , 'textit'] ,
+            \ ['texCmdStyleBoldItal' , 'textsl'] ,
+            \ ['texCmdStyleItalBold' , 'textbf'] ,
+            \ ['texCmdStyleBold'     , 'textbf'] ,
+            \ ['texCmdStyleItal'     , 'emph']   ,
+            \ ['texCmdStyleItal'     , 'textit'] ,
+            \ ['texCmdStyleItal'     , 'textsl'] ,
+        \]
             " 处理\emph 等
             exe     'syntax match' l:group
                     \ '"\\' . l:pattern . '\>"'
