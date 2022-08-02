@@ -4,7 +4,7 @@
 " Email:      karl.yngve@gmail.com
 "
 
-function! vimtex#fzf#run(...) abort " {{{1
+function! vimtex#fzf#run(...) abort
   " Arguments: Two optional arguments
   "
   " First argument: ToC filter (default: 'ctli')
@@ -18,9 +18,8 @@ function! vimtex#fzf#run(...) abort " {{{1
   " Second argument: Custom options for fzf
   "   It should be an object containing the parameters passed to fzf#run().
 
-  " Note: The '--with-nth 3..' option hides the first two words from the fzf
-  "       window. These words are the file name and line number and are used by
-  "       the sink.
+  " Note: The '--with-nth 3..' option hides the first two words from the fzf  window.
+          " These words are the file name and line number and are used by  the sink.
   "
   " Note: Using \u2007 as delimiter allows spaces in the file path, while
   "       keeping the visuals in fzf window unaffected.
@@ -33,8 +32,8 @@ function! vimtex#fzf#run(...) abort " {{{1
   call fzf#run(l:opts)
 endfunction
 
-" }}}1
-function! vimtex#fzf#open_selection(sel) abort " {{{1
+
+function! vimtex#fzf#open_selection(sel) abort
   let line = split(a:sel, '\%u2007')[0]
   let file = split(a:sel, '\%u2007')[1]
   let curr_file = expand('%:p')
@@ -46,10 +45,10 @@ function! vimtex#fzf#open_selection(sel) abort " {{{1
   endif
 endfunction
 
-" }}}1
 
 
-function! s:parse_toc(filter) abort " {{{1
+
+function! s:parse_toc(filter) abort
   " Parsing is mostly adapted from the Denite source
   " (see rplugin/python3/denite/source/vimtex.py)
   python3 << EOF
@@ -112,4 +111,4 @@ EOF
   return candidates
 endfunction
 
-" }}}1
+

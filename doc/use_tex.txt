@@ -13,30 +13,30 @@ TOC
 DEFAULT MAPPINGS                                      *vimtex-default-mappings*
 
     VimTeX is designed to be controlled by a selection of mappings.
-    Note,
-    that most of the mappings are also available as commands,
-    see  |vimtex-commands|.
+    Most of the mappings are also available as  |vimtex-commands|.
 
     Many of the mappings utilize the |maplocalleader|.
     The right-hand sides are provided as <plug>-mappings,
-    see |using-<plug>|.
+        see |using-<plug>|.
+
     For any given <plug> map,
-    the  default mapping will only be created if it does not already exist. This means
-    that  if a user defines a custom mapping, e.g. with
-        nmap <space>li <plug>(vimtex-info)
+        the  default mapping will only be created if it does not already exist.
+        This means  that  if a user defines a custom mapping, e.g. with
+            nmap <space>li <plug>(vimtex-info)
 
         then the corresponding default left-hand side will not be mapped.
 
     If one prefers,
-    one may disable all the default mappings through the option |g:vimtex_mappings_enabled|.
-    Custom mappings for all desired features must then be defined through the listed RHS <plug>-maps or
-    by mapping the available  commands.
+        one may disable all the default mappings through the option |g:vimtex_mappings_enabled|.
+        Custom mappings for all desired features must then be defined through
+                the listed RHS <plug>-maps or
+                by mapping the available  commands.
 
     In the below list of mappings,
-    LHS is the default mapping,
-    RHS is the corresponding <plug>-maps,
-    and MODE indicates in which
-    vim mode the mappings are valid.
+        LHS is the default mapping,
+        RHS is the corresponding <plug>-maps,
+        and MODE indicates in which
+        vim mode the mappings are valid.
     See |map-modes| for an explanation of the various modes.
     The indicator refers to the prefix of the corresponding map command,  e.g.
     `n`  refers to an |nmap|, `nx` refers to both |nmap| and |xmap|, and so on.

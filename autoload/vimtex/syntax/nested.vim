@@ -1,23 +1,25 @@
-fun! vimtex#syntax#nested#include(name) abort " {{{1
+fun! vimtex#syntax#nested#include(name) abort
     let l:inc_name = 'vimtex_nested_' . a:name
 
     if !has_key(s:included, l:inc_name)
         let s:included[l:inc_name] = s:include(l:inc_name, a:name)
     en
 
-    return s:included[l:inc_name] ? l:inc_name : ''
+    return s:included[l:inc_name]
+            \ ? l:inc_name
+            \ : ''
 endf
 
-" }}}1
-fun! vimtex#syntax#nested#reset() abort " {{{1
+
+fun! vimtex#syntax#nested#reset() abort
     let s:included = {'vimtex_nested_tex': 0}
 endf
 
 let s:included = {'vimtex_nested_tex': 0}
 
-" }}}1
 
-fun! s:include(cluster, name) abort " {{{1
+
+fun! s:include(cluster, name) abort
     let l:name = get(g:vimtex_syntax_nested.aliases, a:name, a:name)
     let l:path = 'syntax/' . l:name . '.vim'
 
@@ -44,9 +46,9 @@ fun! s:include(cluster, name) abort " {{{1
     return 1
 endf
 
-" }}}1
 
-fun! s:hooks_dockerfile_before() abort " {{{1
+
+fun! s:hooks_dockerfile_before() abort
     " $VIMRUNTIME/syntax/dockerfile.vim
     " does something it should not do -
     " it sets the commentstring option
@@ -55,10 +57,10 @@ fun! s:hooks_dockerfile_before() abort " {{{1
     let s:commentstring = &l:commentstring
 endf
 
-" }}}1
-fun! s:hooks_dockerfile_after() abort " {{{1
+
+fun! s:hooks_dockerfile_after() abort
     let &l:commentstring = s:commentstring
     syn  cluster vimtex_nested_dockerfile remove=dockerfileLinePrefix
 endf
 
-" }}}1
+

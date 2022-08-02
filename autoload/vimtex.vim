@@ -1,7 +1,5 @@
 fun! vimtex#init() abort
-    if exists('#User#VimtexEventInitPre')
-        doautocmd <nomodeline> User VimtexEventInitPre
-    en
+    if exists('#User#VimtexEventInitPre')  | doautocmd <nomodeline> User VimtexEventInitPre  | en
 
     call vimtex#options#init()
 
@@ -373,25 +371,28 @@ endf
 
 
 fun! s:map(ftype, mode, lhs, rhs, ...) abort
-    if (a:ftype == 0
-                \     || a:ftype == 1 && &filetype ==# 'tex'
-                \     || a:ftype == 2 && &filetype ==# 'bib')
-                \ && !hasmapto(a:rhs, a:mode)
-                \ && index(get(g:vimtex_mappings_disable, a:mode, []), a:lhs) < 0
-                \ && (a:0 > 0
-                \     || g:vimtex_mappings_override_existing
-                \     || empty(maparg(a:lhs, a:mode)))
-        silent execute a:mode . 'map <silent><buffer><nowait>' a:lhs a:rhs
+    if (   a:ftype == 0
+     \ || a:ftype == 1 && &filetype ==# 'tex'
+     \ || a:ftype == 2 && &filetype ==# 'bib'
+      \)
+  \ && !hasmapto(a:rhs, a:mode)
+  \ && index(get(g:vimtex_mappings_disable, a:mode, []), a:lhs) < 0
+  \ && (   a:0 > 0
+  \     || g:vimtex_mappings_override_existing
+  \     || empty(maparg(a:lhs, a:mode))
+      \)
+
+        silent execute a:mode . 'map  <silent><buffer><nowait>'   a:lhs a:rhs
     en
 endf
 
 
 
-" {{{1 Initialize module
+"\ Initialize module
 
 let s:modules = map(
             \ glob(fnamemodify(expand('<sfile>'), ':r') . '/*.vim', 0, 1),
             \ "fnamemodify(v:val, ':t:r')")
 call remove(s:modules, index(s:modules, 'test'))
 
-
+"\ 就算buflist里没有.tex文件, 还是会运行到这里, 只不过函数在调用时才定义?
