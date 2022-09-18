@@ -677,23 +677,24 @@ LATEXMK                                               *vimtex-compiler-latexmk*
                 (别手动放进latexmkrc)
 
                 Another neat way  to use this:
-                        is to use `xdotool` to change the window title of
-                        the viewer to indicate the compilation status:
+                    is to use `xdotool` to change the window title of
+                    the viewer to indicate the compilation status:
 
 
-                            $compiling_cmd = "xdotool search --name \"%D\" " .
-                                            "set_window --name \"%D compiling...\"";
-                            $success_cmd   = "xdotool search --name \"%D\" " .
-                                            "set_window --name \"%D OK\"";
-                            $failure_cmd   = "xdotool search --name \"%D\" " .
-                                            "set_window --name \"%D FAILURE\"";
+                        $compiling_cmd = "xdotool search --name \"%D\" " .
+                                        "set_window --name \"%D compiling...\"";
+                        $success_cmd   = "xdotool search --name \"%D\" " .
+                                        "set_window --name \"%D OK\"";
+                        $failure_cmd   = "xdotool search --name \"%D\" " .
+                                        "set_window --name \"%D FAILURE\"";
 
-                        If you define these options similar to the above `xdotool` trick and
-                            still want to enable the VimTeX callbacks:
-                                include  a semicolon at the end of the `cmd` strings so that
-                                VimTeX may append  safely to the options.
+                    If you define these options
+                    similar to the above `xdotool` trick and
+                    still want to enable the VimTeX callbacks:
+                            include  a semicolon at the end of the `cmd` strings so that
+                            VimTeX may append  safely to the options.
 
-                        More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
+                    More info on `xdotool` here: https://www.semicomplete.com/projects/xdotool.
 
 
             continuous
@@ -989,11 +990,12 @@ VIEWER CONFIGURATION                                *vimtex-view-configuration*
                 If this option is set to 0 or |v:false|, then the check is skipped.
 
         Forward search requires `xdotool` to work properly.
-        That is,
-        `xdotool`  is used to avoid duplicate Zathura instances when the
-            |:VimtexView| command is issued.
-            This is a more severe restriction
-            if the |g:vimtex_view_forward_search_on_start| option is disabled.
+
+            `xdotool`  is used to avoid duplicate Zathura instances when the
+                |:VimtexView| command is issued.
+
+            if the |g:vimtex_view_forward_search_on_start| option is disabled,
+                this is a more severe restriction
 
         Some version of Zathura  has NO  synctex support.
 
